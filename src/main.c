@@ -1,4 +1,5 @@
 #include <my_lapack.h>
+#include <util.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,6 +15,16 @@
 int main(int argc, char **argv){
     int *mat = malloc(sizeof(int)*MAT_WIDTH*MAT_HEIGHT);
 
+    /* Matrix Initialization */
+    int i,j; 
+    for (i = 0; i < MAT_HEIGHT; i++){
+        for (j = 0; j < MAT_WIDTH; j++){
+            mat[i*MAT_WIDTH + j] = i*MAT_WIDTH + j;
+        }   
+    }
+
+    /* Basic functions call */
+    affiche(MAT_WIDTH, MAT_HEIGHT, mat, 0);
 
     free(mat);
     return 0;
