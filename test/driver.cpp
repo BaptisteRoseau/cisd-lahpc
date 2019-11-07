@@ -12,7 +12,8 @@
 #define MAT_HEIGHT 7
 
 
-int main(int argc, char **argv){
+int main(int argc, char **argv)
+{
     int *mat = malloc(sizeof(int)*MAT_WIDTH*MAT_HEIGHT);
 
     /* Matrix Initialization */
