@@ -1,6 +1,9 @@
 # Visual Studio
 *.vs
 
+# Build
+out/*
+
 # Prerequisites
 *.d
 
