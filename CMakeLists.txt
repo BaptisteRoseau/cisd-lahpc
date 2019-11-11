@@ -5,10 +5,6 @@ project( cisd-lahpc VERSION 0.1
 
 set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 
-if( WIN32 )
-    add_definitions ( "-DLAHPC_WIN" )
-endif()
-
 add_subdirectory(lib)
 
 add_subdirectory(test)
