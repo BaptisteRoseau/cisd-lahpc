@@ -11,7 +11,7 @@
 
 #else
     #define LAHPC_CHECK_POSITIVE( X )
-    #define LAHPC_CHECK_POSITIVE_STRICT ( X )
+    #define LAHPC_CHECK_POSITIVE_STRICT( X )
 #endif
 
 #define LAHPC_CHECK_PREDICATE( predicate ) \
