@@ -147,6 +147,7 @@ namespace my_lapack {
             }
         }
     }
+    
 
     void my_dgemm( const enum LAHPC_ORDER     Order,
                    const enum LAHPC_TRANSPOSE TransA,
@@ -161,10 +162,7 @@ namespace my_lapack {
                    const int                  ldb,
                    const double               beta,
                    double *                   C,
-                   const int                  ldc )
-    {
-        
-    }
+                   const int                  ldc );
 
     void my_dger(const enum LAHPC_ORDER order,
                     const int M,

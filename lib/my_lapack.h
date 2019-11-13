@@ -48,7 +48,7 @@ namespace my_lapack {
                   const double *         Y,
                   const int              incY,
                   double *               A,
-                  const int              lda)
+                  const int              lda);
 
     void my_dgemm( const enum LAHPC_ORDER     Order,
                    const enum LAHPC_TRANSPOSE TransA,
