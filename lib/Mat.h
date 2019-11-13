@@ -11,11 +11,13 @@ namespace my_lapack {
         Mat( const Mat &other );
 
         Mat &operator=( const Mat &other );
+        bool operator==( const Mat &other );
 
         inline double &at( int i, int j ) const { return storage[j * m + i]; };
         inline double *get() { return storage; }
-        inline int dimX() { return m; }
-        inline int dimY() { return n; }
+        double* col(int j);
+        inline int     dimX() { return m; }
+        inline int     dimY() { return n; }
 
       private:
         double *storage;
@@ -23,5 +25,8 @@ namespace my_lapack {
 
         double *initStorage( int size );
     };
+
+    Mat MatRandi( int m, int n, unsigned int max, unsigned int seed = 0x9d2c5680 );
+    Mat MatSqrDiag( int m, double v );
 
 } // namespace my_lapack

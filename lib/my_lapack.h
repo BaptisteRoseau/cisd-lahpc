@@ -3,7 +3,26 @@
 
 namespace my_lapack {
 
+    enum class LAHPC_LAYOUT { ColMajor = 0, RowMajor = 1 };
+
+    enum class LAHPC_TRANSPOSE { NoTrans = 0, Trans = 1 };
+
     double my_ddot( const int N, const double *X, const int incX, const double *Y, const int incY );
+
+    void my_daxpy( const int N, const double alpha, const double *X, const int incX, double *Y, const int incY );
+
+    void my_dgemv( LAHPC_LAYOUT    layout,
+                   LAHPC_TRANSPOSE TransA,
+                   int             M,
+                   int             N,
+                   double          alpha,
+                   const double *  A,
+                   int             lda,
+                   const double *  X,
+                   int             incX,
+                   double          beta,
+                   double *        Y,
+                   const int       incY );
 
     /*void my_dgemm( const enum CBLAS_ORDER     Order,
                    const enum CBLAS_TRANSPOSE TransA,

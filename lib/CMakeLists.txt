@@ -1,4 +1,4 @@
-set( HEADERS my_lapack.h util.h Mat.h)
+set( HEADERS my_lapack.h util.h Mat.h err.h)
 set( FLAGS_DEBUG /DEBUG /Od ) 
 set( FLAGS_RELEASE /O2 )
 
