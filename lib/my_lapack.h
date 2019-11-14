@@ -1,18 +1,21 @@
 #ifndef MY_LAPACK_H
 #define MY_LAPACK_H
 
-namespace my_lapack {
+#define BLOCK_SIZE 128
 
-    enum class LAHPC_LAYOUT { ColMajor = 0, RowMajor = 1 };
-    enum class LAHPC_TRANSPOSE { NoTrans = 0, Trans = 1 };
-    enum class LAHPC_ORDER {CblasRowMajor=0, CblasColMajor=1};
+namespace my_lapack {
+    enum CBLAS_ORDER {CblasRowMajor=101, CblasColMajor=102};
+    enum CBLAS_TRANSPOSE {CblasNoTrans=111, CblasTrans=112, CblasConjTrans=113};
+    enum CBLAS_UPLO {CblasUpper=121, CblasLower=122};
+    enum CBLAS_DIAG {CblasNonUnit=131, CblasUnit=132};
+    enum CBLAS_SIDE {CblasLeft=141, CblasRight=142};
 
     double my_ddot( const int N, const double *X, const int incX, const double *Y, const int incY );
 
     void my_daxpy( const int N, const double alpha, const double *X, const int incX, double *Y, const int incY );
 
-    void my_dgemv( LAHPC_LAYOUT    layout,
-                   LAHPC_TRANSPOSE TransA,
+    void my_dgemv( CBLAS_ORDER    layout,
+                   CBLAS_TRANSPOSE TransA,
                    int             M,
                    int             N,
                    double          alpha,
@@ -24,9 +27,9 @@ namespace my_lapack {
                    double *        Y,
                    const int       incY );
 
-    void my_dgemm_scalaire( const enum LAHPC_ORDER     Order,
-                            const enum LAHPC_TRANSPOSE TransA,
-                            const enum LAHPC_TRANSPOSE TransB,
+    void my_dgemm_scalaire( const enum CBLAS_ORDER     Order,
+                            const enum CBLAS_TRANSPOSE TransA,
+                            const enum CBLAS_TRANSPOSE TransB,
                             const int                  M,
                             const int                  N,
                             const int                  K,
@@ -39,7 +42,7 @@ namespace my_lapack {
                             double *                   C,
                             const int                  ldc );
                             
-    void my_dger( const enum LAHPC_ORDER order,
+    void my_dger( const enum CBLAS_ORDER order,
                   const int              M,
                   const int              N,
                   const double           alpha,
@@ -50,9 +53,9 @@ namespace my_lapack {
                   double *               A,
                   const int              lda);
 
-    void my_dgemm( const enum LAHPC_ORDER     Order,
-                   const enum LAHPC_TRANSPOSE TransA,
-                   const enum LAHPC_TRANSPOSE TransB,
+    void my_dgemm( const enum CBLAS_ORDER     Order,
+                   const enum CBLAS_TRANSPOSE TransA,
+                   const enum CBLAS_TRANSPOSE TransB,
                    const int                  M,
                    const int                  N,
                    const int                  K,
@@ -66,7 +69,7 @@ namespace my_lapack {
                    const int                  ldc );
 
     /*
-    int my_dgetrf( const enum LAHPC_ORDER Order, int m, int n, double *a, int lda, int *ipiv );
+    int my_dgetrf( const enum CBLAS_ORDER Order, int m, int n, double *a, int lda, int *ipiv );
     */
 
 } // namespace my_lapack

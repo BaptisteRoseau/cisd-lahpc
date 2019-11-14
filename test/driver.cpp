@@ -4,13 +4,6 @@
 
 #include <iostream>
 
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <cblas.h>
-////#include <flops.h>
-////#include <lapacke.h> //header include error
-////#include <perf.h>
-
 template<typename T, size_t N>
 char ( &ArraySizeHelper( T ( & )[N] ) )[N];
 
@@ -25,8 +18,8 @@ int main( int argc, char **argv )
     Mat m1 =  MatRandi( 10, 10, 100 ), m2 = MatRandi( 10, 10, 100 );
     Mat m3 = MatSqrDiag(50, 1), m4 = MatSqrDiag(50, 999999999.654616165414169);
 
-    my_dgemv( LAHPC_LAYOUT::ColMajor,
-              LAHPC_TRANSPOSE::NoTrans,
+    my_dgemv( CBLAS_ORDER::CblasColMajor,
+              CBLAS_TRANSPOSE::CblasNoTrans,
               m1.dimX(),
               m1.dimY(),
               1.0,
@@ -39,4 +32,9 @@ int main( int argc, char **argv )
               1 );
 
     affiche( m4.dimX(), m4.dimY(), m4.get(), 0, std::cout, 3 );
+
+    /* affiche(CBLAS_ORDER::CblasColMajor,
+            CBLAS_TRANSPOSE::CblasNoTrans,
+            CBLAS_TRANSPOSE::CblasNoTrans,
+            ); */
 }

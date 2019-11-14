@@ -8,6 +8,7 @@
 
 #define AT_RM(i,j,width)  ((i)*(width) + (j))
 #define AT(i,j,heigth) ((j)*(heigth) + (i))
+#define min(a, b) ((a) < (b) ? (a) : (b))
 
 namespace my_lapack {
 
@@ -33,8 +34,8 @@ namespace my_lapack {
         for ( uint32_t i = 0, xi = 0, yi = 0; i < N; ++i, xi += incX, yi += incY ) { Y[yi] += alpha * X[xi]; }
     }
 
-    void my_dgemv( LAHPC_LAYOUT    layout,
-                   LAHPC_TRANSPOSE TransA,
+    void my_dgemv( CBLAS_ORDER    layout,
+                   CBLAS_TRANSPOSE TransA,
                    int             M,
                    int             N,
                    double          alpha,
@@ -50,12 +51,12 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE_STRICT( incX );
         LAHPC_CHECK_POSITIVE_STRICT( incY );
-        LAHPC_CHECK_PREDICATE( layout != LAHPC_LAYOUT::RowMajor );
+        LAHPC_CHECK_PREDICATE( layout != CBLAS_ORDER::CblasRowMajor );
 
         if ( M == 0 || N == 0 || ( alpha == 0.0 && beta == 1.0 ) ) return;
 
         if ( beta != 1.0 ) {
-            int lenY = ( TransA == LAHPC_TRANSPOSE::NoTrans ) ? M : N;
+            int lenY = ( TransA == CBLAS_TRANSPOSE::CblasNoTrans ) ? M : N;
 
             if ( beta == 0 && incY == 1 ) { memset( Y, 0, lenY * sizeof( double ) ); }
             else if ( beta == 0 ) {
@@ -66,14 +67,14 @@ namespace my_lapack {
             }
         }
 
-        if ( TransA == LAHPC_TRANSPOSE::NoTrans ) {
+        if ( TransA == CBLAS_TRANSPOSE::CblasNoTrans ) {
             for ( int j = 0, xi = 0; j < N; ++j, xi += incX ) {
                 double tmp = alpha * X[xi];
                 for ( int i = 0, yi = 0; i < M; ++i, yi += incY ) { Y[yi] += tmp * A[j * M + i]; }
             }
         }
 
-        else if ( TransA == LAHPC_TRANSPOSE::Trans ) {
+        else if ( TransA == CBLAS_TRANSPOSE::CblasTrans ) {
             for ( int j = 0, yi = 0; j < N; ++j, yi += incY ) {
                 double tmp = 0;
                 for ( int i = 0, xi = 0; i < N; ++i, xi += incX ) { tmp += A[j * M + i] * X[xi]; }
@@ -83,9 +84,9 @@ namespace my_lapack {
     }
     
     /// M N and K aren't changed even if transposed.
-    void my_dgemm_scalaire( const enum LAHPC_ORDER     Order,
-                            const enum LAHPC_TRANSPOSE TransA,
-                            const enum LAHPC_TRANSPOSE TransB,
+    void my_dgemm_scalaire( const enum CBLAS_ORDER     Order,
+                            const enum CBLAS_TRANSPOSE TransA,
+                            const enum CBLAS_TRANSPOSE TransB,
                             const int                  M,
                             const int                  N,
                             const int                  K,
@@ -98,7 +99,7 @@ namespace my_lapack {
                             double *                   C,
                             const int                  ldc )
     {
-        (void) Order;
+        (void) Order; // Avoid warning
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE( K );
@@ -106,42 +107,72 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE_STRICT( ldb );
         LAHPC_CHECK_POSITIVE_STRICT( ldc );
 
-        // Initializing C matrix with 0 (could be removed if yoou want to keep what is already inside C)
-        memset(C, 0, sizeof(double)*ldc);
+        // Avoiding useless calculus
+        if (alpha == 0.){
+            if (beta != 1.){
+                size_t t;
+                size_t m = M*N;
+                for (t = 0; t < m; t++){
+                    C[t] *= beta;
+                }
+            }
+            return;
+        }
+
+        // 
+        const bool bTransA = (TransA == CBLAS_TRANSPOSE::CblasTrans);
+        const bool bTransB = (TransB == CBLAS_TRANSPOSE::CblasTrans);
 
         // Calculating dgemm
-        bool bTransA = (TransA == LAHPC_TRANSPOSE::Trans);
-        bool bTransB = (TransB == LAHPC_TRANSPOSE::Trans);
-        size_t i,j,k;
+        size_t i,j,k; //TODO: Changer i,j,k en m,n,k
         if (bTransA && bTransB){
-            for(i = 0; i < M; i++){
-                for(j = 0; j < N; j++){
-                    for(k = 0; k < K; k++){
-                        C[AT(i, j, ldc)] += alpha*A[AT(j, i, lda)] + beta*B[AT(j, i, ldb)];
+            //Verifying dimensions validity
+            if (M != N){
+                fprintf(stderr, "Warning: Invalid diensions of A and B.\n"); //TODO: More helpfull message
+                return;
+            }
+
+            // Computing gemm
+            for(j = 0; j < K; j++){
+                for(i = 0; i < K; i++){
+                    for(k = 0; k < M; k++){
+                        C[AT(i, j, ldc)] += alpha*A[AT(j, i, lda)]*B[AT(j, i, ldb)] + beta*C[AT(i, j, ldc)];
                     }
                 }
             }
         } else if (!bTransA && bTransB){
-            for(i = 0; i < M; i++){
-                for(j = 0; j < N; j++){
+            //Verifying dimensions validity
+            if (N != K){
+                fprintf(stderr, "Warning: Invalid diensions of A and B.\n"); //TODO: More helpfull message
+                return;
+            }
+
+            for(j = 0; j < K; j++){
+                for(i = 0; i < M; i++){
                     for(k = 0; k < K; k++){
-                        C[AT(i, j, ldc)] += alpha*A[AT(i, j, lda)] + beta*B[AT(j, i, ldb)];
+                        C[AT(i, j, ldc)] += alpha*A[AT(i, j, lda)]*B[AT(j, i, ldb)] + beta*C[AT(i, j, ldc)];
                     }
                 }
             }
         } else if (bTransA && !bTransB){
-            for(i = 0; i < M; i++){
-                for(j = 0; j < N; j++){
+            //Verifying dimensions validity
+            if (M != K){
+                fprintf(stderr, "Warning: Invalid diensions of A and B.\n"); //TODO: More helpfull message
+                return;
+            }
+
+            for(j = 0; j < N; j++){
+                for(i = 0; i < K; i++){
                     for(k = 0; k < K; k++){
-                        C[AT(i, j, ldc)] += alpha*A[AT(j, i, lda)] + beta*B[AT(i, j, ldb)];
+                        C[AT(i, j, ldc)] += alpha*A[AT(j, i, lda)]*B[AT(i, j, ldb)] + beta*C[AT(i, j, ldc)];
                     }
                 }
             }
         } else {
-            for(i = 0; i < M; i++){
-                for(j = 0; j < N; j++){
+            for(j = 0; j < N; j++){
+                for(i = 0; i < M; i++){
                     for(k = 0; k < K; k++){
-                        C[AT(i, j, ldc)] += alpha*A[AT(i, j, lda)] + beta*B[AT(i, j, ldb)];
+                        C[AT(i, j, ldc)] += alpha*A[AT(i, j, lda)]*B[AT(i, j, ldb)] + beta*C[AT(i, j, ldc)];
                     }
                 }
             }
@@ -149,9 +180,9 @@ namespace my_lapack {
     }
     
 
-    void my_dgemm( const enum LAHPC_ORDER     Order,
-                   const enum LAHPC_TRANSPOSE TransA,
-                   const enum LAHPC_TRANSPOSE TransB,
+    void my_dgemm( const enum CBLAS_ORDER     Order,
+                   const enum CBLAS_TRANSPOSE TransA,
+                   const enum CBLAS_TRANSPOSE TransB,
                    const int                  M,
                    const int                  N,
                    const int                  K,
@@ -162,9 +193,36 @@ namespace my_lapack {
                    const int                  ldb,
                    const double               beta,
                    double *                   C,
-                   const int                  ldc );
+                   const int                  ldc )
+        {
+            (void) Order;
+            LAHPC_CHECK_POSITIVE( M );
+            LAHPC_CHECK_POSITIVE( N );
+            LAHPC_CHECK_POSITIVE( K );
+            LAHPC_CHECK_POSITIVE_STRICT( lda );
+            LAHPC_CHECK_POSITIVE_STRICT( ldb );
+            LAHPC_CHECK_POSITIVE_STRICT( ldc );
 
-    void my_dger(const enum LAHPC_ORDER order,
+            int blocksize = min(min(M, N), BLOCK_SIZE);
+
+            // Computing most of the blocks
+            /* size_t i,j;
+            for (i = 0; i < M/blocksize; i++){
+                for (j = 0; j < N/blocksize; j++){
+                    my_dgemm_scalaire(Order, TransA, TransB, 
+                                      ???, ???, ???,
+                                      alpha, A, lda,
+                                      B, ldb, beta,
+                                      C, ldc);
+                }   
+            } */
+
+            // Computing the rest of the blocks
+
+
+        }
+
+    void my_dger(const enum CBLAS_ORDER order,
                     const int M,
                     const int N,
                     const double alpha,
