@@ -18,7 +18,7 @@ int main( int argc, char **argv )
     Mat m1 =  MatRandi( 10, 10, 100 ), m2 = MatRandi( 10, 10, 100 );
     Mat m3 = MatSqrDiag(50, 1), m4 = MatSqrDiag(50, 999999999.654616165414169);
 
-    my_dgemv( CBLAS_ORDER::CblasColMajor,
+    my_dgemv( CBLAS_LAYOUT::CblasColMajor,
               CBLAS_TRANSPOSE::CblasNoTrans,
               m1.dimX(),
               m1.dimY(),
