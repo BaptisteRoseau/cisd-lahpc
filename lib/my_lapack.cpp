@@ -8,9 +8,9 @@
 
 static const int BLOCK_SIZE = 128;
 
-#define AT_RM( i, j, width ) ( ( i ) * ( width ) + ( j ) )
-#define AT( i, j, heigth ) ( ( j ) * ( heigth ) + ( i ) )
-#define min( a, b ) ( ( a ) < ( b ) ? ( a ) : ( b ) )
+#define AT_RM( i, j, width ) (( i ) * ( width ) + ( j ))
+#define AT( i, j, heigth ) (( j ) * ( heigth ) + ( i ))
+#define min_macro( a, b ) (( a ) < ( b ) ? ( a ) : ( b ))
 
 namespace my_lapack {
 
@@ -55,12 +55,12 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE_STRICT( incY );
         LAHPC_CHECK_PREDICATE( layout == CBLAS_LAYOUT::CblasColMajor );
 
-        if ( M == 0 || N == 0 || ( alpha == 0.0 && beta == 1.0 ) ) return;
+        if ( M == 0 || N == 0 || ( alpha == 0.0 && beta == 1.0 )) return;
 
         if ( beta != 1.0 ) {
             int lenY = ( TransA == CBLAS_TRANSPOSE::CblasNoTrans ) ? M : N;
 
-            if ( beta == 0 && incY == 1 ) { memset( Y, 0, lenY * sizeof( double ) ); }
+            if ( beta == 0 && incY == 1 ) { memset( Y, 0, lenY * sizeof( double )); }
             else if ( beta == 0 ) {
                 for ( int i = 0, yi = 0; i < lenY; ++i, yi += incY ) { Y[yi] = 0; }
             }
@@ -101,7 +101,7 @@ namespace my_lapack {
                             double *             C,
                             int                  ldc )
     {
-        (void)Order; // Avoid warning
+        assert(Order == CBLAS_LAYOUT::CblasColMajor);
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE( K );
@@ -112,9 +112,12 @@ namespace my_lapack {
         // Avoiding useless calculus
         if ( alpha == 0. ) {
             if ( beta != 1. ) {
-                size_t t;
-                size_t m = M * N;
-                for ( t = 0; t < m; t++ ) { C[t] *= beta; }
+                size_t m, n;
+                for (m = 0; m < M; m++){
+                    for (n = 0; n < N; n++){
+                        C[AT(m,n,ldc)] += beta*C[AT(m,n,ldc)];
+                    }
+                }
             }
             return;
         }
@@ -135,9 +138,10 @@ namespace my_lapack {
             // Computing gemm
             for ( j = 0; j < K; j++ ) {
                 for ( i = 0; i < K; i++ ) {
+                    C[AT( i, j, ldc )] *= beta;
                     for ( k = 0; k < M; k++ ) {
                         C[AT( i, j, ldc )] +=
-                            alpha * A[AT( j, i, lda )] * B[AT( j, i, ldb )] + beta * C[AT( i, j, ldc )];
+                            alpha * A[AT( j, k, lda )] * B[AT( k, i, ldb )] + C[AT( i, j, ldc )];
                     }
                 }
             }
@@ -151,9 +155,10 @@ namespace my_lapack {
 
             for ( j = 0; j < K; j++ ) {
                 for ( i = 0; i < M; i++ ) {
+                    C[AT( i, j, ldc )] *= beta;
                     for ( k = 0; k < K; k++ ) {
                         C[AT( i, j, ldc )] +=
-                            alpha * A[AT( i, j, lda )] * B[AT( j, i, ldb )] + beta * C[AT( i, j, ldc )];
+                            alpha * A[AT( i, k, lda )] * B[AT( k, i, ldb )] + C[AT( i, j, ldc )];
                     }
                 }
             }
@@ -167,9 +172,10 @@ namespace my_lapack {
 
             for ( j = 0; j < N; j++ ) {
                 for ( i = 0; i < K; i++ ) {
+                    C[AT( i, j, ldc )] *= beta;
                     for ( k = 0; k < K; k++ ) {
                         C[AT( i, j, ldc )] +=
-                            alpha * A[AT( j, i, lda )] * B[AT( i, j, ldb )] + beta * C[AT( i, j, ldc )];
+                            alpha * A[AT( j, k, lda )] * B[AT( k, j, ldb )] + C[AT( i, j, ldc )];
                     }
                 }
             }
@@ -177,9 +183,10 @@ namespace my_lapack {
         else {
             for ( j = 0; j < N; j++ ) {
                 for ( i = 0; i < M; i++ ) {
+                    C[AT( i, j, ldc )] *= beta;
                     for ( k = 0; k < K; k++ ) {
                         C[AT( i, j, ldc )] +=
-                            alpha * A[AT( i, j, lda )] * B[AT( i, j, ldb )] + beta * C[AT( i, j, ldc )];
+                            alpha * A[AT( i, k, lda )] * B[AT( k, j, ldb )] + C[AT( i, j, ldc )];
                     }
                 }
             }
@@ -209,7 +216,7 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE_STRICT( ldb );
         LAHPC_CHECK_POSITIVE_STRICT( ldc );
 
-        int blocksize = min( min( M, N ), BLOCK_SIZE );
+        int blocksize = min_macro(min_macro(M, N), BLOCK_SIZE);
 
         // Computing most of the blocks
         /* size_t i,j;

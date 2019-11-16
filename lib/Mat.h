@@ -18,6 +18,7 @@ namespace my_lapack {
         double* col(int j);
         inline int     dimX() { return m; }
         inline int     dimY() { return n; }
+        void print();
 
       private:
         double *storage;

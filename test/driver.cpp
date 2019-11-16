@@ -17,6 +17,7 @@ int main( int argc, char **argv )
 {
     Mat m1 =  MatRandi( 10, 10, 100 ), m2 = MatRandi( 10, 10, 100 );
     Mat m3 = MatSqrDiag(50, 1), m4 = MatSqrDiag(50, 999999999.654616165414169);
+    Mat m5 = MatRandi( 10, 10, 0 );
 
     my_dgemv( CBLAS_LAYOUT::CblasColMajor,
               CBLAS_TRANSPOSE::CblasNoTrans,
@@ -31,10 +32,6 @@ int main( int argc, char **argv )
               m4.col( 1 ),
               1 );
 
-    affiche( m4.dimX(), m4.dimY(), m4.get(), 0, std::cout, 3 );
-
-    /* affiche(CBLAS_ORDER::CblasColMajor,
-            CBLAS_TRANSPOSE::CblasNoTrans,
-            CBLAS_TRANSPOSE::CblasNoTrans,
-            ); */
+    
+    
 }
