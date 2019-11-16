@@ -77,6 +77,20 @@ namespace my_lapack {
         }
     }
 
+    void Mat::print(){
+        int m = this->dimX();
+        int n = this->dimY();
+        double *a = this->storage;
+        for ( int i = 0; i < m; ++i ) {
+            std::cout << "| ";
+            for ( int j = 0; j < n; ++j ) { std::cout << a[j * m + i] << " "; }
+            std::cout << "|\n";
+        }
+
+        std::cout << std::endl;
+        //cout.precision( oldPrecision );
+    }
+
     Mat MatRandi( int m, int n, unsigned int max, unsigned int seed /*= 0x9d2c5680*/ )
     {
         static std::minstd_rand randEngine;
@@ -98,5 +112,6 @@ namespace my_lapack {
 
         return mat;
     }
+
 
 } // namespace my_lapack
