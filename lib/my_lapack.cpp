@@ -113,72 +113,56 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE_STRICT( ldc );
 
         // Early return
+        if ( !M || !N || !K ){ return; }
+
+        // Early return
         if ( alpha == 0. ) {
             if ( beta != 1. ) {
                 size_t m, n;
                 for (m = 0; m < M; m++){
                     for (n = 0; n < N; n++){
-                        C[AT(m,n,ldc)] += beta*C[AT(m,n,ldc)];
+                        C[AT(m,n,ldc)] *= beta;
                     }
                 }
             }
             return;
         }
 
-        //
-        bool bTransA = ( TransA == CBLAS_TRANSPOSE::CblasTrans );
-        bool bTransB = ( TransB == CBLAS_TRANSPOSE::CblasTrans );
+        // Computing booleans in advance
+        bool bTransA = ( TransA == CblasTrans );
+        bool bTransB = ( TransB == CblasTrans );
 
         // Calculating dgemm
         size_t i, j, k; // TODO: Changer i,j,k en m,n,k
         if ( bTransA && bTransB ) {
-            // Verifying dimensions validity
-            if ( M != N ) {
-                fprintf( stderr, "Warning: Invalid dimensions of A and B.\n" ); // TODO: More helpful message
-                return;
-            }
-
-            // Computing gemm
-            for ( j = 0; j < K; j++ ) {
-                for ( i = 0; i < K; i++ ) {
+            for ( j = 0; j < N; j++ ) {
+                for ( i = 0; i < M; i++ ) {
                     C[AT( i, j, ldc )] *= beta;
-                    for ( k = 0; k < M; k++ ) {
+                    for ( k = 0; k < K; k++ ) {
                         C[AT( i, j, ldc )] +=
-                            alpha * A[AT( j, k, lda )] * B[AT( k, i, ldb )] + C[AT( i, j, ldc )];
+                            alpha * A[AT( j, k, lda )] * B[AT( k, i, ldb )];
                     }
                 }
             }
         }
         else if ( !bTransA && bTransB ) {
-            // Verifying dimensions validity
-            if ( N != K ) {
-                fprintf( stderr, "Warning: Invalid dimensions of A and B.\n" ); // TODO: More helpful message
-                return;
-            }
-
-            for ( j = 0; j < K; j++ ) {
+            for ( j = 0; j < N; j++ ) {
                 for ( i = 0; i < M; i++ ) {
                     C[AT( i, j, ldc )] *= beta;
                     for ( k = 0; k < K; k++ ) {
                         C[AT( i, j, ldc )] +=
-                            alpha * A[AT( i, k, lda )] * B[AT( k, i, ldb )] + C[AT( i, j, ldc )];
+                            alpha * A[AT( i, k, lda )] * B[AT( k, i, ldb )];
                     }
                 }
             }
         }
         else if ( bTransA && !bTransB ) {
-            // Verifying dimensions validity
-            if ( M != K ) {
-                fprintf( stderr, "Warning: Invalid dimensions of A and B.\n" ); // TODO: More helpful message
-                return;
-            }
-
             for ( j = 0; j < N; j++ ) {
-                for ( i = 0; i < K; i++ ) {
+                for ( i = 0; i < M; i++ ) {
                     C[AT( i, j, ldc )] *= beta;
                     for ( k = 0; k < K; k++ ) {
                         C[AT( i, j, ldc )] +=
-                            alpha * A[AT( j, k, lda )] * B[AT( k, j, ldb )] + C[AT( i, j, ldc )];
+                            alpha * A[AT( j, k, lda )] * B[AT( k, j, ldb )];
                     }
                 }
             }
@@ -189,7 +173,7 @@ namespace my_lapack {
                     C[AT( i, j, ldc )] *= beta;
                     for ( k = 0; k < K; k++ ) {
                         C[AT( i, j, ldc )] +=
-                            alpha * A[AT( i, k, lda )] * B[AT( k, j, ldb )] + C[AT( i, j, ldc )];
+                            alpha * A[AT( i, k, lda )] * B[AT( k, j, ldb )];
                     }
                 }
             }
