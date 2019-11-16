@@ -10,8 +10,9 @@ add_library( my_lapack
 
 target_include_directories(
     my_lapack
-    PRIVATE
+    PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
+        ${PROJECT_SOURCE_DIR}/perf
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

@@ -15,6 +15,7 @@ namespace my_lapack {
                 stream << "|\n";
             }
         }
+
         else {
             for ( int i = 0; i < m; ++i ) {
                 stream << "| ";
