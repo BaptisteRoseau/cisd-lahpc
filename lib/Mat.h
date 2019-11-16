@@ -29,5 +29,6 @@ namespace my_lapack {
 
     Mat MatRandi( int m, int n, unsigned int max, unsigned int seed = 0x9d2c5680 );
     Mat MatSqrDiag( int m, double v );
+    Mat MatZero( int m, int n );
 
 } // namespace my_lapack
