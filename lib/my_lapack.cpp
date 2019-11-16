@@ -6,14 +6,15 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <limits>
 #include <utility>
 
 static const int BLOCK_SIZE = 128;
 
-#define AT_RM( i, j, width ) (( i ) * ( width ) + ( j ))
-#define AT( i, j, heigth ) (( j ) * ( heigth ) + ( i ))
-#define min_macro( a, b ) (( a ) < ( b ) ? ( a ) : ( b ))
+#define AT_RM( i, j, width ) ( ( i ) * ( width ) + ( j ) )
+#define AT( i, j, heigth ) ( ( j ) * ( heigth ) + ( i ) )
+#define min_macro( a, b ) ( ( a ) < ( b ) ? ( a ) : ( b ) )
 
 namespace my_lapack {
 
@@ -39,18 +40,18 @@ namespace my_lapack {
         for ( int i = 0, xi = 0, yi = 0; i < N; ++i, xi += incX, yi += incY ) { Y[yi] += alpha * X[xi]; }
     }
 
-    void my_dgemv( enum CBLAS_ORDER layout,
+    void my_dgemv( enum CBLAS_ORDER     layout,
                    enum CBLAS_TRANSPOSE TransA,
-                   int M,
-                   int N,
-                   double alpha,
-                   const double * A,
-                   int lda,
-                   const double * X,
-                   int incX,
-                   double beta,
-                   double * Y,
-                   const int incY )
+                   int                  M,
+                   int                  N,
+                   double               alpha,
+                   const double *       A,
+                   int                  lda,
+                   const double *       X,
+                   int                  incX,
+                   double               beta,
+                   double *             Y,
+                   const int            incY )
     {
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
@@ -58,12 +59,12 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE_STRICT( incY );
         LAHPC_CHECK_PREDICATE( layout == CblasColMajor );
 
-        if ( M == 0 || N == 0 || ( alpha == 0.0 && beta == 1.0 )) return;
+        if ( M == 0 || N == 0 || ( alpha == 0.0 && beta == 1.0 ) ) return;
 
         if ( beta != 1.0 ) {
             int lenY = ( TransA == CblasNoTrans ) ? M : N;
 
-            if ( beta == 0 && incY == 1 ) { memset( Y, 0, lenY * sizeof( double )); }
+            if ( beta == 0 && incY == 1 ) { memset( Y, 0, lenY * sizeof( double ) ); }
             else if ( beta == 0 ) {
                 for ( int i = 0, yi = 0; i < lenY; ++i, yi += incY ) { Y[yi] = 0; }
             }
@@ -89,20 +90,20 @@ namespace my_lapack {
     }
 
     /// M N and K aren't changed even if transposed.
-    void my_dgemm_scalaire( enum CBLAS_ORDER layout,
+    void my_dgemm_scalaire( enum CBLAS_ORDER     layout,
                             enum CBLAS_TRANSPOSE TransA,
                             enum CBLAS_TRANSPOSE TransB,
-                            int M,
-                            int N,
-                            int K,
-                            double alpha,
-                            const double * A,
-                            int lda,
-                            const double * B,
-                            int ldb,
-                            double beta,
-                            double * C,
-                            int ldc )
+                            int                  M,
+                            int                  N,
+                            int                  K,
+                            double               alpha,
+                            const double *       A,
+                            int                  lda,
+                            const double *       B,
+                            int                  ldb,
+                            double               beta,
+                            double *             C,
+                            int                  ldc )
     {
         LAHPC_CHECK_PREDICATE( layout == CblasColMajor );
         LAHPC_CHECK_POSITIVE( M );
@@ -116,10 +117,8 @@ namespace my_lapack {
         if ( alpha == 0. ) {
             if ( beta != 1. ) {
                 size_t m, n;
-                for (m = 0; m < M; m++){
-                    for (n = 0; n < N; n++){
-                        C[AT(m,n,ldc)] += beta*C[AT(m,n,ldc)];
-                    }
+                for ( m = 0; m < M; m++ ) {
+                    for ( n = 0; n < N; n++ ) { C[AT( m, n, ldc )] += beta * C[AT( m, n, ldc )]; }
                 }
             }
             return;
@@ -143,8 +142,7 @@ namespace my_lapack {
                 for ( i = 0; i < K; i++ ) {
                     C[AT( i, j, ldc )] *= beta;
                     for ( k = 0; k < M; k++ ) {
-                        C[AT( i, j, ldc )] +=
-                            alpha * A[AT( j, k, lda )] * B[AT( k, i, ldb )] + C[AT( i, j, ldc )];
+                        C[AT( i, j, ldc )] += alpha * A[AT( j, k, lda )] * B[AT( k, i, ldb )] + C[AT( i, j, ldc )];
                     }
                 }
             }
@@ -160,8 +158,7 @@ namespace my_lapack {
                 for ( i = 0; i < M; i++ ) {
                     C[AT( i, j, ldc )] *= beta;
                     for ( k = 0; k < K; k++ ) {
-                        C[AT( i, j, ldc )] +=
-                            alpha * A[AT( i, k, lda )] * B[AT( k, i, ldb )] + C[AT( i, j, ldc )];
+                        C[AT( i, j, ldc )] += alpha * A[AT( i, k, lda )] * B[AT( k, i, ldb )] + C[AT( i, j, ldc )];
                     }
                 }
             }
@@ -177,8 +174,7 @@ namespace my_lapack {
                 for ( i = 0; i < K; i++ ) {
                     C[AT( i, j, ldc )] *= beta;
                     for ( k = 0; k < K; k++ ) {
-                        C[AT( i, j, ldc )] +=
-                            alpha * A[AT( j, k, lda )] * B[AT( k, j, ldb )] + C[AT( i, j, ldc )];
+                        C[AT( i, j, ldc )] += alpha * A[AT( j, k, lda )] * B[AT( k, j, ldb )] + C[AT( i, j, ldc )];
                     }
                 }
             }
@@ -188,15 +184,14 @@ namespace my_lapack {
                 for ( i = 0; i < M; i++ ) {
                     C[AT( i, j, ldc )] *= beta;
                     for ( k = 0; k < K; k++ ) {
-                        C[AT( i, j, ldc )] +=
-                            alpha * A[AT( i, k, lda )] * B[AT( k, j, ldb )] + C[AT( i, j, ldc )];
+                        C[AT( i, j, ldc )] += alpha * A[AT( i, k, lda )] * B[AT( k, j, ldb )] + C[AT( i, j, ldc )];
                     }
                 }
             }
         }
     }
 
-    void my_dgemm( enum CBLAS_LAYOUT    Order,
+    void my_dgemm( enum CBLAS_ORDER     Order,
                    enum CBLAS_TRANSPOSE TransA,
                    enum CBLAS_TRANSPOSE TransB,
                    int                  M,
@@ -236,16 +231,16 @@ namespace my_lapack {
         // Computing the rest of the blocks
     }
 
-    void my_dger( enum CBLAS_LAYOUT layout,
-                  int               M,
-                  int               N,
-                  double            alpha,
-                  const double *    X,
-                  int               incX,
-                  const double *    Y,
-                  int               incY,
-                  double *          A,
-                  int               lda )
+    void my_dger( enum CBLAS_ORDER layout,
+                  int              M,
+                  int              N,
+                  double           alpha,
+                  const double *   X,
+                  int              incX,
+                  const double *   Y,
+                  int              incY,
+                  double *         A,
+                  int              lda )
     {
         LAHPC_CHECK_PREDICATE( layout == CblasColMajor );
         LAHPC_CHECK_POSITIVE( M );
@@ -265,7 +260,7 @@ namespace my_lapack {
         }
     }
 
-    void my_dgetrf2( int M, int N, double *A, int lda, int *ipiv, int *info )
+    void my_dgetf2( int M, int N, double *A, int lda, int *ipiv, int *info )
     {
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
@@ -275,45 +270,61 @@ namespace my_lapack {
 
         if ( M == 0 || N == 0 ) { return; }
 
-        if ( M == 1 ) {
-            ipiv[0] = 1;
-            if ( A[0] == 0.0 ) { *info = 1; }
-        }
-        else if ( N == 1 ) {
-            int pivot = my_idamax( M, A, 1 );
-            ipiv[0]   = pivot;
-            if ( A[pivot] != 0.0 ) {
-                if ( pivot != 0 ) { std::swap( A[0], A[pivot] ); }
+        int minMN = std::min( M, N );
 
-                if ( std::abs( A[0] ) > std::numeric_limits<double>::epsilon() ) {
-                    my_dscal( M - 1, 1.0 / A[0], A + 1, 1 );
+        for ( int j = 0; j < minMN; ++j ) {
+            if ( j < M - 1 ) {
+                if ( std::abs( A[j * lda + j] ) > ( 2.0 * std::numeric_limits<double>::epsilon() ) ) {
+                    my_dscal( M - j - 1, 1.0 / A[j * lda + j], A + j * lda + j + 1, 1 );
                 }
                 else {
-                    for ( int i = 1; i < M; ++i ) { A[i] /= A[0]; } // Can't see why it would not explode...
+                    for ( int i = 0; i < M - j; ++i ) { A[j * lda + j + i] /= A[j * lda + j]; }
                 }
             }
-            else {
-                *info = 1;
+            if ( j < minMN - 1 ) {
+                my_dger( CblasColMajor,
+                         M - j - 1,
+                         N - j - 1,
+                         -1.0,
+                         A + j * lda + j + 1,
+                         1,
+                         A + ( j + 1 ) * lda + j,
+                         lda,
+                         A + ( j + 1 ) * lda + j + 1,
+                         lda );
             }
         }
-        else {
-            int n1 = std::min( M, N ) / 2;
-            int n2 = N - n1;
+    }
 
-            int infoRec;
-            my_dgetrf2( M, n1, A, lda, ipiv, &infoRec );
+    void my_dtrsm( char          side,
+                   char          uplo,
+                   char          transA,
+                   char          diag,
+                   int           M,
+                   int           N,
+                   double        alpha,
+                   const double *A,
+                   int           lda,
+                   double *      B,
+                   int           ldb )
+    {
+        bool lside    = side == 'L' || side == 'l';
+        bool upper    = uplo == 'U' || uplo == 'u';
+        bool isTransA = !( transA == 'N' || transA == 'n' );
+        bool nounit   = diag == 'N' || diag == 'n';
 
-            if ( *info == 0 && infoRec > 0 ) { *info = infoRec; }
+        int nrowa = lside ? M : N;
 
-            my_dlaswp( n2,
-                       A + static_cast<std::size_t>( n1 ) * static_cast<std::size_t>( lda ),
-                       lda,
-                       0,
-                       n1 - 1,
-                       ipiv,
-                       1 );
+        LAHPC_CHECK_PREDICATE( lside && !upper && !isTransA && !nounit );
 
-
+        for ( int j = 0; j < N; ++j ) {
+            if ( alpha != 1.0 ) {
+                for ( int i = 0; i < M; ++i ) { B[j * M + i] *= alpha; }
+            }
+            for ( int k = 0; k < M; ++k ) {
+                if ( nounit ) { B[j * M + k] /= A[k * M + k]; }
+                for ( int i = k + 1; i < M; ++i ) { B[j * M + i] -= B[j * M + k] * A[k * M + i]; }
+            }
         }
     }
 

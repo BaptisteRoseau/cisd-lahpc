@@ -37,18 +37,18 @@ namespace my_lapack {
                             double *             C,
                             int                  ldc );
 
-    void my_dger( enum CBLAS_LAYOUT layout,
-                  int               M,
-                  int               N,
-                  double            alpha,
-                  const double *    X,
-                  int               incX,
-                  const double *    Y,
-                  int               incY,
-                  double *          A,
-                  int               lda );
+    void my_dger( enum CBLAS_ORDER layout,
+                  int              M,
+                  int              N,
+                  double           alpha,
+                  const double *   X,
+                  int              incX,
+                  const double *   Y,
+                  int              incY,
+                  double *         A,
+                  int              lda );
 
-    void my_dgemm( enum CBLAS_LAYOUT    Order,
+    void my_dgemm( enum CBLAS_ORDER     Order,
                    enum CBLAS_TRANSPOSE TransA,
                    enum CBLAS_TRANSPOSE TransB,
                    int                  M,
@@ -75,7 +75,19 @@ namespace my_lapack {
     // Parameter: int * ipiv - Dim (min(M,N)). Pivot indices, row i of A was interchanged with ipiv[i]
     // Parameter: int * info - 0 if success, if info > 0 then U(info - 1,info - 1) == 0.0
     //************************************
-    void my_dgetrf2( int M, int N, double *A, int lda, int *ipiv, int *info );
+    void my_dgetf2( int M, int N, double *A, int lda, int *ipiv, int *info );
+
+    void my_dtrsm( char          side,
+                   char          uplo,
+                   char          transA,
+                   char          diag,
+                   int           M,
+                   int           N,
+                   double        alpha,
+                   const double *A,
+                   int           lda,
+                   double *      B,
+                   int           ldb );
 
     int my_idamax( int N, double *dx, int incX );
 
