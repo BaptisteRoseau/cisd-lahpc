@@ -101,7 +101,7 @@ namespace my_lapack {
                             double *             C,
                             int                  ldc )
     {
-        assert(Order == CBLAS_LAYOUT::CblasColMajor);
+        LAHPC_CHECK_PREDICATE(Order == CBLAS_LAYOUT::CblasColMajor);
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE( K );
@@ -208,7 +208,6 @@ namespace my_lapack {
                    double *             C,
                    int                  ldc )
     {
-        (void)Order;
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE( K );

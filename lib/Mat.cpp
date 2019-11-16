@@ -113,5 +113,8 @@ namespace my_lapack {
         return mat;
     }
 
+    Mat MatZero( int m, int n ){
+        return Mat( m, n, 0 );
+    }
 
 } // namespace my_lapack
