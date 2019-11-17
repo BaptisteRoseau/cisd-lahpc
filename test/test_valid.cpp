@@ -13,7 +13,6 @@ using namespace my_lapack;
 int main(int argc, char** argv){
 
     testall_dgemm( my_dgemm_scalaire );
-    testall_dgemm( my_dgemm );
 
     return 0;
 }

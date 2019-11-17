@@ -44,14 +44,14 @@ void test_dgetf2()
 }
 
 int test_dgemm_scalaire(){
-    Mat m1 = Mat( 10, 5, 1 ), m2 = Mat( 5, 10, 1 );
-    Mat m5 = Mat( 10, 10, 0 );
+    Mat m1 = Mat( 2, 1, 1 ), m2 = Mat( 1, 2, 1 );
+    Mat m5 = Mat( 2, 2, 0 );
     my_dgemm_scalaire( CblasColMajor,
                        CblasNoTrans,
                        CblasNoTrans,
                        m1.dimX(),
-                       m1.dimY(),
                        m2.dimY(),
+                       m1.dimY(),
                        2,
                        m1.get(),
                        m1.dimX(),
@@ -71,8 +71,8 @@ int test_dgemm(){
                        CblasTrans,
                        CblasNoTrans,
                        m1.dimX(),
-                       m1.dimY(),
                        m2.dimY(),
+                       m1.dimY(),
                        2,
                        m1.get(),
                        m1.dimX(),

@@ -50,8 +50,8 @@ set ( FLAGS_RELEASE /O2 )
 
 find_library(
     ALGONUM_LIBRARY
-    NAMES libalgonum.so
-    PATHS "${PROJECT_SOURCE_DIR}/algonum/lib"
+    NAMES libalgonum.so libalgonum
+    PATHS "${PROJECT_SOURCE_DIR}/algonum/lib" "${PROJECT_SOURCE_DIR}/algonum/lib/libalgonum.so"
 )
 
 target_compile_options( 
@@ -59,6 +59,7 @@ target_compile_options(
     PRIVATE
     "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
     "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"
+    -L "${PROJECT_SOURCE_DIR}/algonum/lib"
     )
 
 set_target_properties(
@@ -70,5 +71,5 @@ target_link_libraries(
     test_valid
     PRIVATE 
         my_lapack
-        ALGONUM_LIBRARY
+        #ALGONUM_LIBRARY
 )
