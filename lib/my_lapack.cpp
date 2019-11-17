@@ -116,6 +116,7 @@ namespace my_lapack {
         // Early return
         if ( !M || !N || !K ) { return; }
 
+
         // Early return
         if ( alpha == 0. ) {
             if ( beta != 1. ) {
@@ -132,36 +133,36 @@ namespace my_lapack {
         bool bTransB = ( TransB == CblasTrans );
 
         // Calculating dgemm
-        size_t i, j, k; // TODO: Changer i,j,k en m,n,k
+        size_t m, n, k; // TODO: Changer i,j,k en m,n,k
         if ( bTransA && bTransB ) {
-            for ( j = 0; j < N; j++ ) {
-                for ( i = 0; i < M; i++ ) {
-                    C[AT( i, j, ldc )] *= beta;
-                    for ( k = 0; k < K; k++ ) { C[AT( i, j, ldc )] += alpha * A[AT( j, k, lda )] * B[AT( k, i, ldb )]; }
+            for ( n = 0; n < N; n++ ) {
+                for ( m = 0; m < M; m++ ) {
+                    C[AT( m, n, ldc )] *= beta;
+                    for ( k = 0; k < K; k++ ) { C[AT( m, n, ldc )] += alpha * A[AT( n, k, lda )] * B[AT( k, m, ldb )]; }
                 }
             }
         }
         else if ( !bTransA && bTransB ) {
-            for ( j = 0; j < N; j++ ) {
-                for ( i = 0; i < M; i++ ) {
-                    C[AT( i, j, ldc )] *= beta;
-                    for ( k = 0; k < K; k++ ) { C[AT( i, j, ldc )] += alpha * A[AT( i, k, lda )] * B[AT( k, i, ldb )]; }
+            for ( n = 0; n < N; n++ ) {
+                for ( m = 0; m < M; m++ ) {
+                    C[AT( m, n, ldc )] *= beta;
+                    for ( k = 0; k < K; k++ ) { C[AT( m, n, ldc )] += alpha * A[AT( m, k, lda )] * B[AT( k, m, ldb )]; }
                 }
             }
         }
         else if ( bTransA && !bTransB ) {
-            for ( j = 0; j < N; j++ ) {
-                for ( i = 0; i < M; i++ ) {
-                    C[AT( i, j, ldc )] *= beta;
-                    for ( k = 0; k < K; k++ ) { C[AT( i, j, ldc )] += alpha * A[AT( j, k, lda )] * B[AT( k, j, ldb )]; }
+            for ( n = 0; n < N; n++ ) {
+                for ( m = 0; m < M; m++ ) {
+                    C[AT( m, n, ldc )] *= beta;
+                    for ( k = 0; k < K; k++ ) { C[AT( m, n, ldc )] += alpha * A[AT( n, k, lda )] * B[AT( k, n, ldb )]; }
                 }
             }
         }
         else {
-            for ( j = 0; j < N; j++ ) {
-                for ( i = 0; i < M; i++ ) {
-                    C[AT( i, j, ldc )] *= beta;
-                    for ( k = 0; k < K; k++ ) { C[AT( i, j, ldc )] += alpha * A[AT( i, k, lda )] * B[AT( k, j, ldb )]; }
+            for ( n = 0; n < N; n++ ) {
+                for ( m = 0; m < M; m++ ) {
+                    C[AT( m, n, ldc )] *= beta;
+                    for ( k = 0; k < K; k++ ) { C[AT( m, n, ldc )] += alpha * A[AT( m, k, lda )] * B[AT( k, n, ldb )]; }
                 }
             }
         }
@@ -190,35 +191,38 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE_STRICT( ldb );
         LAHPC_CHECK_POSITIVE_STRICT( ldc );
 
-        int blocksize = std::min( std::min( M, N ), BLOCK_SIZE );
+        // Early return
+        if ( !M || !N || !K || alpha == 0. ) { return; }
 
-        // Computing most of the blocks
-        /* size_t i,j;
-        for (i = 0; i < M/blocksize; i++){
-            for (j = 0; j < N/blocksize; j++){
-                my_dgemm_scalaire(Order, TransA, TransB,
-                                  ???, ???, ???,
-                                  alpha, A, lda,
-                                  B, ldb, beta,
-                                  C, ldc);
+        // Computing booleans in advance
+        bool bTransA = ( TransA == CblasTrans );
+        bool bTransB = ( TransB == CblasTrans );
+
+        int blocksize = min_macro( min_macro( M, N ), BLOCK_SIZE );
+        size_t lastMB = M%blocksize, MB = M/blocksize +1;
+        size_t lastNB = N%blocksize, NB = N/blocksize +1;
+        size_t lastKB = K%blocksize, KB = K/blocksize +1;
+        size_t m,n,k;
+        for (m = 0; m < MB; m++){
+            for (n = 0; n < NB; n++){
+                for (k = 0; k < KB; k++){
+                    my_dgemm_scalaire(Order,
+                                     TransA,
+                                     TransB,
+                                     m < MB - 1  ? blocksize : lastMB,
+                                     n < NB - 1  ? blocksize : lastNB,
+                                     k < KB - 1  ? blocksize : lastKB,
+                                     alpha,
+                                     A + blocksize*AT(m, k, lda),
+                                     lda,
+                                     B + blocksize*AT(k, n, ldb),
+                                     ldb,
+                                     beta,
+                                     C + blocksize*AT(m, n, ldc),
+                                     ldc);
+                }
             }
-        } */
-
-        // Computing the rest of the blocks
-        my_dgemm_scalaire(Order,
-                          TransA,
-                          TransB,
-                          M,
-                          N,
-                          K,
-                          alpha,
-                          A,
-                          lda,
-                          B,
-                          ldb,
-                          beta,
-                          C,
-                          ldc );
+        }
     }
 
     void my_dger( CBLAS_ORDER layout,

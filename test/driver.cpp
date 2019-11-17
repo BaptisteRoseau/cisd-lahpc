@@ -65,22 +65,22 @@ int test_dgemm_scalaire(){
 }
 
 int test_dgemm(){
-    Mat m1 = Mat( 10, 10, 1 ), m2 = Mat( 10, 10, 1 );
+    Mat m1 = Mat( 10, 20, 1 ), m2 = Mat( 20, 10, 1 );
     Mat m5 = Mat( 10, 10, 0 );
     my_dgemm( CblasColMajor,
-                       CblasTrans,
-                       CblasNoTrans,
-                       m1.dimX(),
-                       m2.dimY(),
-                       m1.dimY(),
-                       2,
-                       m1.get(),
-                       m1.dimX(),
-                       m2.get(),
-                       m2.dimX(),
-                       2,
-                       m5.get(),
-                       m5.dimX() );
+              CblasNoTrans,
+              CblasNoTrans,
+              m1.dimX(),
+              m2.dimY(),
+              m1.dimY(),
+              1,
+              m1.get(),
+              m1.dimX(),
+              m2.get(),
+              m2.dimX(),
+              1,
+              m5.get(),
+              m5.dimX() );
     m5.print();
     return 0;
 }
@@ -105,6 +105,6 @@ int main( int argc, char **argv )
               1 ); */
 
     //test_dgetf2();
-    test_dgemm_scalaire();
+    //test_dgemm_scalaire();
     test_dgemm();
 }
