@@ -18,7 +18,7 @@ namespace my_lapack {
         double* col(int j);
         inline int     dimX() { return m; }
         inline int     dimY() { return n; }
-        void print();
+        void print(int precision = 6);
 
       private:
         double *storage;
@@ -30,5 +30,8 @@ namespace my_lapack {
     Mat MatRandi( int m, int n, unsigned int max, unsigned int seed = 0x9d2c5680 );
     Mat MatSqrDiag( int m, double v );
     Mat MatZero( int m, int n );
+    Mat MatRandLi(int m);
+    Mat MatRandUi(int m);
+
 
 } // namespace my_lapack

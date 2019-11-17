@@ -114,16 +114,14 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE_STRICT( ldc );
 
         // Early return
-        if ( !M || !N || !K ){ return; }
+        if ( !M || !N || !K ) { return; }
 
         // Early return
         if ( alpha == 0. ) {
             if ( beta != 1. ) {
                 size_t m, n;
-                for (m = 0; m < M; m++){
-                    for (n = 0; n < N; n++){
-                        C[AT(m,n,ldc)] *= beta;
-                    }
+                for ( m = 0; m < M; m++ ) {
+                    for ( n = 0; n < N; n++ ) { C[AT( m, n, ldc )] *= beta; }
                 }
             }
             return;
@@ -139,10 +137,7 @@ namespace my_lapack {
             for ( j = 0; j < N; j++ ) {
                 for ( i = 0; i < M; i++ ) {
                     C[AT( i, j, ldc )] *= beta;
-                    for ( k = 0; k < K; k++ ) {
-                        C[AT( i, j, ldc )] +=
-                            alpha * A[AT( j, k, lda )] * B[AT( k, i, ldb )];
-                    }
+                    for ( k = 0; k < K; k++ ) { C[AT( i, j, ldc )] += alpha * A[AT( j, k, lda )] * B[AT( k, i, ldb )]; }
                 }
             }
         }
@@ -150,10 +145,7 @@ namespace my_lapack {
             for ( j = 0; j < N; j++ ) {
                 for ( i = 0; i < M; i++ ) {
                     C[AT( i, j, ldc )] *= beta;
-                    for ( k = 0; k < K; k++ ) {
-                        C[AT( i, j, ldc )] +=
-                            alpha * A[AT( i, k, lda )] * B[AT( k, i, ldb )];
-                    }
+                    for ( k = 0; k < K; k++ ) { C[AT( i, j, ldc )] += alpha * A[AT( i, k, lda )] * B[AT( k, i, ldb )]; }
                 }
             }
         }
@@ -161,10 +153,7 @@ namespace my_lapack {
             for ( j = 0; j < N; j++ ) {
                 for ( i = 0; i < M; i++ ) {
                     C[AT( i, j, ldc )] *= beta;
-                    for ( k = 0; k < K; k++ ) {
-                        C[AT( i, j, ldc )] +=
-                            alpha * A[AT( j, k, lda )] * B[AT( k, j, ldb )];
-                    }
+                    for ( k = 0; k < K; k++ ) { C[AT( i, j, ldc )] += alpha * A[AT( j, k, lda )] * B[AT( k, j, ldb )]; }
                 }
             }
         }
@@ -172,10 +161,7 @@ namespace my_lapack {
             for ( j = 0; j < N; j++ ) {
                 for ( i = 0; i < M; i++ ) {
                     C[AT( i, j, ldc )] *= beta;
-                    for ( k = 0; k < K; k++ ) {
-                        C[AT( i, j, ldc )] +=
-                            alpha * A[AT( i, k, lda )] * B[AT( k, j, ldb )];
-                    }
+                    for ( k = 0; k < K; k++ ) { C[AT( i, j, ldc )] += alpha * A[AT( i, k, lda )] * B[AT( k, j, ldb )]; }
                 }
             }
         }
@@ -244,7 +230,7 @@ namespace my_lapack {
             if ( Y[yi] == 0.0 ) { continue; }
             else {
                 double tmp = alpha * Y[yi];
-                for ( int i = 0, xi = 0; i < N; ++i, xi += incX ) { A[j * M + i] += tmp * X[xi]; }
+                for ( int i = 0, xi = 0; i < N; ++i, xi += incX ) { A[j * lda + i] += tmp * X[xi]; }
             }
         }
     }
@@ -329,7 +315,7 @@ namespace my_lapack {
         idamax     = 0;
         double max = std::abs( dx[0] );
         for ( int i = 1, xi = incX; i < N; ++i, xi += incX ) {
-            float tmp = std::abs( dx[i] );
+            double tmp = std::abs( dx[i] );
             if ( tmp > max ) {
                 idamax = i;
                 max    = tmp;

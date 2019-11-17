@@ -77,10 +77,14 @@ namespace my_lapack {
         }
     }
 
-    void Mat::print(){
-        int m = this->dimX();
-        int n = this->dimY();
-        double *a = this->storage;
+    void Mat::print( int precision /*= 6*/ )
+    {
+        int     m = dimX();
+        int     n = dimY();
+        double *a = storage;
+
+        auto oldPrecision = std::cout.precision( precision );
+
         for ( int i = 0; i < m; ++i ) {
             std::cout << "| ";
             for ( int j = 0; j < n; ++j ) { std::cout << a[j * m + i] << " "; }
@@ -88,13 +92,18 @@ namespace my_lapack {
         }
 
         std::cout << std::endl;
-        //cout.precision( oldPrecision );
+        std::cout.precision( oldPrecision );
+    }
+
+    std::minstd_rand &GetRandEngine()
+    {
+        static std::minstd_rand randEngine;
+        return randEngine;
     }
 
     Mat MatRandi( int m, int n, unsigned int max, unsigned int seed /*= 0x9d2c5680*/ )
     {
-        static std::minstd_rand randEngine;
-
+        auto &randEngine = GetRandEngine();
         randEngine.seed( seed );
 
         Mat mat( m, n );
@@ -113,8 +122,29 @@ namespace my_lapack {
         return mat;
     }
 
-    Mat MatZero( int m, int n ){
-        return Mat( m, n, 0 );
+    Mat MatZero( int m, int n ) { return Mat( m, n, 0.0 ); }
+
+    Mat MatRandUi( int m )
+    {
+        auto &randEngine = GetRandEngine();
+
+        Mat mat( m, m, 0.0 );
+        for ( int j = 0; j < m; ++j ) {
+            for ( int i = 0; i <= j; ++i ) { mat.at( i, j ) = 1u + ( randEngine() % 128u ); }
+        }
+        return mat;
+    }
+
+    Mat MatRandLi( int m )
+    {
+        auto &randEngine = GetRandEngine();
+
+        Mat mat( m, m, 0.0 );
+        for ( int i = 0; i < m; ++i ) {
+            mat.at( i, i ) = 1.0;
+            for ( int j = 0; j < i; ++j ) { mat.at( i, j ) = 1u + ( randEngine() % 128u ); }
+        }
+        return mat;
     }
 
 } // namespace my_lapack
