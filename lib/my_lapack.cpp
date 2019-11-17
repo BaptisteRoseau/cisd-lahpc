@@ -133,10 +133,10 @@ namespace my_lapack {
         bool bTransB = ( TransB == CblasTrans );
 
         // Calculating dgemm
-        size_t m, n, k; // TODO: Changer i,j,k en m,n,k
+        size_t m, n, k;
         if ( bTransA && bTransB ) {
-                for ( m = 0; m < M; m++ ) {
             for ( n = 0; n < N; n++ ) {
+                for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
                     for ( k = 0; k < K; k++ ) { C[AT( m, n, ldc )] += alpha * A[AT( n, k, lda )] * B[AT( k, m, ldb )]; }
                 }
@@ -192,7 +192,24 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE_STRICT( ldc );
 
         // Early return
-        if ( !M || !N || !K || alpha == 0. ) { return; }
+        if ( !M || !N || !K || (alpha == 0. && beta == 1.) ) { return; }
+        if (alpha == 0) {
+            my_dgemm_scalaire(Order,
+                              TransA,
+                              TransB,
+                              M,
+                              N,
+                              K,
+                              alpha,
+                              A,
+                              lda,
+                              B,
+                              ldb,
+                              beta,
+                              C,
+                              ldc);
+            return;
+        }
 
         // Computing booleans in advance
         bool bTransA = ( TransA == CblasTrans );
@@ -203,26 +220,26 @@ namespace my_lapack {
         size_t lastNB = N%blocksize, NB = N/blocksize +1;
         size_t lastKB = K%blocksize, KB = K/blocksize +1;
         size_t m,n,k;
-        for (m = 0; m < MB; m++){
-            for (n = 0; n < NB; n++){
-                for (k = 0; k < KB; k++){
-                    my_dgemm_scalaire(Order,
-                                     TransA,
-                                     TransB,
-                                     m < MB - 1  ? blocksize : lastMB,
-                                     n < NB - 1  ? blocksize : lastNB,
-                                     k < KB - 1  ? blocksize : lastKB,
-                                     alpha,
-                                     A + blocksize*AT(m, k, lda),
-                                     lda,
-                                     B + blocksize*AT(k, n, ldb),
-                                     ldb,
-                                     beta,
-                                     C + blocksize*AT(m, n, ldc),
-                                     ldc);
+            for (m = 0; m < MB; m++){
+                for (n = 0; n < NB; n++){
+                    for (k = 0; k < KB; k++){
+                        my_dgemm_scalaire(Order,
+                                        TransA,
+                                        TransB,
+                                        m < MB - 1  ? blocksize : lastMB,
+                                        n < NB - 1  ? blocksize : lastNB,
+                                        k < KB - 1  ? blocksize : lastKB,
+                                        alpha,
+                                        A + blocksize*AT(m, k, lda),
+                                        lda,
+                                        B + blocksize*AT(k, n, ldb),
+                                        ldb,
+                                        beta,
+                                        C + blocksize*AT(m, n, ldc),
+                                        ldc);
+                    }
                 }
             }
-        }
     }
 
     void my_dger( CBLAS_ORDER layout,
