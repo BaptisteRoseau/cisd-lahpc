@@ -135,8 +135,8 @@ namespace my_lapack {
         // Calculating dgemm
         size_t m, n, k; // TODO: Changer i,j,k en m,n,k
         if ( bTransA && bTransB ) {
-            for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
+            for ( n = 0; n < N; n++ ) {
                     C[AT( m, n, ldc )] *= beta;
                     for ( k = 0; k < K; k++ ) { C[AT( m, n, ldc )] += alpha * A[AT( n, k, lda )] * B[AT( k, m, ldb )]; }
                 }

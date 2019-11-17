@@ -73,3 +73,38 @@ target_link_libraries(
         my_lapack
         #ALGONUM_LIBRARY
 )
+
+
+# TEST_PERF
+add_executable(
+    test_perf
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_perf.cpp
+)
+
+target_include_directories(
+    test_perf
+    PRIVATE
+        "${PROJECT_SOURCE_DIR}/lib"
+)
+
+set ( FLAGS_DEBUG /DEBUG /Od ) 
+set ( FLAGS_RELEASE /O2 )
+
+target_compile_options( 
+    test_perf
+    PRIVATE
+    "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
+    "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"
+    )
+
+set_target_properties(
+    test_perf
+    PROPERTIES CXX_STANDARD 11
+    )
+        
+target_link_libraries(
+    test_perf
+    PRIVATE 
+        my_lapack
+        #ALGONUM_LIBRARY
+)
