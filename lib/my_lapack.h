@@ -9,7 +9,7 @@ namespace my_lapack {
 
     void my_daxpy( const int N, const double alpha, const double *X, const int incX, double *Y, const int incY );
 
-    void my_dgemv( enum CBLAS_ORDER     layout,
+    void my_dgemv( CBLAS_ORDER     layout,
                    enum CBLAS_TRANSPOSE TransA,
                    int                  M,
                    int                  N,
@@ -22,7 +22,7 @@ namespace my_lapack {
                    double *             Y,
                    const int            incY );
 
-    void my_dgemm_scalaire( enum CBLAS_ORDER     layout,
+    void my_dgemm_scalaire( CBLAS_ORDER     layout,
                             enum CBLAS_TRANSPOSE TransA,
                             enum CBLAS_TRANSPOSE TransB,
                             int                  M,
@@ -37,7 +37,7 @@ namespace my_lapack {
                             double *             C,
                             int                  ldc );
 
-    void my_dger( enum CBLAS_ORDER layout,
+    void my_dger( CBLAS_ORDER layout,
                   int              M,
                   int              N,
                   double           alpha,
@@ -48,7 +48,7 @@ namespace my_lapack {
                   double *         A,
                   int              lda );
 
-    void my_dgemm( enum CBLAS_ORDER     Order,
+    void my_dgemm( CBLAS_ORDER     Order,
                    enum CBLAS_TRANSPOSE TransA,
                    enum CBLAS_TRANSPOSE TransB,
                    int                  M,

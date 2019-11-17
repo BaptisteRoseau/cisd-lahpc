@@ -40,7 +40,7 @@ namespace my_lapack {
         for ( int i = 0, xi = 0, yi = 0; i < N; ++i, xi += incX, yi += incY ) { Y[yi] += alpha * X[xi]; }
     }
 
-    void my_dgemv( enum CBLAS_ORDER     layout,
+    void my_dgemv( CBLAS_ORDER     layout,
                    enum CBLAS_TRANSPOSE TransA,
                    int                  M,
                    int                  N,
@@ -90,7 +90,7 @@ namespace my_lapack {
     }
 
     /// M N and K aren't changed even if transposed.
-    void my_dgemm_scalaire( enum CBLAS_ORDER     layout,
+    void my_dgemm_scalaire( CBLAS_ORDER     Order,
                             enum CBLAS_TRANSPOSE TransA,
                             enum CBLAS_TRANSPOSE TransB,
                             int                  M,
@@ -105,7 +105,7 @@ namespace my_lapack {
                             double *             C,
                             int                  ldc )
     {
-        LAHPC_CHECK_PREDICATE( layout == CblasColMajor );
+        LAHPC_CHECK_PREDICATE( Order == CblasColMajor );
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE( K );
@@ -167,7 +167,7 @@ namespace my_lapack {
         }
     }
 
-    void my_dgemm( enum CBLAS_ORDER     Order,
+    void my_dgemm( CBLAS_ORDER     Order,
                    enum CBLAS_TRANSPOSE TransA,
                    enum CBLAS_TRANSPOSE TransB,
                    int                  M,
@@ -182,6 +182,7 @@ namespace my_lapack {
                    double *             C,
                    int                  ldc )
     {
+        LAHPC_CHECK_PREDICATE( Order == CblasColMajor );
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE( K );
@@ -204,9 +205,23 @@ namespace my_lapack {
         } */
 
         // Computing the rest of the blocks
+        my_dgemm_scalaire(Order,
+                          TransA,
+                          TransB,
+                          M,
+                          N,
+                          K,
+                          alpha,
+                          A,
+                          lda,
+                          B,
+                          ldb,
+                          beta,
+                          C,
+                          ldc );
     }
 
-    void my_dger( enum CBLAS_ORDER layout,
+    void my_dger( CBLAS_ORDER layout,
                   int              M,
                   int              N,
                   double           alpha,

@@ -8,3 +8,4 @@ set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 add_subdirectory(lib)
 
 add_subdirectory(test)
+

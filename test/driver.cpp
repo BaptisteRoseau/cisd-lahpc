@@ -43,6 +43,48 @@ void test_dgetf2()
     Prod.print();
 }
 
+int test_dgemm_scalaire(){
+    Mat m1 = Mat( 10, 5, 1 ), m2 = Mat( 5, 10, 1 );
+    Mat m5 = Mat( 10, 10, 0 );
+    my_dgemm_scalaire( CblasColMajor,
+                       CblasNoTrans,
+                       CblasNoTrans,
+                       m1.dimX(),
+                       m1.dimY(),
+                       m2.dimY(),
+                       2,
+                       m1.get(),
+                       m1.dimX(),
+                       m2.get(),
+                       m2.dimX(),
+                       2,
+                       m5.get(),
+                       m5.dimX() );
+    m5.print();
+    return 0;
+}
+
+int test_dgemm(){
+    Mat m1 = Mat( 10, 10, 1 ), m2 = Mat( 10, 10, 1 );
+    Mat m5 = Mat( 10, 10, 0 );
+    my_dgemm( CblasColMajor,
+                       CblasTrans,
+                       CblasNoTrans,
+                       m1.dimX(),
+                       m1.dimY(),
+                       m2.dimY(),
+                       2,
+                       m1.get(),
+                       m1.dimX(),
+                       m2.get(),
+                       m2.dimX(),
+                       2,
+                       m5.get(),
+                       m5.dimX() );
+    m5.print();
+    return 0;
+}
+
 int main( int argc, char **argv )
 {
     /*Mat m1 = MatRandi( 10, 10, 100 ), m2 = MatRandi( 10, 10, 100 );
@@ -60,23 +102,9 @@ int main( int argc, char **argv )
               1,
               1.0,
               m4.col( 1 ),
-              1 );
+              1 ); */
 
-    my_dgemm_scalaire( CblasColMajor,
-                       CblasTrans,
-                       CblasNoTrans,
-                       m1.dimX(),
-                       m1.dimY(),
-                       m2.dimY(),
-                       2,
-                       m1.get(),
-                       m1.dimX(),
-                       m2.get(),
-                       m2.dimX(),
-                       2,
-                       m5.get(),
-                       m5.dimX() );
-    m5.print();*/
-
-    test_dgetf2();
+    //test_dgetf2();
+    test_dgemm_scalaire();
+    test_dgemm();
 }
