@@ -7,7 +7,8 @@ add_executable(
 target_include_directories(
     driver
     PRIVATE
-        "${PROJECT_SOURCE_DIR}/lib"
+    "${PROJECT_SOURCE_DIR}/lib_ocv"
+    "${PROJECT_SOURCE_DIR}/lib_seq"
 )
 
 set ( FLAGS_DEBUG /DEBUG /Od ) 
@@ -28,7 +29,7 @@ set_target_properties(
 target_link_libraries(
     driver
     PRIVATE 
-        my_lapack
+        my_lapack_seq
 )
 
 # TEST_VALID
@@ -40,7 +41,8 @@ add_executable(
 target_include_directories(
     test_valid
     PRIVATE
-        "${PROJECT_SOURCE_DIR}/lib"
+        "${PROJECT_SOURCE_DIR}/lib_ocv"
+        "${PROJECT_SOURCE_DIR}/lib_seq"
         "${PROJECT_SOURCE_DIR}/algonum/include"
 )
 
@@ -70,7 +72,7 @@ set_target_properties(
 target_link_libraries(
     test_valid
     PRIVATE 
-        my_lapack
+        my_lapack_seq
         #ALGONUM_LIBRARY
 )
 
@@ -84,7 +86,8 @@ add_executable(
 target_include_directories(
     test_perf
     PRIVATE
-        "${PROJECT_SOURCE_DIR}/lib"
+    "${PROJECT_SOURCE_DIR}/lib_ocv"
+    "${PROJECT_SOURCE_DIR}/lib_seq"
 )
 
 set ( FLAGS_DEBUG /DEBUG /Od ) 
@@ -105,6 +108,6 @@ set_target_properties(
 target_link_libraries(
     test_perf
     PRIVATE 
-        my_lapack
+        my_lapack_seq
         #ALGONUM_LIBRARY
 )
