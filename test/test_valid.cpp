@@ -1,7 +1,5 @@
-#include <my_lapack.h>
-#include "algonum.h"
+//#include "algonum.h"
 #include "Mat.h"
-#include "my_lapack.h"
 #include "util.h"
 #include "cblas.h"
 

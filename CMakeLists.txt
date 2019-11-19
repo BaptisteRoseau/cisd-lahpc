@@ -5,9 +5,7 @@ project( cisd-lahpc VERSION 0.1
 
 set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 
-add_subdirectory(lib_seq)
-
-add_subdirectory(lib_omp)
-
+add_subdirectory(lib)
+add_subdirectory(perf)
 add_subdirectory(test)
 

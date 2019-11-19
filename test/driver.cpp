@@ -11,7 +11,8 @@ char ( &ArraySizeHelper( T ( & )[N] ) )[N];
 
 using namespace my_lapack;
 
-int test_dgemv(){
+int test_dgemv()
+{
     Mat m1 = MatRandi( 10, 10, 100 );
     Mat m4 = MatSqrDiag( 50, 999999999.654616165414169 );
     my_dgemv( CblasColMajor,
@@ -32,11 +33,11 @@ int test_dgemv(){
 
 int test_dgetf2()
 {
-    Mat L = MatRandLi( 5 );
-    Mat U = MatRandUi( 5 );
+    Mat L = MatRandLi( 1000 );
+    Mat U = MatRandUi( 1000 );
 
-    L.print();
-    U.print();
+    /*L.print();
+    U.print();*/
     Mat Prod( L.dimX(), L.dimX(), 0.0 );
 
     my_dgemm_scalaire( CblasColMajor,
@@ -54,16 +55,17 @@ int test_dgetf2()
                        Prod.get(),
                        Prod.dimX() );
 
-    Prod.print();
-    
-    int info;
-    my_dgetf2( Prod.dimX(), Prod.dimY(), Prod.get(), Prod.dimX(), nullptr, &info );
+    // Prod.print();
 
-    Prod.print();
+    int info;
+    // my_dgetf2( Prod.dimX(), Prod.dimY(), Prod.get(), Prod.dimX(), nullptr, &info );
+
+    // Prod.print();
     return 0;
 }
 
-int test_dgemm_scalaire(){
+int test_dgemm_scalaire()
+{
     Mat m1 = Mat( 2, 1, 1 ), m2 = Mat( 1, 2, 1 );
     Mat m5 = Mat( 2, 2, 0 );
     my_dgemm_scalaire( CblasColMajor,
@@ -84,7 +86,8 @@ int test_dgemm_scalaire(){
     return 0;
 }
 
-int test_dgemm(){
+int test_dgemm()
+{
     Mat m1 = Mat( 10, 20, 1 ), m2 = Mat( 20, 10, 1 );
     Mat m5 = Mat( 10, 10, 0 );
     my_dgemm( CblasColMajor,

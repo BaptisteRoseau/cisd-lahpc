@@ -9,7 +9,7 @@ namespace my_lapack {
 
     void my_daxpy( const int N, const double alpha, const double *X, const int incX, double *Y, const int incY );
 
-    void my_dgemv( CBLAS_ORDER     layout,
+    void my_dgemv( CBLAS_ORDER          layout,
                    enum CBLAS_TRANSPOSE TransA,
                    int                  M,
                    int                  N,
@@ -22,7 +22,7 @@ namespace my_lapack {
                    double *             Y,
                    const int            incY );
 
-    void my_dgemm_scalaire( CBLAS_ORDER     layout,
+    void my_dgemm_scalaire( CBLAS_ORDER          layout,
                             enum CBLAS_TRANSPOSE TransA,
                             enum CBLAS_TRANSPOSE TransB,
                             int                  M,
@@ -37,18 +37,18 @@ namespace my_lapack {
                             double *             C,
                             int                  ldc );
 
-    void my_dger( CBLAS_ORDER layout,
-                  int              M,
-                  int              N,
-                  double           alpha,
-                  const double *   X,
-                  int              incX,
-                  const double *   Y,
-                  int              incY,
-                  double *         A,
-                  int              lda );
+    void my_dger( CBLAS_ORDER   layout,
+                  int           M,
+                  int           N,
+                  double        alpha,
+                  const double *X,
+                  int           incX,
+                  const double *Y,
+                  int           incY,
+                  double *      A,
+                  int           lda );
 
-    void my_dgemm( CBLAS_ORDER     Order,
+    void my_dgemm( CBLAS_ORDER          Order,
                    enum CBLAS_TRANSPOSE TransA,
                    enum CBLAS_TRANSPOSE TransB,
                    int                  M,
@@ -64,30 +64,33 @@ namespace my_lapack {
                    int                  ldc );
 
     //************************************
-    // Method:    my_dgetrf2
-    // FullName:  my_lapack::my_dgetrf2
+    // Method:    my_dgetf2
+    // FullName:  my_lapack::my_dgetf2
     // Access:    public
     // Returns:   void
     // Parameter: int M - Number of rows of matrix A
     // Parameter: int N - Number of columns of matrix A
     // Parameter: double * A - Dim (lda, N). Upon exit, holds L, U such that A = L * U
     // Parameter: int lda - Leading dimension of matrix A
-    // Parameter: int * ipiv - /!\ MUST BE nullptr /!\ Dim (min(M,N)). Pivot indices, row i of A was interchanged with ipiv[i]
-    // Parameter: int * info - 0 if success, if info > 0 then U(info - 1,info - 1) == 0.0
+    // Parameter: int * ipiv - /!\ MUST BE nullptr /!\ Dim (min(M,N)). Pivot indices, row i of A was interchanged with
+    // ipiv[i] Parameter: int * info - 0 if success, if info > 0 then U(info - 1,info - 1) == 0.0
     //************************************
-    void my_dgetf2( int M, int N, double *A, int lda, int *ipiv, int *info );
+    void my_dgetf2( CBLAS_ORDER order, int M, int N, double *A, int lda );
 
-    void my_dtrsm( char          side,
-                   char          uplo,
-                   char          transA,
-                   char          diag,
-                   int           M,
-                   int           N,
-                   double        alpha,
-                   const double *A,
-                   int           lda,
-                   double *      B,
-                   int           ldb );
+    void my_dtrsm( CBLAS_ORDER     layout,
+                   CBLAS_SIDE      Side,
+                   CBLAS_UPLO      Uplo,
+                   CBLAS_TRANSPOSE transA,
+                   CBLAS_DIAG      Diag,
+                   int             M,
+                   int             N,
+                   double          alpha,
+                   const double *  A,
+                   int             lda,
+                   double *        B,
+                   int             ldb );
+
+    void my_dgetrf(CBLAS_ORDER order, int M, int N, double* A, int lda);
 
     int my_idamax( int N, double *dx, int incX );
 

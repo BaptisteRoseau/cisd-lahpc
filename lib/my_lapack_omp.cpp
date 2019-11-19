@@ -40,7 +40,7 @@ namespace my_lapack {
         for ( int i = 0, xi = 0, yi = 0; i < N; ++i, xi += incX, yi += incY ) { Y[yi] += alpha * X[xi]; }
     }
 
-    void my_dgemv( CBLAS_ORDER     layout,
+    void my_dgemv( CBLAS_ORDER          layout,
                    enum CBLAS_TRANSPOSE TransA,
                    int                  M,
                    int                  N,
@@ -76,21 +76,21 @@ namespace my_lapack {
         if ( TransA == CblasNoTrans ) {
             for ( int j = 0, xi = 0; j < N; ++j, xi += incX ) {
                 double tmp = alpha * X[xi];
-                for ( int i = 0, yi = 0; i < M; ++i, yi += incY ) { Y[yi] += tmp * A[j * M + i]; }
+                for ( int i = 0, yi = 0; i < M; ++i, yi += incY ) { Y[yi] += tmp * A[j * lda + i]; }
             }
         }
 
         else if ( TransA == CblasTrans ) {
             for ( int j = 0, yi = 0; j < N; ++j, yi += incY ) {
                 double tmp = 0;
-                for ( int i = 0, xi = 0; i < N; ++i, xi += incX ) { tmp += A[j * M + i] * X[xi]; }
+                for ( int i = 0, xi = 0; i < M; ++i, xi += incX ) { tmp += A[j * lda + i] * X[xi]; }
                 Y[yi] += alpha * tmp;
             }
         }
     }
 
     /// M N and K aren't changed even if transposed.
-    void my_dgemm_scalaire( CBLAS_ORDER     Order,
+    void my_dgemm_scalaire( CBLAS_ORDER          Order,
                             enum CBLAS_TRANSPOSE TransA,
                             enum CBLAS_TRANSPOSE TransB,
                             int                  M,
@@ -168,7 +168,7 @@ namespace my_lapack {
         }
     }
 
-    void my_dgemm( CBLAS_ORDER     Order,
+    void my_dgemm( CBLAS_ORDER          Order,
                    enum CBLAS_TRANSPOSE TransA,
                    enum CBLAS_TRANSPOSE TransB,
                    int                  M,
@@ -285,41 +285,22 @@ namespace my_lapack {
                     }
                 }
             }
-        }
-        else {
-            for (m = 0; m < MB; m++){
-                for (n = 0; n < NB; n++){
-                    for (k = 0; k < KB; k++){
-                        my_dgemm_scalaire(Order,
-                                        TransA,
-                                        TransB,
-                                        m < MB - 1  ? blocksize : lastMB,
-                                        n < NB - 1  ? blocksize : lastNB,
-                                        k < KB - 1  ? blocksize : lastKB,
-                                        alpha,
-                                        A + blocksize*AT(m, k, lda),
-                                        lda,
-                                        B + blocksize*AT(k, n, ldb),
-                                        ldb,
-                                        beta,
-                                        C + blocksize*AT(m, n, ldc),
-                                        ldc);
-                    }
-                }
-            }
-        }
+        } */
+
+        // Computing the rest of the blocks
+        my_dgemm_scalaire( Order, TransA, TransB, M, N, K, alpha, A, lda, B, ldb, beta, C, ldc );
     }
 
-    void my_dger( CBLAS_ORDER layout,
-                  int              M,
-                  int              N,
-                  double           alpha,
-                  const double *   X,
-                  int              incX,
-                  const double *   Y,
-                  int              incY,
-                  double *         A,
-                  int              lda )
+    void my_dger( CBLAS_ORDER   layout,
+                  int           M,
+                  int           N,
+                  double        alpha,
+                  const double *X,
+                  int           incX,
+                  const double *Y,
+                  int           incY,
+                  double *      A,
+                  int           lda )
     {
         LAHPC_CHECK_PREDICATE( layout == CblasColMajor );
         LAHPC_CHECK_POSITIVE( M );
@@ -339,7 +320,7 @@ namespace my_lapack {
         }
     }
 
-    void my_dgetf2( int M, int N, double *A, int lda, int *ipiv, int *info )
+    void my_dgetf2( CBLAS_ORDER order, int M, int N, double *A, int lda )
     {
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
@@ -375,38 +356,84 @@ namespace my_lapack {
         }
     }
 
-    void my_dtrsm( char          side,
-                   char          uplo,
-                   char          transA,
-                   char          diag,
-                   int           M,
-                   int           N,
-                   double        alpha,
-                   const double *A,
-                   int           lda,
-                   double *      B,
-                   int           ldb )
+    void my_dgetrf( CBLAS_ORDER order, int M, int N, double* A, int lda ) {}
+
+    void my_dtrsm( CBLAS_ORDER layout,
+                   CBLAS_SIDE side,
+                   CBLAS_UPLO uplo,
+                   CBLAS_TRANSPOSE transA,
+                   CBLAS_DIAG diag,
+                   int M,
+                   int N,
+                   double alpha,
+                   const double * A,
+                   int lda,
+                   double * B,
+                   int ldb )
     {
-        bool lside    = side == 'L' || side == 'l';
-        bool upper    = uplo == 'U' || uplo == 'u';
-        bool isTransA = !( transA == 'N' || transA == 'n' );
-        bool nounit   = diag == 'N' || diag == 'n';
 
-        int nrowa = lside ? M : N;
+        LAHPC_CHECK_POSITIVE( M );
+        LAHPC_CHECK_POSITIVE( N );
+        LAHPC_CHECK_POSITIVE( lda );
+        LAHPC_CHECK_POSITIVE( ldb );
 
-        LAHPC_CHECK_PREDICATE( lside && !upper && !isTransA && !nounit );
+        LAHPC_CHECK_PREDICATE(side == CblasLeft);
 
-        for ( int j = 0; j < N; ++j ) {
-            if ( alpha != 1.0 ) {
-                for ( int i = 0; i < M; ++i ) { B[j * M + i] *= alpha; }
+        double lambda;
+
+        if ( M == 0 || N == 0 ) return;
+
+        if ( alpha == 0. ) {
+            for ( int j = 0; j < N; ++j ) {
+                for ( int i = 0; i < M; ++i ) { B[i + j * ldb] = 0.; }
             }
-            for ( int k = 0; k < M; ++k ) {
-                if ( nounit ) { B[j * M + k] /= A[k * M + k]; }
-                for ( int i = k + 1; i < M; ++i ) { B[j * M + i] -= B[j * M + k] * A[k * M + i]; }
+            return;
+        }
+
+        /* Left side : X * op( A ) = alpha * B */
+        if ( side == CblasLeft ) {
+            /* B = alpha * inv(A ** t) * B */
+            if ( transA == CblasTrans ) {
+                /* A is a lower triangular */
+                if ( uplo == CblasLower ) {
+                    for ( int j = 0; j < N; ++j ) {
+                        for ( int i = M - 1; i >= 0; --i ) {
+                            lambda = alpha * B[i + j * ldb];
+                            for ( int k = i + 1; k < M; ++k ) { lambda -= B[k + j * ldb] * A[k + i * lda]; }
+                            /* The diagonal is A[i + i*lda] (Otherwise : 1.) */
+                            /* Relevent when solving A = L*U as we use A to store
+                             both L and U, so Diag(L) is full of 1. . */
+                            if ( diag == CblasNonUnit ) lambda /= A[i * ( 1 + lda )];
+                            B[i + j * ldb] = lambda;
+                        }
+                    }
+                }
+                /* A is triangular upper */
+                else if ( uplo == CblasUpper ) {
+                    for ( int j = 0; j < N; ++j ) {
+                        for ( int i = 0; i < M; ++i ) {
+                            lambda = alpha * B[i + j * ldb];
+                            for ( int k = 0; k < i; ++k ) { lambda -= A[k + i * lda] * B[k + j * ldb]; }
+                            if ( diag == CblasNonUnit ) lambda /= A[i * ( 1 + lda )];
+                            B[i + j * ldb] = lambda;
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            if ( transA == CblasTrans ) {
+                if ( uplo == CblasUpper ) {}
+                else {
+                }
+            }
+            else {
+                if ( uplo == CblasUpper ) {}
+                else {
+                }
             }
         }
     }
-
     int my_idamax( int N, double *dx, int incX )
     {
         LAHPC_CHECK_POSITIVE_STRICT( N );
