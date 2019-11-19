@@ -2,7 +2,9 @@ CISD 2019 ROSEAU GALVEZ
 
 Algèbre Linéaire HPC
 
-Pour compiler le code, vous pouvez taper les commandes suivantes depuis la racine :
+Prérequis : CMake version 3.13.1 ou supérieure.
+
+Pour compiler le code depuis une console linux, vous pouvez exécuter les commandes suivantes depuis la racine :
 
 - mkdir build
 - cd build
