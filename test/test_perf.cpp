@@ -19,7 +19,7 @@ int test_perf_dgemm(){
     fout.open("test_perf_dgemm.csv", ios::out | ios::app); 
     size_t powInc = 2;
     size_t len = 2;
-    size_t lenMax = powInc << 13;
+    size_t lenMax = powInc << 11;
     double valMax = 200;
     double alpha  = 0.75;
     double beta   = 0;

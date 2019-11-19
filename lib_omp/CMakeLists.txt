@@ -2,14 +2,14 @@ set( HEADERS my_lapack.h util.h Mat.h err.h)
 set( FLAGS_DEBUG /DEBUG /Od ) 
 set( FLAGS_RELEASE /O2 )
 
-add_library( my_lapack_ocv
+add_library( my_lapack_omp
     my_lapack.cpp
     util.cpp
     Mat.cpp
     ${HEADERS} )
 
 target_include_directories(
-    my_lapack_ocv
+    my_lapack_omp
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/perf
@@ -20,13 +20,13 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 target_compile_features(
-    my_lapack_ocv
+    my_lapack_omp
     PUBLIC
         cxx_std_11
 )
 
 target_compile_options( 
-    my_lapack_ocv
+    my_lapack_omp
     PRIVATE
         "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
         "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"

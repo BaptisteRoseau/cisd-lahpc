@@ -7,7 +7,7 @@ set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 
 add_subdirectory(lib_seq)
 
-add_subdirectory(lib_ocv)
+add_subdirectory(lib_omp)
 
 add_subdirectory(test)
 
