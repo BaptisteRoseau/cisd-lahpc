@@ -11,11 +11,39 @@ char ( &ArraySizeHelper( T ( & )[N] ) )[N];
 
 #define ARRAY_SIZE( A ) ( sizeof( ArraySizeHelper( A ) ) )
 
+
 using namespace my_lapack;
 using namespace std;
 
+/*============ UTILS FOR TESTING PURPOSE =============== */
+
+void print_test_result(int result, int *nb_success, int *nb_tests)
+{
+    if (result == EXIT_SUCCESS) {
+        printf("\x1B[32mSUCCESS\x1B[0m\n");
+        (*nb_success)++;
+    } else {
+
+        printf("\x1B[31mFAILED\x1B[0m\n");
+    }
+
+    (*nb_tests)++;
+}
+
+void print_test_summary(int nb_success, int nb_tests)
+{
+    if (nb_success == nb_tests)
+        printf("TESTS SUMMARY: \t\x1B[32m%d\x1B[0m/%d\n", nb_success, nb_tests);
+    else
+        printf("TESTS SUMMARY: \t\x1B[31m%d\x1B[0m/%d\n", nb_success, nb_tests);
+}
+
+/*============ TESTS DEFINITION =============== */
+
 int test_perf_dgemm()
 {
+    printf("%s ", __func__);
+
     fstream fout;
     fout.open( "test_perf_dgemm.csv", ios::out | ios::app );
     size_t                        powInc = 2;
@@ -60,10 +88,22 @@ int test_perf_dgemm()
     }
 
     fout.close();
-    return 0;
+
+    return EXIT_SUCCESS;
 }
+
+/*============ MAIN CALL =============== */
 
 int main( int argc, char **argv )
 {
-    test_perf_dgemm();
+    printf("----------- TEST PERF -----------\n");
+
+    int nb_success = 0;
+    int nb_tests = 0;
+
+    print_test_result(test_perf_dgemm(), &nb_success, &nb_tests);
+
+    print_test_summary(nb_success, nb_tests);
+
+    return EXIT_SUCCESS;
 }
