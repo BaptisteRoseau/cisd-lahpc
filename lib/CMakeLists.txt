@@ -4,8 +4,8 @@ if ( WIN32 )
     set( FLAGS_DEBUG /DEBUG /Od ) 
     set( FLAGS_RELEASE /O2 )
 else()
-    set (FLAGS_DEBUG -g)
-    set( FLAGS_RELEASE -O3 )
+    set (FLAGS_DEBUG -g -fopenmp )
+    set( FLAGS_RELEASE -O3 -fopenmp )
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -41,5 +41,5 @@ function(create_my_lapack_lib libname )
 endfunction()
 
 create_my_lapack_lib("my_lapack_seq")
-#create_my_lapack_lib("my_lapack_omp")
+create_my_lapack_lib("my_lapack_omp")
 
