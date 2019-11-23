@@ -9,7 +9,7 @@ else()
 endif()
 
 ############################################################
-######################   SEQUENTIAL   ######################
+######################   FUNCTIONS DEFINITION   ############
 ############################################################
 
 ########## driver
@@ -46,76 +46,130 @@ function(make_driver my_lapack_lib)
 
 endfunction()
 
-make_driver("my_lapack_seq")
-#make_driver("my_lapack_omp")
+########## test_valid
+function(make_test_valid my_lapack_lib)
 
-
-########## test_valid_seq
-add_executable(
-    test_valid_seq
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_valid.cpp
-)
-
-target_include_directories(
-    test_valid_seq
-    PRIVATE
+    add_executable(
+        "test_valid_${my_lapack_lib}"
+        ${CMAKE_CURRENT_SOURCE_DIR}/test_valid.cpp
+    )
+    
+    target_include_directories(
+        "test_valid_${my_lapack_lib}"
+        PRIVATE
         "${PROJECT_SOURCE_DIR}/lib"
-        "${PROJECT_SOURCE_DIR}/algonum/include"
-)
-
-find_library(
-    ALGONUM_LIBRARY
-    NAMES libalgonum.so libalgonum
-    PATHS "${PROJECT_SOURCE_DIR}/algonum/lib" "${PROJECT_SOURCE_DIR}/algonum/lib/libalgonum.so"
-)
-
-target_compile_options( 
-    test_valid_seq
-    PRIVATE
-    "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
-    "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"
+    )
+    
+    target_compile_options( 
+        "test_valid_${my_lapack_lib}"
+        PRIVATE
+            "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
+            "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"
+    )
+    
+    set_target_properties(
+        "test_valid_${my_lapack_lib}"
+        PROPERTIES CXX_STANDARD 11
+    )
+    
+    target_link_libraries(
+        "test_valid_${my_lapack_lib}"
+        PRIVATE 
+            ${my_lapack_lib}
     )
 
-set_target_properties(
-    test_valid_seq
-    PROPERTIES CXX_STANDARD 11
+endfunction()
+
+
+########## test_perf
+function(make_test_perf my_lapack_lib)
+
+    add_executable(
+        "test_perf_${my_lapack_lib}"
+        ${CMAKE_CURRENT_SOURCE_DIR}/test_perf.cpp
     )
-        
-target_link_libraries(
-    test_valid_seq
-    PRIVATE 
-        my_lapack_seq
-        #ALGONUM_LIBRARY
-)
-
-
-########## test_perf_seq
-add_executable(
-    test_perf_seq
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_perf.cpp
-)
-
-target_include_directories(
-    test_perf_seq
-    PRIVATE
-    "${PROJECT_SOURCE_DIR}/lib"
-)
-
-target_compile_options( 
-    test_perf_seq
-    PRIVATE
-    "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
-    "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"
+    
+    target_include_directories(
+        "test_perf_${my_lapack_lib}"
+        PRIVATE
+        "${PROJECT_SOURCE_DIR}/lib"
+    )
+    
+    target_compile_options( 
+        "test_perf_${my_lapack_lib}"
+        PRIVATE
+            "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
+            "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"
+    )
+    
+    set_target_properties(
+        "test_perf_${my_lapack_lib}"
+        PROPERTIES CXX_STANDARD 11
+    )
+    
+    target_link_libraries(
+        "test_perf_${my_lapack_lib}"
+        PRIVATE 
+            ${my_lapack_lib}
     )
 
-set_target_properties(
-    test_perf_seq
-    PROPERTIES CXX_STANDARD 11
-    )
-        
-target_link_libraries(
-    test_perf_seq
-    PRIVATE 
-        my_lapack_seq
-        #ALGONUM_LIBRARY
-)
+endfunction()
+
+
+
+## NOT WORKING
+##function(initialize_function test_filename)
+##    function(make_${test_filename} my_lapack_lib)
+##
+##        add_executable(
+##            "${test_filename}_${my_lapack_lib}"
+##            ${CMAKE_CURRENT_SOURCE_DIR}/${test_filename}.cpp
+##        )
+##        
+##        target_include_directories(
+##            "${test_filename}_${my_lapack_lib}"
+##            PRIVATE
+##            "${PROJECT_SOURCE_DIR}/lib"
+##        )
+##        
+##        target_compile_options( 
+##            "${test_filename}_${my_lapack_lib}"
+##            PRIVATE
+##                "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
+##                "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"
+##        )
+##        
+##        set_target_properties(
+##            "${test_filename}_${my_lapack_lib}"
+##            PROPERTIES CXX_STANDARD 11
+##        )
+##        
+##        target_link_libraries(
+##            "${test_filename}_${my_lapack_lib}"
+##            PRIVATE 
+##                ${my_lapack_lib}
+##        )
+##
+##    endfunction()
+##endfunction()
+##
+##initialize_function("test_valid")
+##initialize_function("test_perf")
+##
+##make_test_perf("my_lapack_omp")
+
+
+############################################################
+######################   CALL   ############################
+############################################################
+
+
+make_driver("my_lapack_seq")
+make_driver("my_lapack_omp")
+
+
+make_test_valid("my_lapack_seq")
+make_test_valid("my_lapack_omp")
+
+make_test_perf("my_lapack_seq")
+make_test_perf("my_lapack_omp")
