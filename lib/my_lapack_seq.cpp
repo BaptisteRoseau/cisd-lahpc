@@ -396,7 +396,7 @@ namespace my_lapack {
             /* B = alpha * inv(A ** t) * B */
             if ( transA == CblasTrans ) {
                 /* A is a lower triangular */
-                if ( side == CblasLower ) {
+                if ( uplo == CblasLower ) {
                     for ( int j = 0; j < N; ++j ) {
                         for ( int i = M - 1; i >= 0; --i ) {
                             lambda = alpha * B[i + j * ldb];
@@ -410,7 +410,7 @@ namespace my_lapack {
                     }
                 }
                 /* A is triangular upper */
-                else if ( side == CblasUpper ) {
+                else if ( uplo == CblasUpper ) {
                     for ( int j = 0; j < N; ++j ) {
                         for ( int i = 0; i < M; ++i ) {
                             lambda = alpha * B[i + j * ldb];
@@ -424,7 +424,7 @@ namespace my_lapack {
             }
             /* A is triangular Upper */
             else {
-                if ( side == CblasUpper ) {
+                if ( uplo == CblasUpper ) {
                     for ( int j = 0; j < N; ++j ) {
                         if ( alpha != 1. ) {
                             for ( int i = 0; i < M; ++i ) { B[i + j * ldb] *= alpha; }
@@ -455,7 +455,7 @@ namespace my_lapack {
         }
         else {
             if ( transA == CblasTrans ) {
-                if ( side == CblasUpper ) {
+                if ( uplo == CblasUpper ) {
                     for ( int j = 0; j < N; ++j ) {
                         if ( alpha != 1.0 ) {
                             for ( int i = 0; i < M; ++i ) { B[i + j * ldb] *= alpha; }
@@ -489,7 +489,7 @@ namespace my_lapack {
                 }
             }
             else {
-                if ( side == CblasUpper ) {
+                if ( uplo == CblasUpper ) {
                     for ( int k = N - 1; k >= 0; --k ) {
                         if ( diag == CblasNonUnit ) {
                             lambda = 1.0 / A[k + k * lda];
