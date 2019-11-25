@@ -1,11 +1,11 @@
 set( HEADERS my_lapack.h util.h Mat.h err.h)
 
 if ( WIN32 )
-    set( FLAGS_DEBUG /DEBUG /Od /openmp ) 
-    set( FLAGS_RELEASE /O2 /openmp )
+    set( FLAGS_DEBUG /DEBUG /Od ) 
+    set( FLAGS_RELEASE /O2 )
 else()
-    set (FLAGS_DEBUG -g -fopenmp )
-    set( FLAGS_RELEASE -O3 -fopenmp )
+    set (FLAGS_DEBUG -g )
+    set( FLAGS_RELEASE -O3 )
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -31,13 +31,27 @@ function(create_my_lapack_lib libname )
         PUBLIC
             cxx_std_11
     )
-    
-    target_compile_options( 
-        ${libname}
-        PRIVATE
-            "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
-            "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"
-    )
+
+    if ( WIN32 )
+        target_compile_options( 
+            ${libname}
+            PUBLIC
+                "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
+                "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"
+        )
+    else()
+        target_compile_options( 
+            ${libname}
+            PUBLIC
+                "${FLAGS_DEBUG}"
+                "${FLAGS_RELEASE}"
+        )
+    endif()
+
+    find_package(OpenMP)
+    if(OpenMP_CXX_FOUND)
+        target_link_libraries(${libname} PUBLIC OpenMP::OpenMP_CXX)
+    endif()
 endfunction()
 
 create_my_lapack_lib("my_lapack_seq")

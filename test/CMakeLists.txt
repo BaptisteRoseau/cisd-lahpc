@@ -4,8 +4,8 @@ if ( WIN32 )
     set( FLAGS_DEBUG /DEBUG /Od ) 
     set( FLAGS_RELEASE /O2 )
 else()
-    set (FLAGS_DEBUG -g -fopemp)
-    set( FLAGS_RELEASE -O3 -fopemp)
+    set (FLAGS_DEBUG -g )
+    set( FLAGS_RELEASE -O3 )
 endif()
 
 ############################################################
@@ -26,12 +26,21 @@ function(make test_filename my_lapack_lib)
         "${PROJECT_SOURCE_DIR}/lib"
     )
     
-    target_compile_options( 
-        "${test_filename}_${my_lapack_lib}"
-        PRIVATE
-            "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
-            "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"
-    )
+    if ( WIN32 )
+        target_compile_options( 
+            "${test_filename}_${my_lapack_lib}"
+            PRIVATE
+                "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
+                "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"
+        )
+    else()
+        target_compile_options( 
+            "${test_filename}_${my_lapack_lib}"
+            PRIVATE
+                "${FLAGS_DEBUG}"
+                "${FLAGS_RELEASE}"
+        )
+    endif()
     
     set_target_properties(
         "${test_filename}_${my_lapack_lib}"
@@ -43,6 +52,11 @@ function(make test_filename my_lapack_lib)
         PRIVATE 
             ${my_lapack_lib}
     )
+
+    find_package(OpenMP)
+    if(OpenMP_CXX_FOUND)
+        target_link_libraries("${test_filename}_${my_lapack_lib}" PUBLIC OpenMP::OpenMP_CXX)
+    endif()
 
 endfunction()
 
@@ -60,4 +74,3 @@ make("test_valid" "my_lapack_omp")
 
 make("test_perf" "my_lapack_seq")
 make("test_perf" "my_lapack_omp")
-
