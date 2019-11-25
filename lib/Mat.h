@@ -19,6 +19,9 @@ namespace my_lapack {
         inline int     dimX() { return m; }
         inline int     dimY() { return n; }
         void print(int precision = 6);
+        //int equals(const Mat &m);
+        int containsOnly(const double d);
+        void fill(double d);
 
       private:
         double *storage;

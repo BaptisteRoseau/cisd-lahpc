@@ -28,6 +28,7 @@ int test_dgemv()
               m4.col( 1 ),
               1 );
 
+    m4.print();
     return 0;
 }
 
@@ -88,8 +89,8 @@ int test_dgemm_scalaire()
 
 int test_dgemm()
 {
-    Mat m1 = Mat( 10, 20, 1 ), m2 = Mat( 20, 10, 1 );
-    Mat m5 = Mat( 10, 10, 0 );
+    Mat m1 = Mat( 100, 200, 1 ), m2 = Mat( 200, 100, 1 );
+    Mat m5 = Mat( 100, 100, 0 );
     my_dgemm( CblasColMajor,
               CblasNoTrans,
               CblasNoTrans,

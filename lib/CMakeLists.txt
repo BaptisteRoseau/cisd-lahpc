@@ -1,8 +1,8 @@
 set( HEADERS my_lapack.h util.h Mat.h err.h)
 
 if ( WIN32 )
-    set( FLAGS_DEBUG /DEBUG /Od ) 
-    set( FLAGS_RELEASE /O2 )
+    set( FLAGS_DEBUG /DEBUG /Od /openmp ) 
+    set( FLAGS_RELEASE /O2 /openmp )
 else()
     set (FLAGS_DEBUG -g -fopenmp )
     set( FLAGS_RELEASE -O3 -fopenmp )

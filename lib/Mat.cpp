@@ -1,4 +1,5 @@
 #include "Mat.h"
+#include "util.h"
 
 #include <cstring>
 #include <iostream>
@@ -145,6 +146,23 @@ namespace my_lapack {
             for ( int j = 0; j < i; ++j ) { mat.at( i, j ) = 1u + ( randEngine() % 128u ); }
         }
         return mat;
+    }
+
+    int  Mat::containsOnly(const double d){
+        int len = this->m*this->n;
+        for (int i = 0; i < len; i++){
+            if (!dequals(this->storage[i], d)){
+                return 0;
+            }
+        }
+        return 1;
+    }
+
+    void Mat::fill(double d){
+        int len = this->m*this->n;
+        for (int i = 0; i < len; i++){
+            this->storage[i] = d;
+        }
     }
 
 } // namespace my_lapack

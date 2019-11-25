@@ -28,4 +28,8 @@ namespace my_lapack {
         stream.precision( oldPrecision );
     }
 
+    int dequals(const double a, const double b){
+        return std::abs(a-b) < LAHPC_EPSILON;
+    }
+
 } // namespace my_lapack

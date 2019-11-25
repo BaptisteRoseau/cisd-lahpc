@@ -9,8 +9,10 @@
 #include <iostream>
 #include <limits>
 #include <utility>
+#include <omp.h>
 
-static const int BLOCK_SIZE = 128;
+#define _LAHPC_BLOCK_SIZE 128
+static const int BLOCK_SIZE = _LAHPC_BLOCK_SIZE;
 
 #define AT_RM( i, j, width ) ( ( i ) * ( width ) + ( j ) )
 #define AT( i, j, heigth ) ( ( j ) * ( heigth ) + ( i ) )
@@ -37,6 +39,7 @@ namespace my_lapack {
 
         if ( alpha == 0.0 ) { return; }
 
+        #pragma omp parallel for
         for ( int i = 0, xi = 0, yi = 0; i < N; ++i, xi += incX, yi += incY ) { Y[yi] += alpha * X[xi]; }
     }
 
@@ -121,6 +124,7 @@ namespace my_lapack {
         if ( alpha == 0. ) {
             if ( beta != 1. ) {
                 size_t m, n;
+                #pragma omp parallel for collapse(2)
                 for ( m = 0; m < M; m++ ) {
                     for ( n = 0; n < N; n++ ) { C[AT( m, n, ldc )] *= beta; }
                 }
@@ -135,6 +139,7 @@ namespace my_lapack {
         // Calculating dgemm
         size_t m, n, k;
         if ( bTransA && bTransB ) {
+            #pragma omp parallel for collapse(2)
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
@@ -143,6 +148,7 @@ namespace my_lapack {
             }
         }
         else if ( !bTransA && bTransB ) {
+            #pragma omp parallel for collapse(2)
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
@@ -151,6 +157,7 @@ namespace my_lapack {
             }
         }
         else if ( bTransA && !bTransB ) {
+            #pragma omp parallel for collapse(2)
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
@@ -159,6 +166,7 @@ namespace my_lapack {
             }
         }
         else {
+            #pragma omp parallel for collapse(2)
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
@@ -221,6 +229,7 @@ namespace my_lapack {
         size_t lastKB = K%blocksize, KB = K/blocksize +1;
         size_t m,n,k;
         if ( bTransA && bTransB ) {
+            #pragma omp parallel for collapse(2)
             for (m = 0; m < MB; m++){
                 for (n = 0; n < NB; n++){
                     for (k = 0; k < KB; k++){
@@ -243,6 +252,7 @@ namespace my_lapack {
             }
         }
         else if ( !bTransA && bTransB ) {
+            #pragma omp parallel for collapse(2)
             for (m = 0; m < MB; m++){
                 for (n = 0; n < NB; n++){
                     for (k = 0; k < KB; k++){
@@ -265,6 +275,7 @@ namespace my_lapack {
             }
         }
         else if ( bTransA && !bTransB ) {
+            #pragma omp parallel for collapse(2)
             for (m = 0; m < MB; m++){
                 for (n = 0; n < NB; n++){
                     for (k = 0; k < KB; k++){
@@ -285,7 +296,30 @@ namespace my_lapack {
                     }
                 }
             }
-        } */
+        } else {
+            #pragma omp parallel for collapse(2)
+            for (m = 0; m < MB; m++){
+                //std::cout << "Thread " << omp_get_thread_num() << std::endl;
+                for (n = 0; n < NB; n++){
+                    for (k = 0; k < KB; k++){
+                        my_dgemm_scalaire(Order,
+                                        TransA,
+                                        TransB,
+                                        m < MB - 1  ? blocksize : lastMB,
+                                        n < NB - 1  ? blocksize : lastNB,
+                                        k < KB - 1  ? blocksize : lastKB,
+                                        alpha,
+                                        A + blocksize*AT(m, k, lda),
+                                        lda,
+                                        B + blocksize*AT(k, n, ldb),
+                                        ldb,
+                                        beta,
+                                        C + blocksize*AT(m, n, ldc),
+                                        ldc);
+                    }
+                }
+            }            
+        }
 
         // Computing the rest of the blocks
         my_dgemm_scalaire( Order, TransA, TransB, M, N, K, alpha, A, lda, B, ldb, beta, C, ldc );
@@ -325,8 +359,6 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_PREDICATE( lda >= std::max( 1, M ) );
-
-        *info = 0;
 
         if ( M == 0 || N == 0 ) { return; }
 
