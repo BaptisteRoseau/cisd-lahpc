@@ -59,5 +59,6 @@ Mkfile.old
 dkms.conf
 
 # Others
-.ssh
+.ssh/
 .vscode/
+build/
