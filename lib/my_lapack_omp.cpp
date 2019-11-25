@@ -27,13 +27,7 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE( incY );
 
         double ret = 0;
-        //for ( int i = 0, xi = 0, yi = 0; i < N; ++i, xi += incX, yi += incY ) { ret += X[xi] * Y[yi]; }
-        int i, xi, yi = 0;
-        for(i = 0; i < N; ++i){
-            ret += X[xi] * Y[yi];
-            yi += incY;
-            xi += incX;
-        }
+        for ( int i = 0, xi = 0, yi = 0; i < N; ++i, xi += incX, yi += incY ) { ret += X[xi] * Y[yi]; }
         return ret;
     }
 
@@ -45,14 +39,14 @@ namespace my_lapack {
 
         if ( alpha == 0.0 ) { return; }
 
-        //for ( int i = 0, xi = 0, yi = 0; i < N; ++i, xi += incX, yi += incY ) { Y[yi] += alpha * X[xi]; }
-        int i, xi, yi = 0;
-        #pragma omp parallel for
-        for(i = 0; i < N; ++i){
-            Y[yi] += alpha * X[xi]; 
-            yi += incY;
-            xi += incX;
-        }
+        for ( int i = 0, xi = 0, yi = 0; i < N; ++i, xi += incX, yi += incY ) { Y[yi] += alpha * X[xi]; }
+        //~~int i, xi, yi = 0;
+        //~~#pragma omp parallel for
+        //~~for(i = 0; i < N; ++i){
+        //~~    Y[yi] += alpha * X[xi]; 
+        //~~    yi += incY;
+        //~~    xi += incX;
+        //~~}
     }
 
     void my_dgemv( CBLAS_ORDER          layout,
