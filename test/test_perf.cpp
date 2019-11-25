@@ -49,7 +49,6 @@ int test_perf_dgemm()
     size_t                        powInc = 2;
     size_t                        len    = 2;
     size_t                        lenMax = powInc << 11;
-    double                        valMax = 200;
     double                        alpha  = 0.75;
     double                        beta   = 0;
     Mat *                         m1, *m2, *m3;

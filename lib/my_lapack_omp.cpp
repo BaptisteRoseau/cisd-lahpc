@@ -129,7 +129,7 @@ namespace my_lapack {
         // Early return
         if ( alpha == 0. ) {
             if ( beta != 1. ) {
-                size_t m, n;
+                int m, n;
                 #pragma omp parallel for collapse(2)
                 for ( m = 0; m < M; m++ ) {
                     for ( n = 0; n < N; n++ ) { C[AT( m, n, ldc )] *= beta; }
@@ -143,7 +143,7 @@ namespace my_lapack {
         bool bTransB = ( TransB == CblasTrans );
 
         // Calculating dgemm
-        size_t m, n, k;
+        int m, n, k;
         if ( bTransA && bTransB ) {
             #pragma omp parallel for collapse(2)
             for ( n = 0; n < N; n++ ) {
@@ -230,10 +230,10 @@ namespace my_lapack {
         bool bTransB = ( TransB == CblasTrans );
 
         int blocksize = min_macro( min_macro( M, N ), BLOCK_SIZE );
-        size_t lastMB = M%blocksize, MB = M/blocksize +1;
-        size_t lastNB = N%blocksize, NB = N/blocksize +1;
-        size_t lastKB = K%blocksize, KB = K/blocksize +1;
-        size_t m,n,k;
+        int lastMB = M%blocksize, MB = M/blocksize +1;
+        int lastNB = N%blocksize, NB = N/blocksize +1;
+        int lastKB = K%blocksize, KB = K/blocksize +1;
+        int m,n,k;
         if ( bTransA && bTransB ) {
             #pragma omp parallel for collapse(2)
             for (m = 0; m < MB; m++){

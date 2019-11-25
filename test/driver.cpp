@@ -57,8 +57,6 @@ int test_dgetf2()
                        Prod.dimX() );
 
     // Prod.print();
-
-    int info;
     // my_dgetf2( Prod.dimX(), Prod.dimY(), Prod.get(), Prod.dimX(), nullptr, &info );
 
     // Prod.print();
