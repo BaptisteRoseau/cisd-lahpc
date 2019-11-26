@@ -1,8 +1,7 @@
 #include "util.h"
 
+#include <cmath>
 #include <iomanip>
-
-#define abs_macro(a) ((a) >= 0 ? (a) : -(a))
 
 namespace my_lapack {
 
@@ -30,8 +29,7 @@ namespace my_lapack {
         stream.precision( oldPrecision );
     }
 
-    int dequals(const double a, const double b){
-        return abs_macro(a-b) < LAHPC_EPSILON;
-    }
+    int dequals( const double a, const double b, const double epsilon ) { return std::abs( a - b ) < epsilon; }
+
 
 } // namespace my_lapack

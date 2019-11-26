@@ -63,18 +63,6 @@ namespace my_lapack {
                    double *             C,
                    int                  ldc );
 
-    //************************************
-    // Method:    my_dgetf2
-    // FullName:  my_lapack::my_dgetf2
-    // Access:    public
-    // Returns:   void
-    // Parameter: int M - Number of rows of matrix A
-    // Parameter: int N - Number of columns of matrix A
-    // Parameter: double * A - Dim (lda, N). Upon exit, holds L, U such that A = L * U
-    // Parameter: int lda - Leading dimension of matrix A
-    // Parameter: int * ipiv - /!\ MUST BE nullptr /!\ Dim (min(M,N)). Pivot indices, row i of A was interchanged with
-    // ipiv[i] Parameter: int * info - 0 if success, if info > 0 then U(info - 1,info - 1) == 0.0
-    //************************************
     void my_dgetf2( CBLAS_ORDER order, int M, int N, double *A, int lda );
 
     void my_dtrsm( CBLAS_ORDER     layout,

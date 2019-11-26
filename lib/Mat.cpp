@@ -1,4 +1,5 @@
 #include "Mat.h"
+
 #include "util.h"
 
 #include <cstring>
@@ -148,21 +149,19 @@ namespace my_lapack {
         return mat;
     }
 
-    int  Mat::containsOnly(const double d){
-        int len = this->m*this->n;
-        for (int i = 0; i < len; i++){
-            if (!dequals(this->storage[i], d)){
-                return 0;
-            }
+    int Mat::containsOnly( const double d )
+    {
+        int len = m * n;
+        for ( int i = 0; i < len; i++ ) {
+            if ( !dequals( storage[i], d, LAHPC_EPSILON ) ) { return 0; }
         }
         return 1;
     }
 
-    void Mat::fill(double d){
-        int len = this->m*this->n;
-        for (int i = 0; i < len; i++){
-            this->storage[i] = d;
-        }
+    void Mat::fill( double d )
+    {
+        int len = m * n;
+        for ( int i = 0; i < len; i++ ) { storage[i] = d; }
     }
 
 } // namespace my_lapack

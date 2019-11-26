@@ -1,6 +1,5 @@
-#include "my_lapack.h"
-
 #include "err.h"
+#include "my_lapack.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -8,8 +7,8 @@
 #include <cstring>
 #include <iostream>
 #include <limits>
-#include <utility>
 #include <omp.h>
+#include <utility>
 
 #define _LAHPC_BLOCK_SIZE 128
 static const int BLOCK_SIZE = _LAHPC_BLOCK_SIZE;
@@ -43,24 +42,24 @@ namespace my_lapack {
         //~~int i, xi, yi = 0;
         //~~#pragma omp parallel for
         //~~for(i = 0; i < N; ++i){
-        //~~    Y[yi] += alpha * X[xi]; 
+        //~~    Y[yi] += alpha * X[xi];
         //~~    yi += incY;
         //~~    xi += incX;
         //~~}
     }
 
-    void my_dgemv( CBLAS_ORDER          layout,
+    void my_dgemv( CBLAS_ORDER     layout,
                    CBLAS_TRANSPOSE TransA,
-                   int                  M,
-                   int                  N,
-                   double               alpha,
-                   const double *       A,
-                   int                  lda,
-                   const double *       X,
-                   int                  incX,
-                   double               beta,
-                   double *             Y,
-                   const int            incY )
+                   int             M,
+                   int             N,
+                   double          alpha,
+                   const double *  A,
+                   int             lda,
+                   const double *  X,
+                   int             incX,
+                   double          beta,
+                   double *        Y,
+                   const int       incY )
     {
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
@@ -99,20 +98,20 @@ namespace my_lapack {
     }
 
     /// M N and K aren't changed even if transposed.
-    void my_dgemm_scalaire( CBLAS_ORDER          Order,
+    void my_dgemm_scalaire( CBLAS_ORDER     Order,
                             CBLAS_TRANSPOSE TransA,
                             CBLAS_TRANSPOSE TransB,
-                            int                  M,
-                            int                  N,
-                            int                  K,
-                            double               alpha,
-                            const double *       A,
-                            int                  lda,
-                            const double *       B,
-                            int                  ldb,
-                            double               beta,
-                            double *             C,
-                            int                  ldc )
+                            int             M,
+                            int             N,
+                            int             K,
+                            double          alpha,
+                            const double *  A,
+                            int             lda,
+                            const double *  B,
+                            int             ldb,
+                            double          beta,
+                            double *        C,
+                            int             ldc )
     {
         LAHPC_CHECK_PREDICATE( Order == CblasColMajor );
         LAHPC_CHECK_POSITIVE( M );
@@ -125,12 +124,11 @@ namespace my_lapack {
         // Early return
         if ( !M || !N || !K ) { return; }
 
-
         // Early return
         if ( alpha == 0. ) {
             if ( beta != 1. ) {
                 int m, n;
-                #pragma omp parallel for collapse(2)
+#pragma omp parallel for collapse( 2 )
                 for ( m = 0; m < M; m++ ) {
                     for ( n = 0; n < N; n++ ) { C[AT( m, n, ldc )] *= beta; }
                 }
@@ -145,7 +143,7 @@ namespace my_lapack {
         // Calculating dgemm
         int m, n, k;
         if ( bTransA && bTransB ) {
-            #pragma omp parallel for collapse(2)
+#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
@@ -154,7 +152,7 @@ namespace my_lapack {
             }
         }
         else if ( !bTransA && bTransB ) {
-            #pragma omp parallel for collapse(2)
+#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
@@ -163,7 +161,8 @@ namespace my_lapack {
             }
         }
         else if ( bTransA && !bTransB ) {
-            #pragma omp parallel for collapse(2)
+#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
+
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
@@ -172,7 +171,7 @@ namespace my_lapack {
             }
         }
         else {
-            #pragma omp parallel for collapse(2)
+#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
@@ -182,20 +181,20 @@ namespace my_lapack {
         }
     }
 
-    void my_dgemm( CBLAS_ORDER          Order,
+    void my_dgemm( CBLAS_ORDER     Order,
                    CBLAS_TRANSPOSE TransA,
                    CBLAS_TRANSPOSE TransB,
-                   int                  M,
-                   int                  N,
-                   int                  K,
-                   double               alpha,
-                   const double *       A,
-                   int                  lda,
-                   const double *       B,
-                   int                  ldb,
-                   double               beta,
-                   double *             C,
-                   int                  ldc )
+                   int             M,
+                   int             N,
+                   int             K,
+                   double          alpha,
+                   const double *  A,
+                   int             lda,
+                   const double *  B,
+                   int             ldb,
+                   double          beta,
+                   double *        C,
+                   int             ldc )
     {
         LAHPC_CHECK_PREDICATE( Order == CblasColMajor );
         LAHPC_CHECK_POSITIVE( M );
@@ -206,22 +205,9 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE_STRICT( ldc );
 
         // Early return
-        if ( !M || !N || !K || (alpha == 0. && beta == 1.) ) { return; }
-        if (alpha == 0) {
-            my_dgemm_scalaire(Order,
-                              TransA,
-                              TransB,
-                              M,
-                              N,
-                              K,
-                              alpha,
-                              A,
-                              lda,
-                              B,
-                              ldb,
-                              beta,
-                              C,
-                              ldc);
+        if ( !M || !N || !K || ( alpha == 0. && beta == 1. ) ) { return; }
+        if ( alpha == 0 ) {
+            my_dgemm_scalaire( Order, TransA, TransB, M, N, K, alpha, A, lda, B, ldb, beta, C, ldc );
             return;
         }
 
@@ -230,101 +216,102 @@ namespace my_lapack {
         bool bTransB = ( TransB == CblasTrans );
 
         int blocksize = min_macro( min_macro( M, N ), BLOCK_SIZE );
-        int lastMB = M%blocksize, MB = M/blocksize +1;
-        int lastNB = N%blocksize, NB = N/blocksize +1;
-        int lastKB = K%blocksize, KB = K/blocksize +1;
-        int m,n,k;
+        int lastMB = M % blocksize, MB = M / blocksize + 1;
+        int lastNB = N % blocksize, NB = N / blocksize + 1;
+        int lastKB = K % blocksize, KB = K / blocksize + 1;
+        int m, n, k;
         if ( bTransA && bTransB ) {
-            #pragma omp parallel for collapse(2)
-            for (m = 0; m < MB; m++){
-                for (n = 0; n < NB; n++){
-                    for (k = 0; k < KB; k++){
-                        my_dgemm_scalaire(Order,
-                                        TransA,
-                                        TransB,
-                                        m < MB - 1  ? blocksize : lastMB,
-                                        n < NB - 1  ? blocksize : lastNB,
-                                        k < KB - 1  ? blocksize : lastKB,
-                                        alpha,
-                                        A + blocksize*AT(k, m, lda),
-                                        lda,
-                                        B + blocksize*AT(n, k, ldb),
-                                        ldb,
-                                        beta,
-                                        C + blocksize*AT(m, n, ldc),
-                                        ldc);
+#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
+            for ( m = 0; m < MB; m++ ) {
+                for ( n = 0; n < NB; n++ ) {
+                    for ( k = 0; k < KB; k++ ) {
+                        my_dgemm_scalaire( Order,
+                                           TransA,
+                                           TransB,
+                                           m < MB - 1 ? blocksize : lastMB,
+                                           n < NB - 1 ? blocksize : lastNB,
+                                           k < KB - 1 ? blocksize : lastKB,
+                                           alpha,
+                                           A + blocksize * AT( k, m, lda ),
+                                           lda,
+                                           B + blocksize * AT( n, k, ldb ),
+                                           ldb,
+                                           beta,
+                                           C + blocksize * AT( m, n, ldc ),
+                                           ldc );
                     }
                 }
             }
         }
         else if ( !bTransA && bTransB ) {
-            #pragma omp parallel for collapse(2)
-            for (m = 0; m < MB; m++){
-                for (n = 0; n < NB; n++){
-                    for (k = 0; k < KB; k++){
-                        my_dgemm_scalaire(Order,
-                                        TransA,
-                                        TransB,
-                                        m < MB - 1  ? blocksize : lastMB,
-                                        n < NB - 1  ? blocksize : lastNB,
-                                        k < KB - 1  ? blocksize : lastKB,
-                                        alpha,
-                                        A + blocksize*AT(m, k, lda),
-                                        lda,
-                                        B + blocksize*AT(n, k, ldb),
-                                        ldb,
-                                        beta,
-                                        C + blocksize*AT(m, n, ldc),
-                                        ldc);
+#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
+            for ( m = 0; m < MB; m++ ) {
+                for ( n = 0; n < NB; n++ ) {
+                    for ( k = 0; k < KB; k++ ) {
+                        my_dgemm_scalaire( Order,
+                                           TransA,
+                                           TransB,
+                                           m < MB - 1 ? blocksize : lastMB,
+                                           n < NB - 1 ? blocksize : lastNB,
+                                           k < KB - 1 ? blocksize : lastKB,
+                                           alpha,
+                                           A + blocksize * AT( m, k, lda ),
+                                           lda,
+                                           B + blocksize * AT( n, k, ldb ),
+                                           ldb,
+                                           beta,
+                                           C + blocksize * AT( m, n, ldc ),
+                                           ldc );
                     }
                 }
             }
         }
         else if ( bTransA && !bTransB ) {
-            #pragma omp parallel for collapse(2)
-            for (m = 0; m < MB; m++){
-                for (n = 0; n < NB; n++){
-                    for (k = 0; k < KB; k++){
-                        my_dgemm_scalaire(Order,
-                                        TransA,
-                                        TransB,
-                                        m < MB - 1  ? blocksize : lastMB,
-                                        n < NB - 1  ? blocksize : lastNB,
-                                        k < KB - 1  ? blocksize : lastKB,
-                                        alpha,
-                                        A + blocksize*AT(k, m, lda),
-                                        lda,
-                                        B + blocksize*AT(k, n, ldb),
-                                        ldb,
-                                        beta,
-                                        C + blocksize*AT(m, n, ldc),
-                                        ldc);
+#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
+            for ( m = 0; m < MB; m++ ) {
+                for ( n = 0; n < NB; n++ ) {
+                    for ( k = 0; k < KB; k++ ) {
+                        my_dgemm_scalaire( Order,
+                                           TransA,
+                                           TransB,
+                                           m < MB - 1 ? blocksize : lastMB,
+                                           n < NB - 1 ? blocksize : lastNB,
+                                           k < KB - 1 ? blocksize : lastKB,
+                                           alpha,
+                                           A + blocksize * AT( k, m, lda ),
+                                           lda,
+                                           B + blocksize * AT( k, n, ldb ),
+                                           ldb,
+                                           beta,
+                                           C + blocksize * AT( m, n, ldc ),
+                                           ldc );
                     }
                 }
             }
-        } else {
-            #pragma omp parallel for collapse(2)
-            for (m = 0; m < MB; m++){
-                //std::cout << "Thread " << omp_get_thread_num() << std::endl;
-                for (n = 0; n < NB; n++){
-                    for (k = 0; k < KB; k++){
-                        my_dgemm_scalaire(Order,
-                                        TransA,
-                                        TransB,
-                                        m < MB - 1  ? blocksize : lastMB,
-                                        n < NB - 1  ? blocksize : lastNB,
-                                        k < KB - 1  ? blocksize : lastKB,
-                                        alpha,
-                                        A + blocksize*AT(m, k, lda),
-                                        lda,
-                                        B + blocksize*AT(k, n, ldb),
-                                        ldb,
-                                        beta,
-                                        C + blocksize*AT(m, n, ldc),
-                                        ldc);
+        }
+        else {
+            //#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
+            for ( m = 0; m < MB; m++ ) {
+                // std::cout << "Thread " << omp_get_thread_num() << std::endl;
+                for ( n = 0; n < NB; n++ ) {
+                    for ( k = 0; k < KB; k++ ) {
+                        my_dgemm_scalaire( Order,
+                                           TransA,
+                                           TransB,
+                                           m < MB - 1 ? blocksize : lastMB,
+                                           n < NB - 1 ? blocksize : lastNB,
+                                           k < KB - 1 ? blocksize : lastKB,
+                                           alpha,
+                                           A + blocksize * AT( m, k, lda ),
+                                           lda,
+                                           B + blocksize * AT( k, n, ldb ),
+                                           ldb,
+                                           beta,
+                                           C + blocksize * AT( m, n, ldc ),
+                                           ldc );
                     }
                 }
-            }            
+            }
         }
 
         // Computing the rest of the blocks
@@ -394,28 +381,27 @@ namespace my_lapack {
         }
     }
 
-    void my_dgetrf( CBLAS_ORDER order, int M, int N, double* A, int lda ) {}
+    void my_dgetrf( CBLAS_ORDER order, int M, int N, double *A, int lda ) {}
 
-    void my_dtrsm( CBLAS_ORDER layout,
-                   CBLAS_SIDE side,
-                   CBLAS_UPLO uplo,
+    void my_dtrsm( CBLAS_ORDER     layout,
+                   CBLAS_SIDE      side,
+                   CBLAS_UPLO      uplo,
                    CBLAS_TRANSPOSE transA,
-                   CBLAS_DIAG diag,
-                   int M,
-                   int N,
-                   double alpha,
-                   const double * A,
-                   int lda,
-                   double * B,
-                   int ldb )
+                   CBLAS_DIAG      diag,
+                   int             M,
+                   int             N,
+                   double          alpha,
+                   const double *  A,
+                   int             lda,
+                   double *        B,
+                   int             ldb )
     {
-
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE( lda );
         LAHPC_CHECK_POSITIVE( ldb );
 
-        LAHPC_CHECK_PREDICATE(side == CblasLeft);
+        LAHPC_CHECK_PREDICATE( side == CblasLeft );
 
         double lambda;
 

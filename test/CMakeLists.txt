@@ -53,11 +53,6 @@ function(make test_filename my_lapack_lib)
             ${my_lapack_lib}
     )
 
-    find_package(OpenMP)
-    if(OpenMP_CXX_FOUND)
-        target_link_libraries("${test_filename}_${my_lapack_lib}" PUBLIC OpenMP::OpenMP_CXX)
-    endif()
-
 endfunction()
 
 

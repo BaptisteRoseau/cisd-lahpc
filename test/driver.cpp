@@ -87,8 +87,8 @@ int test_dgemm_scalaire()
 
 int test_dgemm()
 {
-    Mat m1 = Mat( 100, 200, 1 ), m2 = Mat( 200, 100, 1 );
-    Mat m5 = Mat( 100, 100, 0 );
+    Mat m1 = Mat( 1000, 2000, 1 ), m2 = Mat( 2000, 1000, 1 );
+    Mat m5 = Mat( m1.dimX(), m2.dimY(), 0 );
     my_dgemm( CblasColMajor,
               CblasNoTrans,
               CblasNoTrans,
@@ -103,14 +103,14 @@ int test_dgemm()
               1,
               m5.get(),
               m5.dimX() );
-    m5.print();
+    // m5.print();
     return 0;
 }
 
 int main( int argc, char **argv )
 {
-    test_dgemv();
+    /*test_dgemv();
     test_dgetf2();
-    test_dgemm_scalaire();
+    test_dgemm_scalaire();*/
     test_dgemm();
 }
