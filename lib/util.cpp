@@ -2,6 +2,8 @@
 
 #include <iomanip>
 
+#define abs_macro(a) ((a) >= 0 ? (a) : -(a))
+
 namespace my_lapack {
 
     void affiche( int m, int n, const double *a, int lda, std::ostream &stream, int precision )
@@ -29,7 +31,7 @@ namespace my_lapack {
     }
 
     int dequals(const double a, const double b){
-        return std::abs(a-b) < LAHPC_EPSILON;
+        return abs_macro(a-b) < LAHPC_EPSILON;
     }
 
 } // namespace my_lapack
