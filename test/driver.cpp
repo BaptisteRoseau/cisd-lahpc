@@ -109,8 +109,8 @@ int test_dgemm()
 
 int main( int argc, char **argv )
 {
-    /*test_dgemv();
+    test_dgemv();
     test_dgetf2();
-    test_dgemm_scalaire();*/
+    test_dgemm_scalaire();
     test_dgemm();
 }

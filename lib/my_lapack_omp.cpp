@@ -17,6 +17,8 @@ static const int BLOCK_SIZE = _LAHPC_BLOCK_SIZE;
 #define AT( i, j, heigth ) ( ( j ) * ( heigth ) + ( i ) )
 #define min_macro( a, b ) ( ( a ) < ( b ) ? ( a ) : ( b ) )
 
+//TODO: simd if incX == 1
+
 namespace my_lapack {
 
     double my_ddot( const int N, const double *X, const int incX, const double *Y, const int incY )
@@ -26,6 +28,7 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE( incY );
 
         double ret = 0;
+        //TODO: reduction
         for ( int i = 0, xi = 0, yi = 0; i < N; ++i, xi += incX, yi += incY ) { ret += X[xi] * Y[yi]; }
         return ret;
     }
@@ -38,14 +41,17 @@ namespace my_lapack {
 
         if ( alpha == 0.0 ) { return; }
 
-        for ( int i = 0, xi = 0, yi = 0; i < N; ++i, xi += incX, yi += incY ) { Y[yi] += alpha * X[xi]; }
-        //~~int i, xi, yi = 0;
-        //~~#pragma omp parallel for
-        //~~for(i = 0; i < N; ++i){
-        //~~    Y[yi] += alpha * X[xi];
-        //~~    yi += incY;
-        //~~    xi += incX;
-        //~~}
+        #pragma omp parallel default(shared)
+        {
+            int xi, yi;
+            #pragma omp for
+            for ( int i = 0; i < N; i++) { 
+                yi = i*incY;
+                xi = i*incX;
+                Y[yi] += alpha * X[xi];
+            }
+
+        }
     }
 
     void my_dgemv( CBLAS_ORDER     layout,
@@ -74,22 +80,29 @@ namespace my_lapack {
 
             if ( beta == 0 && incY == 1 ) { memset( Y, 0, lenY * sizeof( double ) ); }
             else if ( beta == 0 ) {
-                for ( int i = 0, yi = 0; i < lenY; ++i, yi += incY ) { Y[yi] = 0; }
+                int len = lenY*incY;
+                #pragma omp parallel for default(shared)
+                for ( int yi = 0; yi < len; yi += incY ) { Y[yi] = 0; }
             }
             else {
-                for ( int i = 0, yi = 0; i < lenY; ++i, yi += incY ) { Y[yi] *= beta; }
+                int len = lenY*incY;
+                #pragma omp parallel for default(shared)
+                for ( int yi = 0; yi < len; yi += incY ) { Y[yi] *= beta; }
             }
         }
 
         if ( TransA == CblasNoTrans ) {
-            for ( int j = 0, xi = 0; j < N; ++j, xi += incX ) {
-                double tmp = alpha * X[xi];
-                for ( int i = 0, yi = 0; i < M; ++i, yi += incY ) { Y[yi] += tmp * A[j * lda + i]; }
+            #pragma omp parallel for default(shared)
+            for ( int j = 0; j < N; ++j) {
+                double tmp = alpha * X[incX*j];
+                for ( int i = 0; i < M; i++) { Y[i*incY] += tmp * A[j * lda + i]; }
             }
         }
 
         else if ( TransA == CblasTrans ) {
-            for ( int j = 0, yi = 0; j < N; ++j, yi += incY ) {
+            #pragma omp parallel for default(shared)
+            for ( int j = 0; j < N; ++j) {
+                int yi = j*incY;
                 double tmp = 0;
                 for ( int i = 0, xi = 0; i < M; ++i, xi += incX ) { tmp += A[j * lda + i] * X[xi]; }
                 Y[yi] += alpha * tmp;
@@ -97,7 +110,7 @@ namespace my_lapack {
         }
     }
 
-    /// M N and K aren't changed even if transposed.
+    //TODO: reduce on linear add
     void my_dgemm_scalaire( CBLAS_ORDER     Order,
                             CBLAS_TRANSPOSE TransA,
                             CBLAS_TRANSPOSE TransB,
@@ -290,9 +303,8 @@ namespace my_lapack {
             }
         }
         else {
-            //#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
+#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
             for ( m = 0; m < MB; m++ ) {
-                // std::cout << "Thread " << omp_get_thread_num() << std::endl;
                 for ( n = 0; n < NB; n++ ) {
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scalaire( Order,
@@ -313,9 +325,6 @@ namespace my_lapack {
                 }
             }
         }
-
-        // Computing the rest of the blocks
-        my_dgemm_scalaire( Order, TransA, TransB, M, N, K, alpha, A, lda, B, ldb, beta, C, ldc );
     }
 
     void my_dger( CBLAS_ORDER   layout,
@@ -338,11 +347,14 @@ namespace my_lapack {
 
         if ( M == 0 || N == 0 || alpha == 0.0 ) { return; }
 
-        for ( int j = 0, yi = 0; j < N; ++j, yi += incY ) {
+        #pragma omp parallel for default(shared)
+        for ( int j = 0; j < N; ++j) {
+            int yi = j*incY;
             if ( Y[yi] == 0.0 ) { continue; }
             else {
                 double tmp = alpha * Y[yi];
-                for ( int i = 0, xi = 0; i < N; ++i, xi += incX ) { A[j * lda + i] += tmp * X[xi]; }
+                #pragma omp parallel for
+                for ( int i = 0; i < N; ++i) { A[j * lda + i] += tmp * X[i*incX]; }
             }
         }
     }
@@ -357,6 +369,7 @@ namespace my_lapack {
 
         int minMN = std::min( M, N );
 
+        #pragma omp parallel for
         for ( int j = 0; j < minMN; ++j ) {
             if ( j < M - 1 ) {
                 if ( std::abs( A[j * lda + j] ) > ( 2.0 * std::numeric_limits<double>::epsilon() ) ) {
@@ -381,6 +394,7 @@ namespace my_lapack {
         }
     }
 
+    //TODO
     void my_dgetrf( CBLAS_ORDER order, int M, int N, double *A, int lda ) {}
 
     void my_dtrsm( CBLAS_ORDER     layout,
@@ -408,6 +422,7 @@ namespace my_lapack {
         if ( M == 0 || N == 0 ) return;
 
         if ( alpha == 0. ) {
+            #pragma omp parallel for simd collapse(2)
             for ( int j = 0; j < N; ++j ) {
                 for ( int i = 0; i < M; ++i ) { B[i + j * ldb] = 0.; }
             }
