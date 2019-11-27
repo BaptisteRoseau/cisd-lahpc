@@ -430,8 +430,8 @@ namespace my_lapack {
                    int             ldb )
     {
         LAHPC_CHECK_PREDICATE( layout == CblasColMajor );
-        LAHPC_CHECK_POSITIVE_STRICT( M );
-        LAHPC_CHECK_POSITIVE_STRICT( N );
+        LAHPC_CHECK_POSITIVE( M );
+        LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE_STRICT( lda );
         LAHPC_CHECK_POSITIVE_STRICT( ldb );
 
@@ -454,6 +454,7 @@ namespace my_lapack {
             if ( transA == CblasTrans ) {
                 /* A is a lower triangular */
                 if ( uplo == CblasLower ) {
+#pragma omp parallel for default( none ) shared( M, N, alpha, B, ldb, A, lda, diag ) private( lambda )
                     for ( int j = 0; j < N; ++j ) {
                         for ( int i = M - 1; i >= 0; --i ) {
                             lambda = alpha * B[i + j * ldb];
@@ -470,6 +471,7 @@ namespace my_lapack {
                 }
                 /* A is triangular upper */
                 else if ( uplo == CblasUpper ) {
+#pragma omp parallel for default( none ) shared( M, N, alpha, B, ldb, A, lda, diag ) private( lambda )
                     for ( int j = 0; j < N; ++j ) {
                         for ( int i = 0; i < M; ++i ) {
                             lambda = alpha * B[i + j * ldb];
@@ -487,6 +489,7 @@ namespace my_lapack {
             else {
                 /* A is triangular Upper */
                 if ( uplo == CblasUpper ) {
+#pragma omp parallel for default( none ) shared( M, N, alpha, B, ldb, A, lda, diag ) private( lambda )
                     for ( int j = 0; j < N; ++j ) {
                         if ( alpha != 1. ) {
                             for ( int i = 0; i < M; i++ ) {
@@ -506,6 +509,7 @@ namespace my_lapack {
                 }
                 /* A is lower triangular */
                 else {
+#pragma omp parallel for default( none ) shared( M, N, alpha, B, ldb, A, lda, diag ) private( lambda )
                     for ( int j = 0; j < N; ++j ) {
                         for ( int i = 0; i < M; i++ ) {
                             B[i + j * ldb] *= alpha;
@@ -529,6 +533,7 @@ namespace my_lapack {
             if ( transA == CblasNoTrans ) {
                 /* A is upper triangular */
                 if ( uplo == CblasUpper ) {
+#pragma omp parallel for default( none ) shared( M, N, alpha, B, ldb, A, lda, diag ) private( lambda )
                     for ( int j = 0; j < N; j++ ) {
                         if ( alpha != 1.0 ) {
                             for ( int i = 0; i < M; ++i ) {
@@ -552,6 +557,7 @@ namespace my_lapack {
                 }
                 /* A is lower triangular */
                 else {
+#pragma omp parallel for default( none ) shared( M, N, alpha, B, ldb, A, lda, diag ) private( lambda )
                     for ( int j = N - 1; j >= 0; --j ) {
                         if ( alpha != 1.0 ) {
                             for ( int i = 0; i < M; ++i ) {
@@ -578,6 +584,7 @@ namespace my_lapack {
             else {
                 /* A is upper triangular */
                 if ( uplo == CblasUpper ) {
+#pragma omp parallel for default( none ) shared( M, N, alpha, B, ldb, A, lda, diag ) private( lambda )
                     for ( int k = N - 1; k >= 0; --k ) {
                         if ( diag == CblasNonUnit ) {
                             lambda = 1.0 / A[k + k * lda];
@@ -602,6 +609,7 @@ namespace my_lapack {
                 }
                 /* A is lower triangular */
                 else {
+#pragma omp parallel for default( none ) shared( M, N, alpha, B, ldb, A, lda, diag ) private( lambda )
                     for ( int k = 0; k < N; ++k ) {
                         if ( diag == CblasNonUnit ) {
                             lambda = 1.0 / A[k + k * lda];
@@ -630,8 +638,8 @@ namespace my_lapack {
     void my_dgetrf( CBLAS_ORDER order, int M, int N, double *A, int lda )
     {
         LAHPC_CHECK_PREDICATE( order == CblasColMajor );
-        LAHPC_CHECK_POSITIVE_STRICT( M );
-        LAHPC_CHECK_POSITIVE_STRICT( N );
+        LAHPC_CHECK_POSITIVE( M );
+        LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE_STRICT( lda );
 
         if ( M == 0 || N == 0 ) { return; }
@@ -642,15 +650,15 @@ namespace my_lapack {
         if ( nb >= minMN ) { my_dgetf2( CblasColMajor, M, N, A, lda ); }
 
         for ( int j = 0; j < minMN; j += nb ) {
-            int jb = std::min( minMN - j + 1, nb );
-            my_dgetf2( CblasColMajor, M - j + 1, jb, A + j * lda + j, lda );
+            int jb = std::min( minMN - j, nb );
+            my_dgetf2( CblasColMajor, M - j, jb, A + j * lda + j, lda );
             my_dtrsm( order,
                       CBLAS_SIDE::CblasLeft,
                       CBLAS_UPLO::CblasLower,
                       CBLAS_TRANSPOSE::CblasNoTrans,
                       CblasUnit,
                       jb,
-                      N - j - jb + 1,
+                      N - j - jb,
                       1.0,
                       A + j * lda + j,
                       lda,
@@ -660,8 +668,8 @@ namespace my_lapack {
                 my_dgemm( CblasColMajor,
                           CblasNoTrans,
                           CblasNoTrans,
-                          M - j - jb + 1,
-                          N - j - jb + 1,
+                          M - j - jb,
+                          N - j - jb,
                           jb,
                           -1.0,
                           A + j * lda + j + jb,
@@ -674,7 +682,7 @@ namespace my_lapack {
             }
         }
     }
-
+    
     int my_idamax( int N, double *dx, int incX )
     {
         LAHPC_CHECK_POSITIVE_STRICT( N );
