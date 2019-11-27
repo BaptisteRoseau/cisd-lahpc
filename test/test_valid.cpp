@@ -38,33 +38,51 @@ void print_test_summary( int nb_success, int nb_tests )
 
 /*============ TESTS DGEMM =============== */
 
-//TODO: TESTS UTILISANT LA MKL POUR COMPARER
+// TODO: TESTS UTILISANT LA MKL POUR COMPARER
 
-int test_dgemm_square(){
-    printf("%s ", __func__);
+int test_dgemm_square()
+{
+    printf( "%s ", __func__ );
 
-    Mat *m1 = new Mat(10, 10, 1);
-    Mat *m2 = new Mat(10, 10, 1);
-    Mat *m3 = new Mat(10, 10, 1);
-    Mat *m_my = new Mat(10, 10, 0);
-    Mat *m_blas = new Mat(10, 10, 0);
+    Mat *m1     = new Mat( 10, 10, 1 );
+    Mat *m2     = new Mat( 10, 10, 1 );
+    Mat *m3     = new Mat( 10, 10, 1 );
+    Mat *m_my   = new Mat( 10, 10, 0 );
+    Mat *m_blas = new Mat( 10, 10, 0 );
 
     // M1, M2
-    my_dgemm( CblasColMajor, CblasNoTrans, CblasNoTrans,
-                m1->dimX(), m2->dimY(), m1->dimY(), 2,
-                m1->get(), m1->dimX(), m2->get(), m2->dimX(),
-                3, m_my->get(), m_my->dimX());
-    cblas_dgemm( CblasColMajor, CblasNoTrans, CblasNoTrans,
-                m1->dimX(), m2->dimY(), m1->dimY(), 2,
-                m1->get(), m1->dimX(), m2->get(), m2->dimX(),
-                3, m_blas->get(), m_blas->dimX());
-
+    my_dgemm( CblasColMajor,
+              CblasNoTrans,
+              CblasNoTrans,
+              m1->dimX(),
+              m2->dimY(),
+              m1->dimY(),
+              2,
+              m1->get(),
+              m1->dimX(),
+              m2->get(),
+              m2->dimX(),
+              3,
+              m_my->get(),
+              m_my->dimX() );
+    cblas_dgemm( CblasColMajor,
+                 CblasNoTrans,
+                 CblasNoTrans,
+                 m1->dimX(),
+                 m2->dimY(),
+                 m1->dimY(),
+                 2,
+                 m1->get(),
+                 m1->dimX(),
+                 m2->get(),
+                 m2->dimX(),
+                 3,
+                 m_blas->get(),
+                 m_blas->dimX() );
 
     m_my->print();
     m_blas->print();
-    if (!m_my->equals(*m_blas)){
-        return EXIT_FAILURE;
-    }
+    if ( !m_my->equals( *m_blas ) ) { return EXIT_FAILURE; }
 
     // M1, TM2
     m3->fill( 0 );
@@ -300,10 +318,9 @@ int test_dgetrf()
     return 0;
 }
 
-int main(int argc, char** argv){
-    printf("----------- TEST VALID -----------\n");
-
-    
+int main( int argc, char **argv )
+{
+    printf( "----------- TEST VALID -----------\n" );
 
     // M.Faverge's tests
     //~~printf("Running M.Faverge's tests...\n");
