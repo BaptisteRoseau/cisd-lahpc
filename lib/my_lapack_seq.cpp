@@ -224,9 +224,9 @@ namespace my_lapack {
         bool bTransB = ( TransB == CblasTrans );
 
         int blocksize = min_macro( min_macro( M, N ), BLOCK_SIZE );
-        int lastMB = M % blocksize, MB = M / blocksize + 1;
-        int lastNB = N % blocksize, NB = N / blocksize + 1;
-        int lastKB = K % blocksize, KB = K / blocksize + 1;
+        int lastMB = M % blocksize, MB = (M + blocksize - 1 / blocksize);
+        int lastNB = N % blocksize, NB = (N + blocksize - 1 / blocksize);
+        int lastKB = K % blocksize, KB = (M + blocksize - 1 / blocksize);
         int m, n, k;
         if ( bTransA && bTransB ) {
             for ( m = 0; m < MB; m++ ) {
@@ -399,8 +399,8 @@ namespace my_lapack {
                    int             ldb )
     {
         LAHPC_CHECK_PREDICATE( layout == CblasColMajor );
-        LAHPC_CHECK_POSITIVE_STRICT( M );
-        LAHPC_CHECK_POSITIVE_STRICT( N );
+        LAHPC_CHECK_POSITIVE( M );
+        LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE_STRICT( lda );
         LAHPC_CHECK_POSITIVE_STRICT( ldb );
 
@@ -605,15 +605,15 @@ namespace my_lapack {
         if ( nb >= minMN ) { my_dgetf2( CblasColMajor, M, N, A, lda ); }
 
         for ( int j = 0; j < minMN; j += nb ) {
-            int jb = std::min( minMN - j + 1, nb );
-            my_dgetf2( CblasColMajor, M - j + 1, jb, A + j * lda + j, lda );
+            int jb = std::min( minMN - j, nb );
+            my_dgetf2( CblasColMajor, M - j, jb, A + j * lda + j, lda );
             my_dtrsm( order,
                       CBLAS_SIDE::CblasLeft,
                       CBLAS_UPLO::CblasLower,
                       CBLAS_TRANSPOSE::CblasNoTrans,
                       CblasUnit,
                       jb,
-                      N - j - jb + 1,
+                      N - j - jb,
                       1.0,
                       A + j * lda + j,
                       lda,
@@ -623,10 +623,10 @@ namespace my_lapack {
                 my_dgemm( CblasColMajor,
                           CblasNoTrans,
                           CblasNoTrans,
-                          M - j - jb + 1,
-                          N - j - jb + 1,
-                          -1.0,
+                          M - j - jb,
+                          N - j - jb,
                           jb,
+                          -1.0,
                           A + j * lda + j + jb,
                           lda,
                           A + ( j + jb ) * lda + j,
