@@ -156,7 +156,7 @@ namespace my_lapack {
 
         int len = this->m*this->n;
         for (int i = 0; i < len; i++){
-            if (!dequals(this->storage[i], mat.at(i))){
+            if (!dequals(this->storage[i], mat.at(i), 2*std::numeric_limits<double>::epsilon())){
                 return 0;
             }
         }
@@ -166,7 +166,7 @@ namespace my_lapack {
     int  Mat::containsOnly(const double d){
         int len = this->m*this->n;
         for (int i = 0; i < len; i++){
-            if (!dequals(this->storage[i], d)){
+            if (!dequals(this->storage[i], d, 2*std::numeric_limits<double>::epsilon())){
                 return 0;
             }
         }
