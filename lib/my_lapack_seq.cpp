@@ -1,6 +1,5 @@
-#include "my_lapack.h"
-
 #include "err.h"
+#include "my_lapack.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -26,7 +25,9 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE( incY );
 
         double ret = 0;
-        for ( int i = 0, xi = 0, yi = 0; i < N; ++i, xi += incX, yi += incY ) { ret += X[xi] * Y[yi]; }
+        for ( int i = 0, xi = 0, yi = 0; i < N; ++i, xi += incX, yi += incY ) {
+            ret += X[xi] * Y[yi];
+        }
         return ret;
     }
 
@@ -38,21 +39,23 @@ namespace my_lapack {
 
         if ( alpha == 0.0 ) { return; }
 
-        for ( int i = 0, xi = 0, yi = 0; i < N; ++i, xi += incX, yi += incY ) { Y[yi] += alpha * X[xi]; }
+        for ( int i = 0, xi = 0, yi = 0; i < N; ++i, xi += incX, yi += incY ) {
+            Y[yi] += alpha * X[xi];
+        }
     }
 
-    void my_dgemv( CBLAS_ORDER          layout,
+    void my_dgemv( CBLAS_ORDER     layout,
                    CBLAS_TRANSPOSE TransA,
-                   int                  M,
-                   int                  N,
-                   double               alpha,
-                   const double *       A,
-                   int                  lda,
-                   const double *       X,
-                   int                  incX,
-                   double               beta,
-                   double *             Y,
-                   const int            incY )
+                   int             M,
+                   int             N,
+                   double          alpha,
+                   const double *  A,
+                   int             lda,
+                   const double *  X,
+                   int             incX,
+                   double          beta,
+                   double *        Y,
+                   const int       incY )
     {
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
@@ -67,44 +70,52 @@ namespace my_lapack {
 
             if ( beta == 0 && incY == 1 ) { memset( Y, 0, lenY * sizeof( double ) ); }
             else if ( beta == 0 ) {
-                for ( int i = 0, yi = 0; i < lenY; ++i, yi += incY ) { Y[yi] = 0; }
+                for ( int i = 0, yi = 0; i < lenY; ++i, yi += incY ) {
+                    Y[yi] = 0;
+                }
             }
             else {
-                for ( int i = 0, yi = 0; i < lenY; ++i, yi += incY ) { Y[yi] *= beta; }
+                for ( int i = 0, yi = 0; i < lenY; ++i, yi += incY ) {
+                    Y[yi] *= beta;
+                }
             }
         }
 
         if ( TransA == CblasNoTrans ) {
             for ( int j = 0, xi = 0; j < N; ++j, xi += incX ) {
                 double tmp = alpha * X[xi];
-                for ( int i = 0, yi = 0; i < M; ++i, yi += incY ) { Y[yi] += tmp * A[j * M + i]; }
+                for ( int i = 0, yi = 0; i < M; ++i, yi += incY ) {
+                    Y[yi] += tmp * A[j * M + i];
+                }
             }
         }
 
         else if ( TransA == CblasTrans ) {
             for ( int j = 0, yi = 0; j < N; ++j, yi += incY ) {
                 double tmp = 0;
-                for ( int i = 0, xi = 0; i < N; ++i, xi += incX ) { tmp += A[j * M + i] * X[xi]; }
+                for ( int i = 0, xi = 0; i < N; ++i, xi += incX ) {
+                    tmp += A[j * M + i] * X[xi];
+                }
                 Y[yi] += alpha * tmp;
             }
         }
     }
 
     /// M N and K aren't changed even if transposed.
-    void my_dgemm_scalaire( CBLAS_ORDER          Order,
+    void my_dgemm_scalaire( CBLAS_ORDER     Order,
                             CBLAS_TRANSPOSE TransA,
                             CBLAS_TRANSPOSE TransB,
-                            int                  M,
-                            int                  N,
-                            int                  K,
-                            double               alpha,
-                            const double *       A,
-                            int                  lda,
-                            const double *       B,
-                            int                  ldb,
-                            double               beta,
-                            double *             C,
-                            int                  ldc )
+                            int             M,
+                            int             N,
+                            int             K,
+                            double          alpha,
+                            const double *  A,
+                            int             lda,
+                            const double *  B,
+                            int             ldb,
+                            double          beta,
+                            double *        C,
+                            int             ldc )
     {
         LAHPC_CHECK_PREDICATE( Order == CblasColMajor );
         LAHPC_CHECK_POSITIVE( M );
@@ -122,7 +133,9 @@ namespace my_lapack {
             if ( beta != 1. ) {
                 int m, n;
                 for ( m = 0; m < M; m++ ) {
-                    for ( n = 0; n < N; n++ ) { C[AT( m, n, ldc )] *= beta; }
+                    for ( n = 0; n < N; n++ ) {
+                        C[AT( m, n, ldc )] *= beta;
+                    }
                 }
             }
             return;
@@ -138,7 +151,9 @@ namespace my_lapack {
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
-                    for ( k = 0; k < K; k++ ) { C[AT( m, n, ldc )] += alpha * A[AT( n, k, lda )] * B[AT( k, m, ldb )]; }
+                    for ( k = 0; k < K; k++ ) {
+                        C[AT( m, n, ldc )] += alpha * A[AT( n, k, lda )] * B[AT( k, m, ldb )];
+                    }
                 }
             }
         }
@@ -146,7 +161,9 @@ namespace my_lapack {
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
-                    for ( k = 0; k < K; k++ ) { C[AT( m, n, ldc )] += alpha * A[AT( m, k, lda )] * B[AT( k, m, ldb )]; }
+                    for ( k = 0; k < K; k++ ) {
+                        C[AT( m, n, ldc )] += alpha * A[AT( m, k, lda )] * B[AT( k, m, ldb )];
+                    }
                 }
             }
         }
@@ -154,7 +171,9 @@ namespace my_lapack {
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
-                    for ( k = 0; k < K; k++ ) { C[AT( m, n, ldc )] += alpha * A[AT( n, k, lda )] * B[AT( k, n, ldb )]; }
+                    for ( k = 0; k < K; k++ ) {
+                        C[AT( m, n, ldc )] += alpha * A[AT( n, k, lda )] * B[AT( k, n, ldb )];
+                    }
                 }
             }
         }
@@ -162,26 +181,28 @@ namespace my_lapack {
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
-                    for ( k = 0; k < K; k++ ) { C[AT( m, n, ldc )] += alpha * A[AT( m, k, lda )] * B[AT( k, n, ldb )]; }
+                    for ( k = 0; k < K; k++ ) {
+                        C[AT( m, n, ldc )] += alpha * A[AT( m, k, lda )] * B[AT( k, n, ldb )];
+                    }
                 }
             }
         }
     }
 
-    void my_dgemm( CBLAS_ORDER          Order,
+    void my_dgemm( CBLAS_ORDER     Order,
                    CBLAS_TRANSPOSE TransA,
                    CBLAS_TRANSPOSE TransB,
-                   int                  M,
-                   int                  N,
-                   int                  K,
-                   double               alpha,
-                   const double *       A,
-                   int                  lda,
-                   const double *       B,
-                   int                  ldb,
-                   double               beta,
-                   double *             C,
-                   int                  ldc )
+                   int             M,
+                   int             N,
+                   int             K,
+                   double          alpha,
+                   const double *  A,
+                   int             lda,
+                   const double *  B,
+                   int             ldb,
+                   double          beta,
+                   double *        C,
+                   int             ldc )
     {
         LAHPC_CHECK_PREDICATE( Order == CblasColMajor );
         LAHPC_CHECK_POSITIVE( M );
@@ -202,7 +223,7 @@ namespace my_lapack {
         bool bTransA = ( TransA == CblasTrans );
         bool bTransB = ( TransB == CblasTrans );
 
-        int    blocksize = min_macro( min_macro( M, N ), BLOCK_SIZE );
+        int blocksize = min_macro( min_macro( M, N ), BLOCK_SIZE );
         int lastMB = M % blocksize, MB = M / blocksize + 1;
         int lastNB = N % blocksize, NB = N / blocksize + 1;
         int lastKB = K % blocksize, KB = K / blocksize + 1;
@@ -321,7 +342,9 @@ namespace my_lapack {
             if ( Y[yi] == 0.0 ) { continue; }
             else {
                 double tmp = alpha * Y[yi];
-                for ( int i = 0, xi = 0; i < N; ++i, xi += incX ) { A[j * lda + i] += tmp * X[xi]; }
+                for ( int i = 0, xi = 0; i < N; ++i, xi += incX ) {
+                    A[j * lda + i] += tmp * X[xi];
+                }
             }
         }
     }
@@ -342,7 +365,9 @@ namespace my_lapack {
                     my_dscal( M - j - 1, 1.0 / A[j * lda + j], A + j * lda + j + 1, 1 );
                 }
                 else {
-                    for ( int i = 0; i < M - j; ++i ) { A[j * lda + j + i] /= A[j * lda + j]; }
+                    for ( int i = 0; i < M - j; ++i ) {
+                        A[j * lda + j + i] /= A[j * lda + j];
+                    }
                 }
             }
             if ( j < minMN - 1 ) {
@@ -386,7 +411,9 @@ namespace my_lapack {
         /* scale 0. */
         if ( alpha == 0. ) {
             for ( int j = 0; j < N; ++j ) {
-                for ( int i = 0; i < M; ++i ) { B[i + j * ldb] = 0.; }
+                for ( int i = 0; i < M; ++i ) {
+                    B[i + j * ldb] = 0.;
+                }
             }
             return;
         }
@@ -400,7 +427,9 @@ namespace my_lapack {
                     for ( int j = 0; j < N; ++j ) {
                         for ( int i = M - 1; i >= 0; --i ) {
                             lambda = alpha * B[i + j * ldb];
-                            for ( int k = i + 1; k < M; ++k ) { lambda -= B[k + j * ldb] * A[k + i * lda]; }
+                            for ( int k = i + 1; k < M; ++k ) {
+                                lambda -= B[k + j * ldb] * A[k + i * lda];
+                            }
                             /* The diagonal is A[i + i*lda] (Otherwise : 1.) */
                             /* Relevent when solving A = L*U as we use A to store
                             both L and U, so diag(L) is full of 1. . */
@@ -414,7 +443,9 @@ namespace my_lapack {
                     for ( int j = 0; j < N; ++j ) {
                         for ( int i = 0; i < M; ++i ) {
                             lambda = alpha * B[i + j * ldb];
-                            for ( int k = 0; k < i; ++k ) { lambda -= A[k + i * lda] * B[k + j * ldb]; }
+                            for ( int k = 0; k < i; ++k ) {
+                                lambda -= A[k + i * lda] * B[k + j * ldb];
+                            }
                             /* The diagonal is A[i + i*lda] (Otherwise : 1.) */
                             if ( diag == CblasNonUnit ) lambda /= A[i * ( 1 + lda )];
                             B[i + j * ldb] = lambda;
@@ -427,13 +458,17 @@ namespace my_lapack {
                 if ( uplo == CblasUpper ) {
                     for ( int j = 0; j < N; ++j ) {
                         if ( alpha != 1. ) {
-                            for ( int i = 0; i < M; ++i ) { B[i + j * ldb] *= alpha; }
+                            for ( int i = 0; i < M; ++i ) {
+                                B[i + j * ldb] *= alpha;
+                            }
                         }
                         for ( int k = M - 1; k >= 0; --k ) {
                             if ( B[k + j * ldb] ) {
                                 if ( diag != CblasNonUnit ) B[k + j * ldb] /= A[k * ( 1 + lda )];
                                 lambda = B[k + j * ldb];
-                                for ( int i = 0; i < k; ++i ) { B[i + j * ldb] -= lambda * A[i + k * lda]; }
+                                for ( int i = 0; i < k; ++i ) {
+                                    B[i + j * ldb] -= lambda * A[i + k * lda];
+                                }
                             }
                         }
                     }
@@ -441,12 +476,16 @@ namespace my_lapack {
                 /* A is lower triangular */
                 else {
                     for ( int j = 0; j < N; ++j ) {
-                        for ( int i = 0; i < M; ++i ) { B[i + j * ldb] *= alpha; }
+                        for ( int i = 0; i < M; ++i ) {
+                            B[i + j * ldb] *= alpha;
+                        }
                         for ( int k = 0; k < M; ++k ) {
                             if ( B[k + j * ldb] ) {
                                 if ( diag != CblasNonUnit ) B[k + j * ldb] /= A[k * ( 1 + lda )];
                                 lambda = B[k + j * ldb];
-                                for ( int i = k + 1; k < M; ++k ) { B[k + j * ldb] -= lambda * A[i + k * lda]; }
+                                for ( int i = k + 1; k < M; ++k ) {
+                                    B[k + j * ldb] -= lambda * A[i + k * lda];
+                                }
                             }
                         }
                     }
@@ -458,32 +497,44 @@ namespace my_lapack {
                 if ( uplo == CblasUpper ) {
                     for ( int j = 0; j < N; ++j ) {
                         if ( alpha != 1.0 ) {
-                            for ( int i = 0; i < M; ++i ) { B[i + j * ldb] *= alpha; }
+                            for ( int i = 0; i < M; ++i ) {
+                                B[i + j * ldb] *= alpha;
+                            }
                         }
                         for ( int k = 0; k < j; ++k ) {
                             if ( A[k + j * lda] != 0.0 ) {
-                                for ( int i = 0; i < M; i++ ) { lambda -= A[k + j * lda] * B[i + k * ldb]; }
+                                for ( int i = 0; i < M; i++ ) {
+                                    lambda -= A[k + j * lda] * B[i + k * ldb];
+                                }
                             }
                         }
                         if ( diag == CblasNonUnit ) {
                             lambda = 1.0 / A[j * ( 1 + lda )];
-                            for ( int i = 0; i < M; i++ ) { B[i + j * ldb] = lambda * B[i + j * ldb]; }
+                            for ( int i = 0; i < M; i++ ) {
+                                B[i + j * ldb] = lambda * B[i + j * ldb];
+                            }
                         }
                     }
                 }
                 else {
                     for ( int j = N - 1; j >= 0; --j ) {
                         if ( alpha != 1.0 ) {
-                            for ( int i = 0; i < M; ++i ) { B[i + j * ldb] *= alpha; }
+                            for ( int i = 0; i < M; ++i ) {
+                                B[i + j * ldb] *= alpha;
+                            }
                         }
                         for ( int k = j + 1; k < N; ++k ) {
                             if ( A[k + j * lda] != 0.0 ) {
-                                for ( int i = 0; i < M; ++i ) { B[i + j * ldb] -= A[k + j * lda] * B[i + k * ldb]; }
+                                for ( int i = 0; i < M; ++i ) {
+                                    B[i + j * ldb] -= A[k + j * lda] * B[i + k * ldb];
+                                }
                             }
                         }
                         if ( diag == CblasNonUnit ) {
                             lambda = 1.0 / A[j * ( 1 + lda )];
-                            for ( int i = 0; i < M; i++ ) { B[i + j * ldb] = lambda * B[i + j * ldb]; }
+                            for ( int i = 0; i < M; i++ ) {
+                                B[i + j * ldb] = lambda * B[i + j * ldb];
+                            }
                         }
                     }
                 }
@@ -493,16 +544,22 @@ namespace my_lapack {
                     for ( int k = N - 1; k >= 0; --k ) {
                         if ( diag == CblasNonUnit ) {
                             lambda = 1.0 / A[k + k * lda];
-                            for ( int i = 0; i < M; ++i ) { B[i + k * ldb] = lambda * B[i + k * ldb]; }
+                            for ( int i = 0; i < M; ++i ) {
+                                B[i + k * ldb] = lambda * B[i + k * ldb];
+                            }
                         }
                         for ( int j = 0; j < k; ++j ) {
                             if ( A[j + k * lda] != 0.0 ) {
                                 lambda = A[j + k * lda];
-                                for ( int i = 0; i < M; ++i ) { B[i + j * ldb] -= lambda * B[i + k * ldb]; }
+                                for ( int i = 0; i < M; ++i ) {
+                                    B[i + j * ldb] -= lambda * B[i + k * ldb];
+                                }
                             }
                         }
                         if ( alpha != 1.0 ) {
-                            for ( int i = 0; i < M; ++i ) { B[i + k * ldb] = alpha * B[i + k * ldb]; }
+                            for ( int i = 0; i < M; ++i ) {
+                                B[i + k * ldb] = alpha * B[i + k * ldb];
+                            }
                         }
                     }
                 }
@@ -510,16 +567,22 @@ namespace my_lapack {
                     for ( int k = 0; k < N; ++k ) {
                         if ( diag == CblasNonUnit ) {
                             lambda = 1.0 / A[k + k * lda];
-                            for ( int i = 0; i < M; ++i ) { B[i + k * ldb] = lambda * B[i + k * ldb]; }
+                            for ( int i = 0; i < M; ++i ) {
+                                B[i + k * ldb] = lambda * B[i + k * ldb];
+                            }
                         }
                         for ( int j = k + 1; j < N; ++j ) {
                             if ( A[j + k * lda] != 0.0 ) {
                                 lambda = A[j + k * lda];
-                                for ( int i = 0; i < M; ++i ) { B[i + j * ldb] -= lambda * B[i + k * ldb]; }
+                                for ( int i = 0; i < M; ++i ) {
+                                    B[i + j * ldb] -= lambda * B[i + k * ldb];
+                                }
                             }
                         }
                         if ( alpha != 1.0 ) {
-                            for ( int i = 0; i < M; ++i ) { B[i + k * lda] = alpha * B[i + k * ldb]; }
+                            for ( int i = 0; i < M; ++i ) {
+                                B[i + k * lda] = alpha * B[i + k * ldb];
+                            }
                         }
                     }
                 }
@@ -562,8 +625,8 @@ namespace my_lapack {
                           CblasNoTrans,
                           M - j - jb + 1,
                           N - j - jb + 1,
-                          jb,
                           -1.0,
+                          jb,
                           A + j * lda + j + jb,
                           lda,
                           A + ( j + jb ) * lda + j,
@@ -574,8 +637,8 @@ namespace my_lapack {
             }
         }
     }
-
     int my_idamax( int N, double *dx, int incX )
+
     {
         LAHPC_CHECK_POSITIVE_STRICT( N );
         LAHPC_CHECK_POSITIVE_STRICT( incX );
@@ -608,10 +671,14 @@ namespace my_lapack {
             return;
         }
         if ( da == 0.0 ) {
-            for ( int i = 0, xi = 0; i < N; ++i, xi += incX ) { dx[xi] = 0.0; }
+            for ( int i = 0, xi = 0; i < N; ++i, xi += incX ) {
+                dx[xi] = 0.0;
+            }
         }
         else {
-            for ( int i = 0, xi = 0; i < N; ++i, xi += incX ) { dx[xi] *= da; }
+            for ( int i = 0, xi = 0; i < N; ++i, xi += incX ) {
+                dx[xi] *= da;
+            }
         }
     }
 
@@ -624,7 +691,9 @@ namespace my_lapack {
         for ( int i = k1, xi = k1; i <= k2; ++i, xi += incX ) {
             int pivot = ipv[xi];
             if ( pivot != i ) {
-                for ( int j = 0; j < N; ++j ) { std::swap( A[j * lda + i], A[j * lda + pivot] ); }
+                for ( int j = 0; j < N; ++j ) {
+                    std::swap( A[j * lda + i], A[j * lda + pivot] );
+                }
             }
         }
     }
