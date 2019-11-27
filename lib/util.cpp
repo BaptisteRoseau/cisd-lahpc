@@ -1,5 +1,6 @@
 #include "util.h"
 
+#include <cmath>
 #include <iomanip>
 
 namespace my_lapack {
@@ -28,8 +29,7 @@ namespace my_lapack {
         stream.precision( oldPrecision );
     }
 
-    int dequals(const double a, const double b){
-        return std::abs(a-b) < LAHPC_EPSILON;
-    }
+    int dequals( const double a, const double b, const double epsilon ) { return std::abs( a - b ) < epsilon; }
+
 
 } // namespace my_lapack

@@ -1,4 +1,5 @@
 #include "Mat.h"
+
 #include "util.h"
 
 #include <cstring>
@@ -172,11 +173,10 @@ namespace my_lapack {
         return 1;
     }
 
-    void Mat::fill(double d){
-        int len = this->m*this->n;
-        for (int i = 0; i < len; i++){
-            this->storage[i] = d;
-        }
+    void Mat::fill( double d )
+    {
+        int len = m * n;
+        for ( int i = 0; i < len; i++ ) { storage[i] = d; }
     }
 
 } // namespace my_lapack

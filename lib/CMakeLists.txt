@@ -9,10 +9,10 @@ else()
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        add_definitions ( "-DLAHPC_DEBUG" )
-    endif()
+    add_definitions ( "-DLAHPC_DEBUG" )
+endif()
 
-function(create_my_lapack_lib libname )
+function(my_lapack_lib_common libname )
     add_library( ${libname} 
         ${libname}.cpp
         util.cpp
@@ -48,12 +48,19 @@ function(create_my_lapack_lib libname )
         )
     endif()
 
+endfunction()
+
+function(link_omp libname)
     find_package(OpenMP)
     if(OpenMP_CXX_FOUND)
         target_link_libraries(${libname} PUBLIC OpenMP::OpenMP_CXX)
+    else()
+        message(FATAL_ERROR "OpenMP not found !")
     endif()
 endfunction()
 
-create_my_lapack_lib("my_lapack_seq")
-create_my_lapack_lib("my_lapack_omp")
+my_lapack_lib_common("my_lapack_seq")
+
+my_lapack_lib_common("my_lapack_omp")
+link_omp("my_lapack_omp")
 
