@@ -148,6 +148,20 @@ namespace my_lapack {
         return mat;
     }
 
+    int Mat::equals(const Mat &mat){
+        if ((this->m != mat.m) || (this->n != mat.n)){
+            return 0;
+        }
+
+        int len = this->m*this->n;
+        for (int i = 0; i < len; i++){
+            if (!dequals(this->storage[i], mat.at(i))){
+                return 0;
+            }
+        }
+        return 1;
+    }
+
     int  Mat::containsOnly(const double d){
         int len = this->m*this->n;
         for (int i = 0; i < len; i++){

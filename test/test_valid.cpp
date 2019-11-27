@@ -39,34 +39,31 @@ void print_test_summary(int nb_success, int nb_tests)
 
 /*============ TESTS DGEMM =============== */
 
+//TODO: TESTS UTILISANT LA MKL POUR COMPARER
 
-//TODO: Matrices plus grosses pour verifier les blocs
-//TODO: Comparer avec les résultats de la mkl....
 int test_dgemm_square(){
     printf("%s ", __func__);
 
     Mat *m1 = new Mat(10, 10, 1);
     Mat *m2 = new Mat(10, 10, 1);
-    Mat *m3 = new Mat(10, 10, 0);
+    Mat *m3 = new Mat(10, 10, 1);
+    Mat *m_my = new Mat(10, 10, 0);
+    Mat *m_blas = new Mat(10, 10, 0);
 
     // M1, M2
-    my_dgemm( CblasColMajor,
-              CblasNoTrans,
-              CblasNoTrans,
-              m1->dimX(),
-              m2->dimY(),
-              m1->dimY(),
-              1,
-              m1->get(),
-              m1->dimX(),
-              m2->get(),
-              m2->dimX(),
-              0,
-              m3->get(),
-              m3->dimX());
+    my_dgemm( CblasColMajor, CblasNoTrans, CblasNoTrans,
+                m1->dimX(), m2->dimY(), m1->dimY(), 2,
+                m1->get(), m1->dimX(), m2->get(), m2->dimX(),
+                3, m_my->get(), m_my->dimX());
+    cblas_dgemm( CblasColMajor, CblasNoTrans, CblasNoTrans,
+                m1->dimX(), m2->dimY(), m1->dimY(), 2,
+                m1->get(), m1->dimX(), m2->get(), m2->dimX(),
+                3, m_blas->get(), m_blas->dimX());
 
 
-    if (!m3->containsOnly(10)){
+    m_my->print();
+    m_blas->print();
+    if (!m_my->equals(*m_blas)){
         return EXIT_FAILURE;
     }
 
@@ -274,18 +271,22 @@ int test_dgemm_submatrix();
 
 int test_dgemm_error_cases();
 
-
 int test_dgemm_alpha_beta();
 
 
 /*============ MAIN CALL =============== */
 
-
 int main(int argc, char** argv){
     printf("----------- TEST VALID -----------\n");
 
-    //testall_dgemm( my_dgemm_scalaire );
+    
 
+    // M.Faverge's tests
+    //~~printf("Running M.Faverge's tests...\n");
+    //~~testall_dgemm( (dgemm_fct_t) my_dgemm );
+    //~~testall_dgetrf( (dgetrf_fct_t) my_dgetrf );
+
+    // Our tests
     int nb_success = 0;
     int nb_tests = 0;
 

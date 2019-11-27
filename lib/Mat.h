@@ -14,12 +14,13 @@ namespace my_lapack {
         bool operator==( const Mat &other );
 
         inline double &at( int i, int j ) const { return storage[j * m + i]; };
+        inline double &at( int i ) const { return storage[i]; };
         inline double *get() { return storage; }
         double* col(int j);
         inline int     dimX() { return m; }
         inline int     dimY() { return n; }
         void print(int precision = 6);
-        //int equals(const Mat &m);
+        int equals(const Mat &m);
         int containsOnly(const double d);
         void fill(double d);
 
