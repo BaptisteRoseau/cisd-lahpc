@@ -16,6 +16,11 @@ static const int BLOCK_SIZE = _LAHPC_BLOCK_SIZE;
 #define AT( i, j, heigth ) ( ( j ) * ( heigth ) + ( i ) )
 #define min_macro( a, b ) ( ( a ) < ( b ) ? ( a ) : ( b ) )
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+
 namespace my_lapack {
 
     double my_ddot_seq( const int N, const double *X, const int incX, const double *Y, const int incY )
@@ -697,3 +702,8 @@ namespace my_lapack {
         }
     }
 } // namespace my_lapack
+
+
+#ifdef __cplusplus
+} // extern "C"
+#endif

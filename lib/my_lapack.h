@@ -3,6 +3,10 @@
 
 #include "cblas.h"
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 namespace my_lapack {
 
     double my_ddot_seq( const int N, const double *X, const int incX, const double *Y, const int incY );
@@ -190,5 +194,10 @@ namespace my_lapack {
 
 
 } // namespace my_lapack
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif
 

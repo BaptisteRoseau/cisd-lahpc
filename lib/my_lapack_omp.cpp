@@ -17,6 +17,10 @@ static const int BLOCK_SIZE = _LAHPC_BLOCK_SIZE;
 #define AT( i, j, heigth ) ( ( j ) * ( heigth ) + ( i ) )
 #define min_macro( a, b ) ( ( a ) < ( b ) ? ( a ) : ( b ) )
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 // TODO: simd if incX == 1
 
 namespace my_lapack {
@@ -744,7 +748,7 @@ namespace my_lapack {
 
 
 // TODO: Implement these ones
-void my_dgemm_tiled_openmp( CBLAS_LAYOUT layout,
+/* void my_dgemm_tiled_openmp( CBLAS_LAYOUT layout,
                             CBLAS_TRANSPOSE TransA, CBLAS_TRANSPOSE TransB,
                             int M, int N, int K, int b,
                             double alpha, const double **A,
@@ -753,5 +757,10 @@ void my_dgemm_tiled_openmp( CBLAS_LAYOUT layout,
 
 void my_dgetrf_tiled_openmp( CBLAS_LAYOUT layout,
                              int m, int n, int b, double **a );
+ */
 
 } // namespace my_lapack
+
+#ifdef __cplusplus
+}
+#endif
