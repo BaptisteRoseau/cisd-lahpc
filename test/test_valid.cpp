@@ -44,6 +44,8 @@ int test_dgemm_square()
 {
     size_t SideLen = 10;
     double val = 5;
+    double alpha = 3;
+    double beta = 2;
     Mat A, B, C;
 
     // Main loop, testing for all possible transpose cases
@@ -58,16 +60,16 @@ int test_dgemm_square()
                       SideLen,
                       SideLen,
                       SideLen,
-                      1,
+                      alpha,
                       A.get(),
                       A.dimX(),
                       B.get(),
                       B.dimX(),
-                      0,
+                      beta,
                       C.get(),
                       C.dimX() );
-            if (!C.containsOnly( SideLen*val*val )){
-                printf("ERROR: Expected %f, got %f.\n", SideLen*val*val, C.at(0));
+            if (!C.containsOnly( SideLen*val*val*alpha + val*beta )){
+                printf("ERROR: Expected %f, got %f.\n", SideLen*val*val*alpha + val*beta, C.at(0));
                 return EXIT_FAILURE;
             }
             C.fill(val);
@@ -83,6 +85,11 @@ int test_dgemm_rectangle()
     size_t N = 3;
     size_t K = 4;
     double val = 2;
+    double alpha = 3;
+    double beta = 2;
+    Mat A = Mat(M, K);
+    Mat B = Mat(K, N);
+    Mat C = Mat(M, N);
 
     // Main loop, testing for all possible transpose cases
     int AdimX, AdimY, BdimX, BdimY;
@@ -92,9 +99,9 @@ int test_dgemm_rectangle()
             AdimY = transA ? M : K;
             BdimX = transB ? N : K;
             BdimY = transB ? K : N;
-            Mat A = Mat(AdimX, AdimY, val);
-            Mat B = Mat(BdimX, BdimY, val);
-            Mat C = Mat(M, N, val);
+            A.reshape(AdimX, AdimY, val);
+            B.reshape(BdimX, BdimY, val);
+            C.fill(val);
             if (((transA ? AdimX : AdimY) != (int) K)
              || ((transB ? BdimY : BdimX) != (int) K)){
                 printf("ERROR: Invalid dims %d and %d doesn't match.\n",
@@ -107,20 +114,18 @@ int test_dgemm_rectangle()
                       AdimX,
                       BdimY,
                       AdimY,
-                      1,
+                      alpha,
                       A.get(),
                       A.dimX(),
                       B.get(),
                       B.dimX(),
-                      0,
+                      beta,
                       C.get(),
                       C.dimX() );
-            //if (!C.containsOnly(  AdimY*val*val )){
-            //    printf("ERROR: Expected %f, got %f.\n", AdimY*val*val, C.at(0));
-            //    return EXIT_FAILURE;
-            //}
-            //FIXME: PUTAIN DE BORDEL DE DOUBLE FREE OR CORRUPTION
-            C.fill(val);
+            if (!C.containsOnly(  AdimY*val*val*alpha + val*beta )){
+                printf("ERROR: Expected %f, got %f.\n", AdimY*val*val*alpha + val*beta, C.at(0));
+                return EXIT_FAILURE;
+            }
         }
     }
 
@@ -185,7 +190,6 @@ int main( int argc, char **argv )
     int nb_tests   = 0;
 
     print_test_result(test_dgemm_square(), &nb_success, &nb_tests );
-
     print_test_result( test_dgemm_rectangle(), &nb_success, &nb_tests );
     print_test_result( test_dgetrf(), &nb_success, &nb_tests );
 

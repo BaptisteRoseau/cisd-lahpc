@@ -41,7 +41,7 @@ int test_dgetf2()
     U.print();*/
     Mat Prod( L.dimX(), L.dimX(), 0.0 );
 
-    my_dgemm_scalaire( CblasColMajor,
+    my_dgemm_scal( CblasColMajor,
                        CblasNoTrans,
                        CblasNoTrans,
                        L.dimX(),
@@ -67,7 +67,7 @@ int test_dgemm_scalaire()
 {
     Mat m1 = Mat( 2, 1, 1 ), m2 = Mat( 1, 2, 1 );
     Mat m5 = Mat( 2, 2, 0 );
-    my_dgemm_scalaire( CblasColMajor,
+    my_dgemm_scal( CblasColMajor,
                        CblasNoTrans,
                        CblasNoTrans,
                        m1.dimX(),

@@ -50,18 +50,14 @@ namespace my_lapack {
 
     double *Mat::col( int j ) { return storage + static_cast<std::size_t>( j ) * static_cast<std::size_t>( m ); }
 
-    void Mat::renew(int m, int n, double value){
+    void Mat::reshape(int m, int n, double value){
+        if (m*n != this->m*this->n){
+            std::cerr << "Dims products are differents, cannot reshape" << std::endl;
+            return;
+        }
         this->m = m;
         this->n = n;
-        delete[] this->storage;
-        storage = initStorage( m * n );
-        if ( value == 0.0 ) {
-            memset( storage, 0, static_cast<std::size_t>( m ) * static_cast<std::size_t>( n ) * sizeof( double ) );
-        }
-        else {
-            for ( int i = 0; i < m * n; ++i ) { storage[i] = value; }
-        }
-        
+        for ( int i = 0; i < m * n; ++i ) { storage[i] = value; }
     }
 
     Mat &Mat::operator=( const Mat &other )

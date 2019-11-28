@@ -18,7 +18,7 @@ static const int BLOCK_SIZE = _LAHPC_BLOCK_SIZE;
 
 namespace my_lapack {
 
-    double my_ddot( const int N, const double *X, const int incX, const double *Y, const int incY )
+    double my_ddot_seq( const int N, const double *X, const int incX, const double *Y, const int incY )
     {
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE( incX );
@@ -31,7 +31,7 @@ namespace my_lapack {
         return ret;
     }
 
-    void my_daxpy( const int N, const double alpha, const double *X, const int incX, double *Y, const int incY )
+    void my_daxpy_seq( const int N, const double alpha, const double *X, const int incX, double *Y, const int incY )
     {
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE( incX );
@@ -44,7 +44,7 @@ namespace my_lapack {
         }
     }
 
-    void my_dgemv( CBLAS_ORDER     layout,
+    void my_dgemv_seq( CBLAS_ORDER     layout,
                    CBLAS_TRANSPOSE TransA,
                    int             M,
                    int             N,
@@ -102,7 +102,7 @@ namespace my_lapack {
     }
 
     /// M N and K aren't changed even if transposed.
-    void my_dgemm_scalaire( CBLAS_ORDER     Order,
+    void my_dgemm_scal_seq( CBLAS_ORDER     Order,
                             CBLAS_TRANSPOSE TransA,
                             CBLAS_TRANSPOSE TransB,
                             int             M,
@@ -189,7 +189,7 @@ namespace my_lapack {
         }
     }
 
-    void my_dgemm( CBLAS_ORDER     Order,
+    void my_dgemm_seq( CBLAS_ORDER     Order,
                    CBLAS_TRANSPOSE TransA,
                    CBLAS_TRANSPOSE TransB,
                    int             M,
@@ -215,7 +215,7 @@ namespace my_lapack {
         // Early return
         if ( !M || !N || !K || ( alpha == 0. && beta == 1. ) ) { return; }
         if ( alpha == 0 ) {
-            my_dgemm_scalaire( Order, TransA, TransB, M, N, K, alpha, A, lda, B, ldb, beta, C, ldc );
+            my_dgemm_scal_seq( Order, TransA, TransB, M, N, K, alpha, A, lda, B, ldb, beta, C, ldc );
             return;
         }
 
@@ -232,7 +232,7 @@ namespace my_lapack {
             for ( m = 0; m < MB; m++ ) {
                 for ( n = 0; n < NB; n++ ) {
                     for ( k = 0; k < KB; k++ ) {
-                        my_dgemm_scalaire( Order,
+                        my_dgemm_scal_seq( Order,
                                            TransA,
                                            TransB,
                                            m < MB - 1 ? blocksize : lastMB,
@@ -254,7 +254,7 @@ namespace my_lapack {
             for ( m = 0; m < MB; m++ ) {
                 for ( n = 0; n < NB; n++ ) {
                     for ( k = 0; k < KB; k++ ) {
-                        my_dgemm_scalaire( Order,
+                        my_dgemm_scal_seq( Order,
                                            TransA,
                                            TransB,
                                            m < MB - 1 ? blocksize : lastMB,
@@ -276,7 +276,7 @@ namespace my_lapack {
             for ( m = 0; m < MB; m++ ) {
                 for ( n = 0; n < NB; n++ ) {
                     for ( k = 0; k < KB; k++ ) {
-                        my_dgemm_scalaire( Order,
+                        my_dgemm_scal_seq( Order,
                                            TransA,
                                            TransB,
                                            m < MB - 1 ? blocksize : lastMB,
@@ -298,7 +298,7 @@ namespace my_lapack {
             for ( m = 0; m < MB; m++ ) {
                 for ( n = 0; n < NB; n++ ) {
                     for ( k = 0; k < KB; k++ ) {
-                        my_dgemm_scalaire( Order,
+                        my_dgemm_scal_seq( Order,
                                            TransA,
                                            TransB,
                                            m < MB - 1 ? blocksize : lastMB,
@@ -318,7 +318,7 @@ namespace my_lapack {
         }
     }
 
-    void my_dger( CBLAS_ORDER   layout,
+    void my_dger_seq( CBLAS_ORDER   layout,
                   int           M,
                   int           N,
                   double        alpha,
@@ -349,7 +349,7 @@ namespace my_lapack {
         }
     }
 
-    void my_dgetf2( CBLAS_ORDER order, int M, int N, double *A, int lda )
+    void my_dgetf2_seq( CBLAS_ORDER order, int M, int N, double *A, int lda )
     {
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
@@ -362,7 +362,7 @@ namespace my_lapack {
         for ( int j = 0; j < minMN; ++j ) {
             if ( j < M - 1 ) {
                 if ( std::abs( A[j * lda + j] ) > ( 2.0 * std::numeric_limits<double>::epsilon() ) ) {
-                    my_dscal( M - j - 1, 1.0 / A[j * lda + j], A + j * lda + j + 1, 1 );
+                    my_dscal_seq( M - j - 1, 1.0 / A[j * lda + j], A + j * lda + j + 1, 1 );
                 }
                 else {
                     for ( int i = 0; i < M - j; ++i ) {
@@ -371,7 +371,7 @@ namespace my_lapack {
                 }
             }
             if ( j < minMN - 1 ) {
-                my_dger( CblasColMajor,
+                my_dger_seq( CblasColMajor,
                          M - j - 1,
                          N - j - 1,
                          -1.0,
@@ -385,7 +385,7 @@ namespace my_lapack {
         }
     }
 
-    void my_dtrsm( CBLAS_ORDER     layout,
+    void my_dtrsm_seq( CBLAS_ORDER     layout,
                    CBLAS_SIDE      side,
                    CBLAS_UPLO      uplo,
                    CBLAS_TRANSPOSE transA,
@@ -590,7 +590,7 @@ namespace my_lapack {
         }
     }
 
-    void my_dgetrf( CBLAS_ORDER order, int M, int N, double *A, int lda )
+    void my_dgetrf_seq( CBLAS_ORDER order, int M, int N, double *A, int lda )
     {
         LAHPC_CHECK_PREDICATE( order == CblasColMajor );
         LAHPC_CHECK_POSITIVE_STRICT( M );
@@ -602,12 +602,12 @@ namespace my_lapack {
         const int nb    = BLOCK_SIZE;
         int       minMN = std::min( M, N );
 
-        if ( nb >= minMN ) { my_dgetf2( CblasColMajor, M, N, A, lda ); }
+        if ( nb >= minMN ) { my_dgetf2_seq( CblasColMajor, M, N, A, lda ); }
 
         for ( int j = 0; j < minMN; j += nb ) {
             int jb = std::min( minMN - j, nb );
-            my_dgetf2( CblasColMajor, M - j, jb, A + j * lda + j, lda );
-            my_dtrsm( order,
+            my_dgetf2_seq( CblasColMajor, M - j, jb, A + j * lda + j, lda );
+            my_dtrsm_seq( order,
                       CBLAS_SIDE::CblasLeft,
                       CBLAS_UPLO::CblasLower,
                       CBLAS_TRANSPOSE::CblasNoTrans,
@@ -620,7 +620,7 @@ namespace my_lapack {
                       A + ( j + jb ) * lda + j,
                       lda );
             if ( j + jb <= M ) {
-                my_dgemm( CblasColMajor,
+                my_dgemm_seq( CblasColMajor,
                           CblasNoTrans,
                           CblasNoTrans,
                           M - j - jb,
@@ -637,8 +637,7 @@ namespace my_lapack {
             }
         }
     }
-    int my_idamax( int N, double *dx, int incX )
-
+    int my_idamax_seq( int N, double *dx, int incX )
     {
         LAHPC_CHECK_POSITIVE_STRICT( N );
         LAHPC_CHECK_POSITIVE_STRICT( incX );
@@ -660,7 +659,7 @@ namespace my_lapack {
         return idamax;
     }
 
-    void my_dscal( int N, double da, double *dx, int incX )
+    void my_dscal_seq( int N, double da, double *dx, int incX )
     {
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE_STRICT( incX );
@@ -682,7 +681,7 @@ namespace my_lapack {
         }
     }
 
-    void my_dlaswp( int N, double *A, int lda, int k1, int k2, int *ipv, int incX )
+    void my_dlaswp_seq( int N, double *A, int lda, int k1, int k2, int *ipv, int incX )
     {
         LAHPC_CHECK_POSITIVE( lda );
         LAHPC_CHECK_POSITIVE( N );
@@ -697,5 +696,4 @@ namespace my_lapack {
             }
         }
     }
-
 } // namespace my_lapack

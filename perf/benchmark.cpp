@@ -14,20 +14,20 @@ void benchmark_dgemm_scalaire( int n )
     Mat m2 = MatRandi( n, n, std::numeric_limits<int>::max() );
     Mat prod( n, n, 0.0 );
 
-    my_dgemm_scalaire( CblasColMajor,
-                       CblasNoTrans,
-                       CblasNoTrans,
-                       m1.dimX(),
-                       m2.dimY(),
-                       m1.dimX(),
-                       10.0,
-                       m1.get(),
-                       m1.dimX(),
-                       m2.get(),
-                       m2.dimX(),
-                       0.0,
-                       prod.get(),
-                       prod.dimX() );
+    my_dgemm_scal( CblasColMajor,
+                   CblasNoTrans,
+                   CblasNoTrans,
+                   m1.dimX(),
+                   m2.dimY(),
+                   m1.dimX(),
+                   10.0,
+                   m1.get(),
+                   m1.dimX(),
+                   m2.get(),
+                   m2.dimX(),
+                   0.0,
+                   prod.get(),
+                   prod.dimX() );
 }
 
 int main( int argc, char **argv )
