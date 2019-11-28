@@ -23,7 +23,8 @@ function(make test_filename my_lapack_lib)
     target_include_directories(
         "${test_filename}_${my_lapack_lib}"
         PRIVATE
-        "${PROJECT_SOURCE_DIR}/lib"
+            "${PROJECT_SOURCE_DIR}/lib"
+            "${PROJECT_SOURCE_DIR}/algonum/include"
     )
     
     if ( WIN32 )
@@ -112,7 +113,5 @@ make("driver" "my_lapack_omp")
 make("test_valid" "my_lapack_seq")
 make("test_valid" "my_lapack_omp")
 
-make("test_perf" "my_lapack_seq")
-make("test_perf" "my_lapack_omp")
 make("test_perf" "my_lapack_all")
 

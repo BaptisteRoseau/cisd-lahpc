@@ -1,5 +1,6 @@
 #include "Mat.h"
 #include "my_lapack.h"
+#include "algonum.h"
 #include "util.h"
 
 #include <chrono>
@@ -11,81 +12,72 @@ char ( &ArraySizeHelper( T ( & )[N] ) )[N];
 
 #define ARRAY_SIZE( A ) ( sizeof( ArraySizeHelper( A ) ) )
 
-
 using namespace my_lapack;
 using namespace std;
 
-/*============ UTILS FOR TESTING PURPOSE =============== */
-
-void print_test_result(int result, int *nb_success, int *nb_tests)
-{
-    if (result == EXIT_SUCCESS) {
-        printf("\x1B[32mSUCCESS\x1B[0m\n");
-        (*nb_success)++;
-    } else {
-
-        printf("\x1B[31mFAILED\x1B[0m\n");
-    }
-
-    (*nb_tests)++;
-}
-
-void print_test_summary(int nb_success, int nb_tests)
-{
-    if (nb_success == nb_tests)
-        printf("TESTS SUMMARY: \t\x1B[32m%d\x1B[0m/%d\n", nb_success, nb_tests);
-    else
-        printf("TESTS SUMMARY: \t\x1B[31m%d\x1B[0m/%d\n", nb_success, nb_tests);
-}
-
 /*============ TESTS DEFINITION =============== */
 
-int test_perf_dgemm()
+int test_perf_dgemm(dgemm_fct_t dgemm_func, 
+                    const char *csv_file, 
+                    const char *curve_title,
+                    bool appendToFile)
 {
-    printf("%s ", __func__);
+    printf("%s, curve %s into %s\n", __func__, curve_title, csv_file);
 
+    // Output stream
     fstream fout;
-    fout.open( "test_perf_dgemm.csv", ios::out | ios::app );
-    size_t                        powInc = 2;
-    size_t                        len    = 2;
-    size_t                        lenMax = powInc << 11;
-    double                        alpha  = 0.75;
-    double                        beta   = 0;
-    Mat *                         m1, *m2, *m3;
-    std::chrono::duration<double> diff;
+    fout.open( csv_file, ios::out | (appendToFile ? ios::app : ios::trunc ) );
+    if (!appendToFile){
+        // WARNING: Spaces between comma aren't allowed !
+        // Title, XTitle, YTitle, XScale, YScale
+        fout << "DGEMM time taken,Matrix dimension,Time (s),log,log\n";
+    }
+    fout << curve_title << endl;
 
+    // Test variables
+    size_t powInc    = 2;
+    size_t len       = 2;
+    size_t lenMax    = powInc << 11;
+    double alpha     = 0.75;
+    double beta      = 0;
+    Mat *  m1, *m2, *m3;
+    chrono::duration<double> diff;
+
+    // Main loop (exponential increment)
     while ( len < lenMax ) {
         m1      = new Mat( len, len, 10 );
         m2      = new Mat( len, len, 10 );
         m3      = new Mat( len, len, 10 );
         auto t0 = chrono::system_clock::now();
-        my_dgemm( CblasColMajor,
-                  CblasNoTrans,
-                  CblasNoTrans,
-                  m1->dimX(),
-                  m2->dimY(),
-                  m1->dimY(),
-                  alpha,
-                  m1->get(),
-                  m1->dimX(),
-                  m2->get(),
-                  m2->dimX(),
-                  beta,
-                  m3->get(),
-                  m3->dimX() );
+        dgemm_func( CblasColMajor,
+                    CblasNoTrans,
+                    CblasNoTrans,
+                    m1->dimX(),
+                    m2->dimY(),
+                    m1->dimY(),
+                    alpha,
+                    m1->get(),
+                    m1->dimX(),
+                    m2->get(),
+                    m2->dimX(),
+                    beta,
+                    m3->get(),
+                    m3->dimX() );
         auto t1 = chrono::system_clock::now();
         diff    = t1 - t0;
 
         // Insert the data to file
-        fout << len << ", " << ( t1 - t0 ).count() << "\n";
+        fout << len << ", " << ( diff ).count() << "\n";
         cout << "Len: " << len << "\tTime: " << ( diff ).count() << endl;
 
+        // Freeing memory
         delete m1;
         delete m2;
         delete m3;
         len *= powInc;
     }
 
+    cout << "Done.\n";
     fout.close();
 
     return EXIT_SUCCESS;
@@ -93,16 +85,28 @@ int test_perf_dgemm()
 
 /*============ MAIN CALL =============== */
 
+/* 
+CSV OUTPUT FORMAT:
+TITLE, XTITLE, YTITLE, XSCALE ("linear" or "log"), YSCALE
+CURVE LABEL
+x0_0, y0_0
+x0_1, y0_1
+...
+CURVE LABEL
+x1_0, y1_0
+x1_1, y1_1
+x1_2, y1_2
+...
+*/
+
 int main( int argc, char **argv )
 {
     printf("----------- TEST PERF -----------\n");
 
-    int nb_success = 0;
-    int nb_tests = 0;
-
-    print_test_result(test_perf_dgemm(), &nb_success, &nb_tests);
-
-    print_test_summary(nb_success, nb_tests);
+    //test_perf_dgemm(my_dgemm_seq, "dgemm.csv", "Sequential", false);
+    test_perf_dgemm(my_dgemm_openmp, "dgemm.csv", "OpenMP1", false);
+    test_perf_dgemm(my_dgemm_openmp, "dgemm.csv", "OpenMP2", true);
+    test_perf_dgemm(my_dgemm_openmp, "dgemm.csv", "OpenMP3", true);
 
     return EXIT_SUCCESS;
 }
