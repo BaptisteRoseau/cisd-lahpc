@@ -12,12 +12,18 @@ int main( int argc, char **argv )
     printf( "----------- TEST ALGONUM -----------\n" );
 
     // M.Faverge's tests
+    printf( "DGEMM OPENMP:\n" );
     testall_dgemm( (dgemm_fct_t) my_dgemm_openmp );
-    //testall_dgemm( (dgemm_fct_t) my_dgemm_seq );
-    //testall_dgetrf( (dgemm_tiled_fct_t) my_dgetrf_openmp );
-    //testall_dgetrf( (dgemm_tiled_fct_t) my_dgetrf_seq );
-    //testall_dgemm_tiled( (dgemm_tiled_fct_t) tested_dgemm );
-    //testall_dgetrf_tiled( (dgetrf_tiled_fct_t) tested_dgetrf );
+    printf( "DGEMM SEQUENTIAL:\n" );
+    testall_dgemm( (dgemm_fct_t) my_dgemm_seq );
+    printf( "DGETRF OPENMP:\n" );
+    testall_dgetrf( (dgetrf_fct_t) my_dgetrf_openmp );
+    printf( "DGETRF SEQUENTIAL:\n" );
+    testall_dgetrf( (dgetrf_fct_t) my_dgetrf_seq );
+    /* printf( "DGEMM TILED OPENMP:\n" );
+    testall_dgemm_tiled( (dgemm_tiled_fct_t) tested_dgemm );
+    printf( "DGEMM TILED SEQUENTIAL:\n" );
+    testall_dgetrf_tiled( (dgetrf_tiled_fct_t) tested_dgetrf ); */
 
     return EXIT_SUCCESS;
 }
