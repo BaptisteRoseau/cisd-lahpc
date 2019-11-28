@@ -9,10 +9,13 @@
 
 namespace my_lapack {
 
-    Mat::~Mat() { delete[] storage; }
+    Mat::~Mat() {
+        if (storage != nullptr)
+            delete[] storage;
+    }
 
     Mat::Mat(){
-        this->storage = NULL;
+        this->storage = nullptr;
     }
 
     Mat::Mat( int m, int n )
@@ -69,7 +72,8 @@ namespace my_lapack {
             double *tmp = initStorage( other.m * other.n );
             for ( int i = 0; i < other.m * other.n; ++i ) { tmp[i] = other.storage[i]; }
 
-            delete[] storage;
+            if (storage != nullptr)
+                delete[] storage;
             storage = tmp;
             m       = other.m;
             n       = other.n;

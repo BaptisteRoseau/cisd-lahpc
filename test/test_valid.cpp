@@ -128,9 +128,6 @@ int test_dgemm_rectangle()
 }
 
 
-
-
-
 int test_dgemm_submatrix();
 
 int test_dgemm_error_cases();
