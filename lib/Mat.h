@@ -4,7 +4,7 @@ namespace my_lapack {
 
     class Mat {
       public:
-        Mat() = delete;
+        Mat();
         ~Mat();
         Mat( int m, int n );
         Mat( int m, int n, double value );
@@ -19,6 +19,7 @@ namespace my_lapack {
         double *       col( int j );
         inline int     dimX() { return m; }
         inline int     dimY() { return n; }
+        void renew(int m, int n, double value);
         inline int     ld() { return m; }
         void print(int precision = 6);
         int equals(const Mat &m);

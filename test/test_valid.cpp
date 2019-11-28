@@ -42,247 +42,103 @@ void print_test_summary( int nb_success, int nb_tests )
 
 int test_dgemm_square()
 {
-    printf( "%s ", __func__ );
+    size_t SideLen = 10;
+    double val = 5;
+    Mat A, B, C;
 
-    Mat *m1     = new Mat( 10, 10, 1 );
-    Mat *m2     = new Mat( 10, 10, 1 );
-    Mat *m3     = new Mat( 10, 10, 1 );
-    Mat *m_my   = new Mat( 10, 10, 0 );
-    Mat *m_blas = new Mat( 10, 10, 0 );
-
-    // M1, M2
-    my_dgemm( CblasColMajor,
-              CblasNoTrans,
-              CblasNoTrans,
-              m1->dimX(),
-              m2->dimY(),
-              m1->dimY(),
-              2,
-              m1->get(),
-              m1->dimX(),
-              m2->get(),
-              m2->dimX(),
-              3,
-              m_my->get(),
-              m_my->dimX() );
-    cblas_dgemm( CblasColMajor,
-                 CblasNoTrans,
-                 CblasNoTrans,
-                 m1->dimX(),
-                 m2->dimY(),
-                 m1->dimY(),
-                 2,
-                 m1->get(),
-                 m1->dimX(),
-                 m2->get(),
-                 m2->dimX(),
-                 3,
-                 m_blas->get(),
-                 m_blas->dimX() );
-
-    m_my->print();
-    m_blas->print();
-    if ( !m_my->equals( *m_blas ) ) { return EXIT_FAILURE; }
-
-    // M1, TM2
-    m3->fill( 0 );
-    my_dgemm( CblasColMajor,
-              CblasNoTrans,
-              CblasTrans,
-              m1->dimX(),
-              m1->dimY(),
-              m2->dimX(),
-              1,
-              m1->get(),
-              m1->dimX(),
-              m2->get(),
-              m2->dimX(),
-              0,
-              m3->get(),
-              m3->dimX() );
-
-    if ( !m3->containsOnly( 10 ) ) { return EXIT_FAILURE; }
-
-    // TM1, M2
-    m3->fill( 0 );
-    my_dgemm( CblasColMajor,
-              CblasTrans,
-              CblasNoTrans,
-              m1->dimY(),
-              m1->dimX(),
-              m2->dimY(),
-              1,
-              m1->get(),
-              m1->dimX(),
-              m2->get(),
-              m2->dimX(),
-              0,
-              m3->get(),
-              m3->dimX() );
-
-    if ( !m3->containsOnly( 10 ) ) { return EXIT_FAILURE; }
-
-    // TM1, TM2
-    m3->fill( 0 );
-    my_dgemm( CblasColMajor,
-              CblasTrans,
-              CblasTrans,
-              m1->dimY(),
-              m1->dimX(),
-              m2->dimX(),
-              1,
-              m1->get(),
-              m1->dimX(),
-              m2->get(),
-              m2->dimX(),
-              0,
-              m3->get(),
-              m3->dimX() );
-
-    if ( !m3->containsOnly( 10 ) ) { return EXIT_FAILURE; }
-
-    delete m1;
-    delete m2;
-    delete m3;
+    // Main loop, testing for all possible transpose cases
+    A = Mat(SideLen, SideLen, val);
+    B = Mat(SideLen, SideLen, val);
+    C = Mat(SideLen, SideLen, val);
+    for (int transA = 0; transA <= 1; transA++){
+        for (int transB = 0; transB <= 1; transB++){
+            my_dgemm( CblasColMajor,
+                      transA ? CblasTrans : CblasNoTrans,
+                      transA ? CblasTrans : CblasNoTrans,
+                      SideLen,
+                      SideLen,
+                      SideLen,
+                      1,
+                      A.get(),
+                      A.dimX(),
+                      B.get(),
+                      B.dimX(),
+                      0,
+                      C.get(),
+                      C.dimX() );
+            if (!C.containsOnly( SideLen*val*val )){
+                printf("ERROR: Expected %f, got %f.\n", SideLen*val*val, C.at(0));
+                return EXIT_FAILURE;
+            }
+            C.fill(val);
+        }   
+    }
 
     return EXIT_SUCCESS;
 }
 
 int test_dgemm_rectangle()
 {
-    printf( "%s ", __func__ );
+    size_t M = 2;
+    size_t N = 3;
+    size_t K = 4;
+    double val = 2;
 
-    Mat *m1 = new Mat( 10, 20, 1 );
-    Mat *m2 = new Mat( 20, 10, 1 );
-    Mat *m3 = new Mat( 10, 10, 0 );
-
-    // M1, M2
-    my_dgemm( CblasColMajor,
-              CblasNoTrans,
-              CblasNoTrans,
-              m1->dimX(),
-              m2->dimY(),
-              m1->dimY(),
-              1,
-              m1->get(),
-              m1->dimX(),
-              m2->get(),
-              m2->dimX(),
-              0,
-              m3->get(),
-              m3->dimX() );
-
-    if ( !m3->containsOnly( 20 ) ) {
-        m3->print();
-        delete m1;
-        delete m2;
-        delete m3;
-
-        return EXIT_FAILURE;
+    // Main loop, testing for all possible transpose cases
+    int AdimX, AdimY, BdimX, BdimY;
+    for (int transA = 0; transA <= 1; transA++){
+        for (int transB = 0; transB <= 1; transB++){
+            AdimX = transA ? K : M;
+            AdimY = transA ? M : K;
+            BdimX = transB ? N : K;
+            BdimY = transB ? K : N;
+            Mat A = Mat(AdimX, AdimY, val);
+            Mat B = Mat(BdimX, BdimY, val);
+            Mat C = Mat(M, N, val);
+            if (((transA ? AdimX : AdimY) != (int) K)
+             || ((transB ? BdimY : BdimX) != (int) K)){
+                printf("ERROR: Invalid dims %d and %d doesn't match.\n",
+                 (transA ? AdimX : AdimY), (transB ? BdimY : BdimX));
+                return EXIT_FAILURE;
+            }
+            my_dgemm( CblasColMajor,
+                      transA ? CblasTrans : CblasNoTrans,
+                      transA ? CblasTrans : CblasNoTrans,
+                      AdimX,
+                      BdimY,
+                      AdimY,
+                      1,
+                      A.get(),
+                      A.dimX(),
+                      B.get(),
+                      B.dimX(),
+                      0,
+                      C.get(),
+                      C.dimX() );
+            //if (!C.containsOnly(  AdimY*val*val )){
+            //    printf("ERROR: Expected %f, got %f.\n", AdimY*val*val, C.at(0));
+            //    return EXIT_FAILURE;
+            //}
+            //FIXME: PUTAIN DE BORDEL DE DOUBLE FREE OR CORRUPTION
+            C.fill(val);
+        }
     }
-
-    // M1, TM2
-    // delete m1;
-    // delete m2;
-    // delete m3;
-    m1 = new Mat( 10, 20, 1 );
-    m2 = new Mat( 10, 20, 1 );
-    m3 = new Mat( 10, 10, 0 );
-    my_dgemm( CblasColMajor,
-              CblasNoTrans,
-              CblasTrans,
-              m1->dimX(),
-              m1->dimY(),
-              m2->dimX(),
-              1,
-              m1->get(),
-              m1->dimX(),
-              m2->get(),
-              m2->dimX(),
-              0,
-              m3->get(),
-              m3->dimX() );
-    m3->print();
-    if ( !m3->containsOnly( 20 ) ) {
-        delete m1;
-        delete m2;
-        delete m3;
-
-        return EXIT_FAILURE;
-    }
-
-    // TM1, M2
-    // delete m1;
-    // delete m2;
-    // delete m3;
-    m1 = new Mat( 20, 10, 1 );
-    m2 = new Mat( 20, 10, 1 );
-    m3 = new Mat( 10, 10, 0 );
-    my_dgemm( CblasColMajor,
-              CblasTrans,
-              CblasNoTrans,
-              m1->dimY(),
-              m1->dimX(),
-              m2->dimY(),
-              1,
-              m1->get(),
-              m1->dimX(),
-              m2->get(),
-              m2->dimX(),
-              0,
-              m3->get(),
-              m3->dimX() );
-    m3->print();
-    if ( !m3->containsOnly( 20 ) ) {
-        delete m1;
-        delete m2;
-        delete m3;
-
-        return EXIT_FAILURE;
-    }
-
-    // TM1, TM2
-    // delete m1;
-    // delete m2;
-    // delete m3;
-    m1 = new Mat( 20, 10, 1 );
-    m2 = new Mat( 10, 20, 1 );
-    m3 = new Mat( 10, 10, 0 );
-    my_dgemm( CblasColMajor,
-              CblasTrans,
-              CblasTrans,
-              m1->dimY(),
-              m1->dimX(),
-              m2->dimX(),
-              1,
-              m1->get(),
-              m1->dimX(),
-              m2->get(),
-              m2->dimX(),
-              0,
-              m3->get(),
-              m3->dimX() );
-    m3->print();
-    if ( !m3->containsOnly( 20 ) ) {
-        delete m1;
-        delete m2;
-        delete m3;
-
-        return EXIT_FAILURE;
-    }
-
-    delete m1;
-    delete m2;
-    delete m3;
 
     return EXIT_SUCCESS;
 }
+
+
+
+
 
 int test_dgemm_submatrix();
 
 int test_dgemm_error_cases();
 
 int test_dgemm_alpha_beta();
+
+
+/*============ TESTS DGETRF =============== */
 
 int test_dgetrf()
 {
@@ -331,10 +187,10 @@ int main( int argc, char **argv )
     int nb_success = 0;
     int nb_tests   = 0;
 
-    print_test_result( test_dgemm_square(), &nb_success, &nb_tests );
-    print_test_result( test_dgemm_rectangle(), &nb_success, &nb_tests );
+    print_test_result(test_dgemm_square(), &nb_success, &nb_tests );
 
-    test_dgetrf();
+    print_test_result( test_dgemm_rectangle(), &nb_success, &nb_tests );
+    print_test_result( test_dgetrf(), &nb_success, &nb_tests );
 
     print_test_summary( nb_success, nb_tests );
 
