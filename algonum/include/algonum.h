@@ -1,11 +1,16 @@
 #ifndef _algonum_h_
 #define _algonum_h_
 
+
 #include <cblas.h>
 #include <lapacke.h>
 #include <math.h>
 #include "flops.h"
 #include "perf.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Testing function for the matrix-matrix product
@@ -117,5 +122,10 @@ void my_dgemm_tiled_openmp( CBLAS_LAYOUT layout,
 
 void my_dgetrf_tiled_openmp( CBLAS_LAYOUT layout,
                              int m, int n, int b, double **a );
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _algonum_h_ */

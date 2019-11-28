@@ -55,6 +55,51 @@ function(make test_filename my_lapack_lib)
 
 endfunction()
 
+############################################################
+######################   CALL   ############################
+############################################################
+
+add_executable(
+    "test_algonum_my_lapack_all"
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_algonum.cpp
+)
+
+target_include_directories(
+    "test_algonum_my_lapack_all"
+    PRIVATE
+        "${PROJECT_SOURCE_DIR}/lib"
+        "${PROJECT_SOURCE_DIR}/algonum/include"
+)
+
+target_compile_options( 
+    "test_algonum_my_lapack_all"
+    PRIVATE
+        "${FLAGS_DEBUG}"
+        "${FLAGS_RELEASE}"
+)
+
+set_target_properties(
+    "test_algonum_my_lapack_all"
+    PROPERTIES CXX_STANDARD 11
+)
+
+find_library(
+    libalgonum
+    "libalgonum.so"
+    HINTS
+        "${PROJECT_SOURCE_DIR}/algonum/lib/"
+)
+message(STATUS ${libalgonum})
+
+target_link_libraries(
+    "test_algonum_my_lapack_all"
+    PRIVATE 
+        my_lapack_all
+        ${libalgonum}
+)
+
+
+
 
 ############################################################
 ######################   CALL   ############################
@@ -69,3 +114,5 @@ make("test_valid" "my_lapack_omp")
 
 make("test_perf" "my_lapack_seq")
 make("test_perf" "my_lapack_omp")
+make("test_perf" "my_lapack_all")
+
