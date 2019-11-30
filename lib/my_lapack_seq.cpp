@@ -220,7 +220,7 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE_STRICT( ldc );
 
         // Early return
-        if ( !M || !N || !K || ( alpha == 0. && beta == 1. ) ) { return; }
+        if ( alpha == 0. && beta == 1. ) { return; }
         if ( alpha == 0 ) {
             my_dgemm_scal_seq( Order, TransA, TransB, M, N, K, alpha, A, lda, B, ldb, beta, C, ldc );
             return;
@@ -230,22 +230,21 @@ namespace my_lapack {
         bool bTransA = ( TransA == CblasTrans );
         bool bTransB = ( TransB == CblasTrans );
 
-        int blocksize = min_macro( min_macro( M, N ), BLOCK_SIZE );
-        int lastMB = M % blocksize;
-        int lastNB = N % blocksize;
-        int lastKB = K % blocksize;
-        int MB = lastMB ? (M / blocksize) + 1 : (M / BLOCK_SIZE) ;
-        int NB = lastNB ? (N / blocksize) + 1 : (N / BLOCK_SIZE) ;
-        int KB = lastKB ? (K / blocksize) + 1 : (K / BLOCK_SIZE) ;
+        int lastMBB = M % BLOCK_SIZE;
+        int lastNBB = N % BLOCK_SIZE;
+        int lastKBB = K % BLOCK_SIZE;
+        int MB = lastMBB ? (M / BLOCK_SIZE) + 1 : (M / BLOCK_SIZE) ;
+        int NB = lastNBB ? (N / BLOCK_SIZE) + 1 : (N / BLOCK_SIZE) ;
+        int KB = lastKBB ? (K / BLOCK_SIZE) + 1 : (K / BLOCK_SIZE) ;
 
         double *C_padding;
         int m, n, k, m_blk, n_blk;
         if ( bTransA && bTransB ) {
             for ( m = 0; m < MB; m++ ) {
-                m_blk = m < MB - 1 ? blocksize : lastMB;
+                m_blk = m < MB - 1 ? BLOCK_SIZE : lastMBB;
                 for ( n = 0; n < NB; n++ ) {
-                    n_blk = n < NB - 1 ? blocksize : lastNB;
-                    C_padding = C + blocksize * AT( m, n, ldc );
+                    n_blk = n < NB - 1 ? BLOCK_SIZE : lastNBB;
+                    C_padding = C + BLOCK_SIZE * AT( m, n, ldc );
                     for(int l = 0; l < m_blk; ++l) {
                         for(int c = 0; c < n_blk; ++c) {
                         C_padding[AT(l, c, ldc)] *= beta;
@@ -257,11 +256,11 @@ namespace my_lapack {
                                            TransB,
                                            m_blk,
                                            n_blk,
-                                           k < KB - 1 ? blocksize : lastKB,
+                                           k < KB - 1 ? BLOCK_SIZE : lastKBB,
                                            alpha,
-                                           A + blocksize * AT( k, m, lda ),
+                                           A + BLOCK_SIZE * AT( k, m, lda ),
                                            lda,
-                                           B + blocksize * AT( n, k, ldb ),
+                                           B + BLOCK_SIZE * AT( n, k, ldb ),
                                            ldb,
                                            1.,
                                            C_padding,
@@ -272,10 +271,10 @@ namespace my_lapack {
         }
         else if ( !bTransA && bTransB ) {
             for ( m = 0; m < MB; m++ ) {
-                m_blk = m < MB - 1 ? blocksize : lastMB;
+                m_blk = m < MB - 1 ? BLOCK_SIZE : lastMBB;
                 for ( n = 0; n < NB; n++ ) {
-                    n_blk = n < NB - 1 ? blocksize : lastNB;
-                    C_padding = C + blocksize * AT( m, n, ldc );
+                    n_blk = n < NB - 1 ? BLOCK_SIZE : lastNBB;
+                    C_padding = C + BLOCK_SIZE * AT( m, n, ldc );
                     for(int l = 0; l < m_blk; ++l) {
                         for(int c = 0; c < n_blk; ++c) {
                         C_padding[AT(l, c, ldc)] *= beta;
@@ -287,11 +286,11 @@ namespace my_lapack {
                                            TransB,
                                            m_blk,
                                            n_blk,
-                                           k < KB - 1 ? blocksize : lastKB,
+                                           k < KB - 1 ? BLOCK_SIZE : lastKBB,
                                            alpha,
-                                           A + blocksize * AT( m, k, lda ),
+                                           A + BLOCK_SIZE * AT( m, k, lda ),
                                            lda,
-                                           B + blocksize * AT( n, k, ldb ),
+                                           B + BLOCK_SIZE * AT( n, k, ldb ),
                                            ldb,
                                            1.,
                                            C_padding,
@@ -302,10 +301,10 @@ namespace my_lapack {
         }
         else if ( bTransA && !bTransB ) {
             for ( m = 0; m < MB; m++ ) {
-                m_blk = m < MB - 1 ? blocksize : lastMB;
+                m_blk = m < MB - 1 ? BLOCK_SIZE : lastMBB;
                 for ( n = 0; n < NB; n++ ) {
-                    n_blk = n < NB - 1 ? blocksize : lastNB;
-                    C_padding = C + blocksize * AT( m, n, ldc );
+                    n_blk = n < NB - 1 ? BLOCK_SIZE : lastNBB;
+                    C_padding = C + BLOCK_SIZE * AT( m, n, ldc );
                     for(int l = 0; l < m_blk; ++l) {
                         for(int c = 0; c < n_blk; ++c) {
                         C_padding[AT(l, c, ldc)] *= beta;
@@ -317,11 +316,11 @@ namespace my_lapack {
                                            TransB,
                                            m_blk,
                                            n_blk,
-                                           k < KB - 1 ? blocksize : lastKB,
+                                           k < KB - 1 ? BLOCK_SIZE : lastKBB,
                                            alpha,
-                                           A + blocksize * AT( k, m, lda ),
+                                           A + BLOCK_SIZE * AT( k, m, lda ),
                                            lda,
-                                           B + blocksize * AT( k, n, ldb ),
+                                           B + BLOCK_SIZE * AT( k, n, ldb ),
                                            ldb,
                                            1.,
                                            C_padding,
@@ -332,10 +331,10 @@ namespace my_lapack {
         }
         else {
             for ( m = 0; m < MB; m++ ) {
-                m_blk = m < MB - 1 ? blocksize : lastMB;
+                m_blk = m < MB - 1 ? BLOCK_SIZE : lastMBB;
                 for ( n = 0; n < NB; n++ ) {
-                    n_blk = n < NB - 1 ? blocksize : lastNB;
-                    C_padding = C + blocksize * AT( m, n, ldc );
+                    n_blk = n < NB - 1 ? BLOCK_SIZE : lastNBB;
+                    C_padding = C + BLOCK_SIZE * AT( m, n, ldc );
                     for(int l = 0; l < m_blk; ++l) {
                         for(int c = 0; c < n_blk; ++c) {
                         C_padding[AT(l, c, ldc)] *= beta;
@@ -347,11 +346,11 @@ namespace my_lapack {
                                            TransB,
                                            m_blk,
                                            n_blk,
-                                           k < KB - 1 ? blocksize : lastKB,
+                                           k < KB - 1 ? BLOCK_SIZE : lastKBB,
                                            alpha,
-                                           A + blocksize * AT( m, k, lda ),
+                                           A + BLOCK_SIZE * AT( m, k, lda ),
                                            lda,
-                                           B + blocksize * AT( k, n, ldb ),
+                                           B + BLOCK_SIZE * AT( k, n, ldb ),
                                            ldb,
                                            1.,
                                            C_padding,

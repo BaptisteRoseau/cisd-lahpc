@@ -39,7 +39,7 @@ int test_perf_dgemm(dgemm_fct_t dgemm_func,
     size_t len       = 16;
     size_t lenMax    = powInc << 11;
     double alpha     = 0.75;
-    double beta      = 0;
+    double beta      = 2;
     Mat *  m1, *m2, *m3;
     chrono::duration<double> diff;
 
@@ -103,7 +103,9 @@ int main( int argc, char **argv )
 {
     printf("----------- TEST PERF -----------\n");
 
-    test_perf_dgemm(my_dgemm_seq, "dgemm.csv", "Sequential", false);
+    test_perf_dgemm(my_dgemm_scal_seq, "dgemm.csv", "Sequential Scalar", false);
+    test_perf_dgemm(my_dgemm_scal_openmp, "dgemm.csv", "OpenMP Scalar", true);
+    test_perf_dgemm(my_dgemm_seq, "dgemm.csv", "Sequential", true);
     test_perf_dgemm(my_dgemm_openmp, "dgemm.csv", "OpenMP", true);
     
     return EXIT_SUCCESS;

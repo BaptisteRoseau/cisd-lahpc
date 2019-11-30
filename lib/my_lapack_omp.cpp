@@ -240,7 +240,7 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE_STRICT( ldc );
 
         // Early return
-        if ( !M || !N || !K || ( alpha == 0. && beta == 1. ) ) { return; }
+        if ( alpha == 0. && beta == 1. ) { return; }
         if ( alpha == 0 ) {
             my_dgemm_scal_openmp( Order, TransA, TransB, M, N, K, alpha, A, lda, B, ldb, beta, C, ldc );
             return;
@@ -250,98 +250,146 @@ namespace my_lapack {
         bool bTransA = ( TransA == CblasTrans );
         bool bTransB = ( TransB == CblasTrans );
 
-        int blocksize = min_macro( min_macro( M, N ), BLOCK_SIZE );
-        int lastMB = M % blocksize, MB = (M + blocksize) / blocksize;
-        int lastNB = N % blocksize, NB = (N + blocksize) / blocksize;
-        int lastKB = K % blocksize, KB = (M + blocksize) / blocksize;
-        int m, n, k;
+        int lastMB = M % BLOCK_SIZE;
+        int lastNB = N % BLOCK_SIZE;
+        int lastKB = K % BLOCK_SIZE;
+        int MB = lastMB ? (M / BLOCK_SIZE) + 1 : (M / BLOCK_SIZE) ;
+        int NB = lastNB ? (N / BLOCK_SIZE) + 1 : (N / BLOCK_SIZE) ;
+        int KB = lastKB ? (K / BLOCK_SIZE) + 1 : (K / BLOCK_SIZE) ;
+
+        double *C_padding;
+        int m, n, k, m_blk, n_blk;
         if ( bTransA && bTransB ) {
-#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
+            #pragma omp parallel for default(shared) private(m, n, k, m_blk, n_blk, C_padding)
             for ( m = 0; m < MB; m++ ) {
+                m_blk = m < MB - 1 ? BLOCK_SIZE : lastMB;
+                #pragma omp parallel for default(shared) private(n, k, n_blk, C_padding)
                 for ( n = 0; n < NB; n++ ) {
+                    n_blk = n < NB - 1 ? BLOCK_SIZE : lastNB;
+                    C_padding = C + BLOCK_SIZE * AT( m, n, ldc );
+                    #pragma omp parallel for default(shared)
+                    for(int l = 0; l < m_blk; ++l) {
+                        for(int c = 0; c < n_blk; ++c) {
+                        C_padding[AT(l, c, ldc)] *= beta;
+                        }
+                    }
+                    #pragma omp parallel for default(shared)
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_openmp( Order,
                                            TransA,
                                            TransB,
-                                           m < MB - 1 ? blocksize : lastMB,
-                                           n < NB - 1 ? blocksize : lastNB,
-                                           k < KB - 1 ? blocksize : lastKB,
+                                           m_blk,
+                                           n_blk,
+                                           k < KB - 1 ? BLOCK_SIZE : lastKB,
                                            alpha,
-                                           A + blocksize * AT( k, m, lda ),
+                                           A + BLOCK_SIZE * AT( k, m, lda ),
                                            lda,
-                                           B + blocksize * AT( n, k, ldb ),
+                                           B + BLOCK_SIZE * AT( n, k, ldb ),
                                            ldb,
-                                           beta,
-                                           C + blocksize * AT( m, n, ldc ),
+                                           1.,
+                                           C_padding,
                                            ldc );
                     }
                 }
             }
         }
         else if ( !bTransA && bTransB ) {
-#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
+            #pragma omp parallel for default(shared) private(m, n, k, m_blk, n_blk, C_padding)
             for ( m = 0; m < MB; m++ ) {
+                m_blk = m < MB - 1 ? BLOCK_SIZE : lastMB;
+                #pragma omp parallel for default(shared) private(n, k, n_blk, C_padding)
                 for ( n = 0; n < NB; n++ ) {
+                    n_blk = n < NB - 1 ? BLOCK_SIZE : lastNB;
+                    C_padding = C + BLOCK_SIZE * AT( m, n, ldc );
+                    #pragma omp parallel for default(shared)
+                    for(int l = 0; l < m_blk; ++l) {
+                        for(int c = 0; c < n_blk; ++c) {
+                        C_padding[AT(l, c, ldc)] *= beta;
+                        }
+                    }
+                    #pragma omp parallel for default(shared)
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_openmp( Order,
                                            TransA,
                                            TransB,
-                                           m < MB - 1 ? blocksize : lastMB,
-                                           n < NB - 1 ? blocksize : lastNB,
-                                           k < KB - 1 ? blocksize : lastKB,
+                                           m_blk,
+                                           n_blk,
+                                           k < KB - 1 ? BLOCK_SIZE : lastKB,
                                            alpha,
-                                           A + blocksize * AT( m, k, lda ),
+                                           A + BLOCK_SIZE * AT( m, k, lda ),
                                            lda,
-                                           B + blocksize * AT( n, k, ldb ),
+                                           B + BLOCK_SIZE * AT( n, k, ldb ),
                                            ldb,
-                                           beta,
-                                           C + blocksize * AT( m, n, ldc ),
+                                           1.,
+                                           C_padding,
                                            ldc );
                     }
                 }
             }
         }
         else if ( bTransA && !bTransB ) {
-#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
+            #pragma omp parallel for default(shared) private(m, n, k, m_blk, n_blk, C_padding)
             for ( m = 0; m < MB; m++ ) {
+                m_blk = m < MB - 1 ? BLOCK_SIZE : lastMB;
+                #pragma omp parallel for default(shared) private(n, k, n_blk, C_padding)
                 for ( n = 0; n < NB; n++ ) {
+                    n_blk = n < NB - 1 ? BLOCK_SIZE : lastNB;
+                    C_padding = C + BLOCK_SIZE * AT( m, n, ldc );
+                    #pragma omp parallel for default(shared)
+                    for(int l = 0; l < m_blk; ++l) {
+                        for(int c = 0; c < n_blk; ++c) {
+                        C_padding[AT(l, c, ldc)] *= beta;
+                        }
+                    }
+                    #pragma omp parallel for default(shared)
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_openmp( Order,
                                            TransA,
                                            TransB,
-                                           m < MB - 1 ? blocksize : lastMB,
-                                           n < NB - 1 ? blocksize : lastNB,
-                                           k < KB - 1 ? blocksize : lastKB,
+                                           m_blk,
+                                           n_blk,
+                                           k < KB - 1 ? BLOCK_SIZE : lastKB,
                                            alpha,
-                                           A + blocksize * AT( k, m, lda ),
+                                           A + BLOCK_SIZE * AT( k, m, lda ),
                                            lda,
-                                           B + blocksize * AT( k, n, ldb ),
+                                           B + BLOCK_SIZE * AT( k, n, ldb ),
                                            ldb,
-                                           beta,
-                                           C + blocksize * AT( m, n, ldc ),
+                                           1.,
+                                           C_padding,
                                            ldc );
                     }
                 }
             }
         }
         else {
-#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
+            #pragma omp parallel for default(shared) private(m, n, k, m_blk, n_blk, C_padding)
             for ( m = 0; m < MB; m++ ) {
+                m_blk = m < MB - 1 ? BLOCK_SIZE : lastMB;
+                #pragma omp parallel for default(shared) private(n, k, n_blk, C_padding)
                 for ( n = 0; n < NB; n++ ) {
+                    n_blk = n < NB - 1 ? BLOCK_SIZE : lastNB;
+                    C_padding = C + BLOCK_SIZE * AT( m, n, ldc );
+                    #pragma omp parallel for default(shared)
+                    for(int l = 0; l < m_blk; ++l) {
+                        for(int c = 0; c < n_blk; ++c) {
+                        C_padding[AT(l, c, ldc)] *= beta;
+                        }
+                    }
+                    #pragma omp parallel for default(shared)
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_openmp( Order,
                                            TransA,
                                            TransB,
-                                           m < MB - 1 ? blocksize : lastMB,
-                                           n < NB - 1 ? blocksize : lastNB,
-                                           k < KB - 1 ? blocksize : lastKB,
+                                           m_blk,
+                                           n_blk,
+                                           k < KB - 1 ? BLOCK_SIZE : lastKB,
                                            alpha,
-                                           A + blocksize * AT( m, k, lda ),
+                                           A + BLOCK_SIZE * AT( m, k, lda ),
                                            lda,
-                                           B + blocksize * AT( k, n, ldb ),
+                                           B + BLOCK_SIZE * AT( k, n, ldb ),
                                            ldb,
-                                           beta,
-                                           C + blocksize * AT( m, n, ldc ),
+                                           1.,
+                                           C_padding,
                                            ldc );
                     }
                 }
