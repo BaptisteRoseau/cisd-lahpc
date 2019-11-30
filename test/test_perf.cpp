@@ -36,7 +36,7 @@ int test_perf_dgemm(dgemm_fct_t dgemm_func,
 
     // Test variables
     size_t powInc    = 2;
-    size_t len       = 2;
+    size_t len       = 16;
     size_t lenMax    = powInc << 11;
     double alpha     = 0.75;
     double beta      = 0;

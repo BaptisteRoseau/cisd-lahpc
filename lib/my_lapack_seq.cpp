@@ -134,9 +134,6 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE_STRICT( ldc );
 
         // Early return
-        if ( !M || !N || !K ) { return; }
-
-        // Early return
         if ( alpha == 0. ) {
             if ( beta != 1. ) {
                 int m, n;
