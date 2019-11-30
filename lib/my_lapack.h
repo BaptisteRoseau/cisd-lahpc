@@ -189,7 +189,7 @@ namespace my_lapack {
             #define my_dscal      my_dscal_openmp
             #define my_dlaswp     my_dlaswp_openmp
 
-            #define my_dgemm_bloc_openmp my_dgemm_openmp //Default verison is bloc bersion
+            #define my_dgemm_bloc_openmp my_dgemm_openmp //Default version is bloc bersion
         #endif
     #endif
 

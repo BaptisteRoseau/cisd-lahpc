@@ -10,7 +10,7 @@ namespace my_lapack {
     /* lda = 0 : column major (else: row major) */
     void affiche( int m, int n, const double *a, int lda, std::ostream &stream, int precision = 6 );
 
-    int dequals( const double a, const double b, const double epsilon );
+    int dequals( const double a, const double b, const double epsilon = LAHPC_EPSILON );
 
 } // namespace my_lapack
 
