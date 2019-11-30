@@ -32,8 +32,11 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE( incY );
 
         double ret = 0;
-        // TODO: reduction
-        for ( int i = 0, xi = 0, yi = 0; i < N; ++i, xi += incX, yi += incY ) {
+        int xi, yi;
+        #pragma omp parallel for reduction(+:ret) default(shared) private(xi, yi)
+        for ( int i = 0; i < N; ++i) {
+            xi = i*incX;
+            yi = i*incY;
             ret += X[xi] * Y[yi];
         }
         return ret;
@@ -47,16 +50,13 @@ namespace my_lapack {
 
         if ( alpha == 0.0 ) { return; }
 
-#pragma omp parallel default( shared )
-        {
             int xi, yi;
-#pragma omp for
+#pragma omp parallel for private(xi, yi) default( shared )
             for ( int i = 0; i < N; i++ ) {
                 yi = i * incY;
                 xi = i * incX;
                 Y[yi] += alpha * X[xi];
             }
-        }
     }
 
     void my_dgemv_openmp( CBLAS_ORDER     layout,
