@@ -30,7 +30,7 @@ int test_perf_dgemm(dgemm_fct_t dgemm_func,
     if (!appendToFile){
         // WARNING: Spaces between comma aren't allowed !
         // Title, XTitle, YTitle, XScale, YScale
-        fout << "DGEMM time taken,Matrix dimension,Time (s),log,log\n";
+        fout << "DGEMM time taken,Matrix dimension,Time (s),linear,log\n";
     }
     fout << curve_title << endl;
 
@@ -103,10 +103,8 @@ int main( int argc, char **argv )
 {
     printf("----------- TEST PERF -----------\n");
 
-    //test_perf_dgemm(my_dgemm_seq, "dgemm.csv", "Sequential", false);
-    test_perf_dgemm(my_dgemm_openmp, "dgemm.csv", "OpenMP1", false);
-    test_perf_dgemm(my_dgemm_openmp, "dgemm.csv", "OpenMP2", true);
-    test_perf_dgemm(my_dgemm_openmp, "dgemm.csv", "OpenMP3", true);
-
+    test_perf_dgemm(my_dgemm_seq, "dgemm.csv", "Sequential", false);
+    test_perf_dgemm(my_dgemm_openmp, "dgemm.csv", "OpenMP", true);
+    
     return EXIT_SUCCESS;
 }

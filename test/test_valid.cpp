@@ -38,14 +38,12 @@ void print_test_summary( int nb_success, int nb_tests )
 
 /*============ TESTS DGEMM =============== */
 
-// TODO: TESTS UTILISANT LA MKL POUR COMPARER
-
 int test_dgemm_square()
 {
+    printf("%s:\t", __func__);
+
     size_t SideLen = 10;
-    double val = 5;
-    double alpha = 3;
-    double beta = 2;
+    double alpha, beta, val = (double)rand() / RAND_MAX;
     Mat A, B, C;
 
     // Main loop, testing for all possible transpose cases
@@ -54,6 +52,8 @@ int test_dgemm_square()
     C = Mat(SideLen, SideLen, val);
     for (int transA = 0; transA <= 1; transA++){
         for (int transB = 0; transB <= 1; transB++){
+            alpha = (double)rand() / RAND_MAX;
+            beta  = (double)rand() / RAND_MAX;
             my_dgemm( CblasColMajor,
                       transA ? CblasTrans : CblasNoTrans,
                       transA ? CblasTrans : CblasNoTrans,
@@ -69,7 +69,7 @@ int test_dgemm_square()
                       C.get(),
                       C.dimX() );
             if (!C.containsOnly( SideLen*val*val*alpha + val*beta )){
-                printf("ERROR: Expected %f, got %f.\n", SideLen*val*val*alpha + val*beta, C.at(0));
+                printf("ERROR: Expected %f, got %f.\t", SideLen*val*val*alpha + val*beta, C.at(0));
                 return EXIT_FAILURE;
             }
             C.fill(val);
@@ -81,12 +81,12 @@ int test_dgemm_square()
 
 int test_dgemm_rectangle()
 {
+    printf("%s:\t", __func__);
+    
     size_t M = 2;
     size_t N = 3;
     size_t K = 4;
-    double val = 2;
-    double alpha = 3;
-    double beta = 2;
+    double alpha, beta, val;
     Mat A = Mat(M, K);
     Mat B = Mat(K, N);
     Mat C = Mat(M, N);
@@ -95,6 +95,9 @@ int test_dgemm_rectangle()
     int AdimX, AdimY, BdimX, BdimY;
     for (int transA = 0; transA <= 1; transA++){
         for (int transB = 0; transB <= 1; transB++){
+            alpha = (double)rand() / RAND_MAX;
+            beta  = (double)rand() / RAND_MAX;
+            val   = (double)rand() / RAND_MAX;
             AdimX = transA ? K : M;
             AdimY = transA ? M : K;
             BdimX = transB ? N : K;
@@ -104,7 +107,7 @@ int test_dgemm_rectangle()
             C.fill(val);
             if (((transA ? AdimX : AdimY) != (int) K)
              || ((transB ? BdimY : BdimX) != (int) K)){
-                printf("ERROR: Invalid dims %d and %d doesn't match.\n",
+                printf("ERROR: Invalid dims %d and %d doesn't match.\t",
                  (transA ? AdimX : AdimY), (transB ? BdimY : BdimX));
                 return EXIT_FAILURE;
             }
@@ -123,7 +126,7 @@ int test_dgemm_rectangle()
                       C.get(),
                       C.dimX() );
             if (!C.containsOnly(  AdimY*val*val*alpha + val*beta )){
-                printf("ERROR: Expected %f, got %f.\n", AdimY*val*val*alpha + val*beta, C.at(0));
+                printf("ERROR: Expected %f, got %f.\t", AdimY*val*val*alpha + val*beta, C.at(0));
                 return EXIT_FAILURE;
             }
         }
@@ -188,8 +191,9 @@ int main( int argc, char **argv )
     // Our tests
     int nb_success = 0;
     int nb_tests   = 0;
+    srand(time(NULL));
 
-    print_test_result(test_dgemm_square(), &nb_success, &nb_tests );
+    print_test_result( test_dgemm_square(), &nb_success, &nb_tests );
     print_test_result( test_dgemm_rectangle(), &nb_success, &nb_tests );
     print_test_result( test_dgetrf(), &nb_success, &nb_tests );
 
