@@ -36,12 +36,6 @@ function(make_benchmark my_lapack_lib)
                 "${FLAGS_RELEASE}"
         )
     endif()
-
-    target_link_options (
-        ${benchmark_exe}
-        PRIVATE
-            "$<$<CONFIG:Debug>:${FLAGS_LINKER_DEBUG}>"   
-    )
     
     set_target_properties(
         ${benchmark_exe}
@@ -56,5 +50,5 @@ function(make_benchmark my_lapack_lib)
 
 endfunction()
 
-make_benchmark("my_lapack_seq")
+#make_benchmark("my_lapack_seq")
 make_benchmark("my_lapack_omp")

@@ -1,38 +1,37 @@
 #include "algonum.h"
 #include "my_lapack.h"
 
+#include <iostream>
+
 using namespace my_lapack;
 
-#ifdef __cplusplus
-extern "C"{
-#endif
-
-int main( int argc, char **argv )
+int main()
 {
     printf( "----------- TEST ALGONUM -----------\n" );
 
     // M.Faverge's tests
     printf( "DGEMM SCAL SEQUENTIAL:\n" );
-    testall_dgemm( (dgemm_fct_t) my_dgemm_scal_seq );
+    testall_dgemm( static_cast<dgemm_fct_t>( my_dgemm_scal_seq ) );
+
     printf( "DGEMM SCAL OPENMP:\n" );
-    testall_dgemm( (dgemm_fct_t) my_dgemm_scal_openmp );
+    testall_dgemm( static_cast<dgemm_fct_t>( my_dgemm_scal_openmp ) );
+
     printf( "DGEMM SEQUENTIAL:\n" );
-    testall_dgemm( (dgemm_fct_t) my_dgemm_seq );
+    testall_dgemm( static_cast<dgemm_fct_t>( my_dgemm_seq ) );
+
     printf( "DGEMM OPENMP:\n" );
-    testall_dgemm( (dgemm_fct_t) my_dgemm_openmp );
+    testall_dgemm( static_cast<dgemm_fct_t>( my_dgemm_openmp ) );
+
     printf( "DGETRF SEQUENTIAL:\n" );
-    testall_dgetrf( (dgetrf_fct_t) my_dgetrf_seq );
-    printf( "DGETRF OPENMP:\n" );
-    testall_dgetrf( (dgetrf_fct_t) my_dgetrf_openmp );
+    testone_dgetrf( static_cast<dgetrf_fct_t>( my_dgetrf_seq ), 100, 100, 0 );
+    testall_dgetrf( static_cast<dgetrf_fct_t>( my_dgetrf_seq ) );
+
+    /*printf( "DGETRF OPENMP:\n" );
+    testall_dgetrf( (dgetrf_fct_t) my_dgetrf_openmp );*/
     /* printf( "DGEMM TILED SEQUENTIAL:\n" );
     testall_dgetrf_tiled( (dgetrf_tiled_fct_t) tested_dgetrf );
     printf( "DGEMM TILED OPENMP:\n" );
     testall_dgemm_tiled( (dgemm_tiled_fct_t) tested_dgemm ); */
 
-    return EXIT_SUCCESS;
+    return 1;
 }
-
-#ifdef __cplusplus
-}
-#endif
-

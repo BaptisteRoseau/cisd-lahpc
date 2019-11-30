@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.13.1)
-project( cisd-lahpc VERSION 0.1
+cmake_minimum_required(VERSION 2.8)
+project( cisd-lahpc
                DESCRIPTION "Matrix product and sequential LU factorisation"
                LANGUAGES CXX )
 

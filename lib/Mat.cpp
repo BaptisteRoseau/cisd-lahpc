@@ -9,14 +9,12 @@
 
 namespace my_lapack {
 
-    Mat::~Mat() {
-        if (storage != nullptr)
-            delete[] storage;
+    Mat::~Mat()
+    {
+        if ( storage != nullptr ) delete[] storage;
     }
 
-    Mat::Mat(){
-        this->storage = nullptr;
-    }
+    Mat::Mat() { storage = nullptr; }
 
     Mat::Mat( int m, int n )
         : m( m )
@@ -30,11 +28,13 @@ namespace my_lapack {
         , n( n )
     {
         storage = initStorage( m * n );
-        if ( value == 0.0 ) {
+        if ( false && value == 0.0 ) {
             memset( storage, 0, static_cast<std::size_t>( m ) * static_cast<std::size_t>( n ) * sizeof( double ) );
         }
         else {
-            for ( int i = 0; i < m * n; ++i ) { storage[i] = value; }
+            for ( int i = 0; i < m * n; ++i ) {
+                storage[i] = value;
+            }
         }
     }
 
@@ -50,14 +50,17 @@ namespace my_lapack {
 
     double *Mat::col( int j ) { return storage + static_cast<std::size_t>( j ) * static_cast<std::size_t>( m ); }
 
-    void Mat::reshape(int m, int n, double value){
-        if (m*n != this->m*this->n){
-            std::cerr << "Dims products are differents, cannot reshape" << std::endl;
+    void Mat::reshape( int m, int n, double value )
+    {
+        if ( m * n != this->m * this->n ) {
+            std::cerr << "Dims products are different, cannot reshape" << std::endl;
             return;
         }
         this->m = m;
         this->n = n;
-        for ( int i = 0; i < m * n; ++i ) { storage[i] = value; }
+        for ( int i = 0; i < m * n; ++i ) {
+            storage[i] = value;
+        }
     }
 
     Mat &Mat::operator=( const Mat &other )
@@ -66,10 +69,11 @@ namespace my_lapack {
             // I chose to offer the strong exception safety.
             // Though it eats up memory...
             double *tmp = initStorage( other.m * other.n );
-            for ( int i = 0; i < other.m * other.n; ++i ) { tmp[i] = other.storage[i]; }
+            for ( int i = 0; i < other.m * other.n; ++i ) {
+                tmp[i] = other.storage[i];
+            }
 
-            if (storage != nullptr)
-                delete[] storage;
+            if ( storage != nullptr ) delete[] storage;
             storage = tmp;
             m       = other.m;
             n       = other.n;
@@ -106,13 +110,23 @@ namespace my_lapack {
         auto oldPrecision = std::cout.precision( precision );
 
         for ( int i = 0; i < m; ++i ) {
-            std::cout << "| ";
-            for ( int j = 0; j < n; ++j ) { std::cout << a[j * m + i] << " "; }
+            std::cout << "( " << i << " )| ";
+            for ( int j = 0; j < n; ++j ) {
+                std::cout << a[j * m + i] << " ";
+            }
             std::cout << "|\n";
         }
 
         std::cout << std::endl;
         std::cout.precision( oldPrecision );
+    }
+
+    void Mat::fill( double d )
+    {
+        int len = m * n;
+        for ( int i = 0; i < len; i++ ) {
+            storage[i] = d;
+        }
     }
 
     std::minstd_rand &GetRandEngine()
@@ -128,7 +142,9 @@ namespace my_lapack {
 
         Mat mat( m, n );
         for ( int j = 0; j < n; ++j ) {
-            for ( int i = 0; i < m; ++i ) { mat.at( i, j ) = randEngine() % ( max + 1 ); }
+            for ( int i = 0; i < m; ++i ) {
+                mat.at( i, j ) = randEngine() % ( max + 1 );
+            }
         }
 
         return mat;
@@ -137,7 +153,9 @@ namespace my_lapack {
     Mat MatSqrDiag( int m, double v )
     {
         Mat mat( m, m, 0 );
-        for ( int i = 0; i < m; ++i ) { mat.at( i, i ) = v; }
+        for ( int i = 0; i < m; ++i ) {
+            mat.at( i, i ) = v;
+        }
 
         return mat;
     }
@@ -150,7 +168,9 @@ namespace my_lapack {
 
         Mat mat( m, m, 0.0 );
         for ( int j = 0; j < m; ++j ) {
-            for ( int i = 0; i <= j; ++i ) { mat.at( i, j ) = 1u + ( randEngine() % 128u ); }
+            for ( int i = 0; i <= j; ++i ) {
+                mat.at( i, j ) = 1u + ( randEngine() % 128u );
+            }
         }
         return mat;
     }
@@ -162,39 +182,31 @@ namespace my_lapack {
         Mat mat( m, m, 0.0 );
         for ( int i = 0; i < m; ++i ) {
             mat.at( i, i ) = 1.0;
-            for ( int j = 0; j < i; ++j ) { mat.at( i, j ) = 1u + ( randEngine() % 128u ); }
+            for ( int j = 0; j < i; ++j ) {
+                mat.at( i, j ) = 1u + ( randEngine() % 128u );
+            }
         }
         return mat;
     }
 
-    int Mat::equals(const Mat &mat){
-        if ((this->m != mat.m) || (this->n != mat.n)){
-            return 0;
-        }
+    bool Mat::equals( const Mat &mat, double epsilon )
+    {
+        if ( ( m != mat.m ) || ( n != mat.n ) ) { return 0; }
 
-        int len = this->m*this->n;
-        for (int i = 0; i < len; i++){
-            if (!dequals(this->storage[i], mat.at(i), 2*LAHPC_EPSILON)){
-                return 0;
-            }
+        int len = m * n;
+        for ( int i = 0; i < len; i++ ) {
+            if ( !dequals( storage[i], mat.at( i ), epsilon ) ) { return false; }
         }
-        return 1;
+        return true;
     }
 
-    int  Mat::containsOnly(const double d){
-        int len = this->m*this->n;
-        for (int i = 0; i < len; i++){
-            if (!dequals(this->storage[i], d, 2*LAHPC_EPSILON)){
-                return 0;
-            }
-        }
-        return 1;
-    }
-
-    void Mat::fill( double d )
+    bool Mat::containsOnly( const double d )
     {
         int len = m * n;
-        for ( int i = 0; i < len; i++ ) { storage[i] = d; }
+        for ( int i = 0; i < len; i++ ) {
+            if ( !dequals( storage[i], d, 2 * LAHPC_EPSILON ) ) { return false; }
+        }
+        return true;
     }
 
 } // namespace my_lapack

@@ -4,6 +4,7 @@ CMakeSettings.json
 
 # Build
 out/*
+unix-builds/*
 
 # Prerequisites
 *.d
