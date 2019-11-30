@@ -9,11 +9,11 @@
 #include <limits>
 #include <utility>
 
-#define _LAHPC_BLOCK_SIZE 128
+#define _LAHPC_BLOCK_SIZE 11 //128
 static const int BLOCK_SIZE = _LAHPC_BLOCK_SIZE;
 
 #define AT_RM( i, j, width ) ( ( i ) * ( width ) + ( j ) )
-#define AT( i, j, heigth ) ( ( j ) * ( heigth ) + ( i ) )
+#define AT( i, j, heigth ) ( ( i ) + ( j ) * ( heigth ) )
 #define min_macro( a, b ) ( ( a ) < ( b ) ? ( a ) : ( b ) )
 
 #ifdef __cplusplus
@@ -160,7 +160,7 @@ namespace my_lapack {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
                     for ( k = 0; k < K; k++ ) {
-                        C[AT( m, n, ldc )] += alpha * A[AT( n, k, lda )] * B[AT( k, m, ldb )];
+                        C[AT( m, n, ldc )] += alpha * A[AT( k, m, lda )] * B[AT( n, k, ldb )];
                     }
                 }
             }
@@ -170,7 +170,7 @@ namespace my_lapack {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
                     for ( k = 0; k < K; k++ ) {
-                        C[AT( m, n, ldc )] += alpha * A[AT( m, k, lda )] * B[AT( k, m, ldb )];
+                        C[AT( m, n, ldc )] += alpha * A[AT( m, k, lda )] * B[AT( n, k, ldb )];
                     }
                 }
             }
@@ -180,7 +180,7 @@ namespace my_lapack {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
                     for ( k = 0; k < K; k++ ) {
-                        C[AT( m, n, ldc )] += alpha * A[AT( n, k, lda )] * B[AT( k, n, ldb )];
+                        C[AT( m, n, ldc )] += alpha * A[AT( k, m, lda )] * B[AT( k, n, ldb )];
                     }
                 }
             }
@@ -234,27 +234,40 @@ namespace my_lapack {
         bool bTransB = ( TransB == CblasTrans );
 
         int blocksize = min_macro( min_macro( M, N ), BLOCK_SIZE );
-        int lastMB = M % blocksize, MB = (M + blocksize) / blocksize;
-        int lastNB = N % blocksize, NB = (N + blocksize) / blocksize;
-        int lastKB = K % blocksize, KB = (M + blocksize) / blocksize;
-        int m, n, k;
+        int lastMB = M % blocksize;
+        int lastNB = N % blocksize;
+        int lastKB = K % blocksize;
+        int MB = lastMB ? (M / blocksize) + 1 : (M / BLOCK_SIZE) ;
+        int NB = lastNB ? (N / blocksize) + 1 : (N / BLOCK_SIZE) ;
+        int KB = lastKB ? (K / blocksize) + 1 : (K / BLOCK_SIZE) ;
+
+        double *C_padding;
+        int m, n, k, m_blk, n_blk;
         if ( bTransA && bTransB ) {
             for ( m = 0; m < MB; m++ ) {
+                m_blk = m < MB - 1 ? blocksize : lastMB;
                 for ( n = 0; n < NB; n++ ) {
+                    n_blk = n < NB - 1 ? blocksize : lastNB;
+                    C_padding = C + blocksize * AT( m, n, ldc );
+                    for(int l = 0; l < m_blk; ++l) {
+                        for(int c = 0; c < n_blk; ++c) {
+                        C_padding[AT(l, c, ldc)] *= beta;
+                        }
+                    }
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_seq( Order,
                                            TransA,
                                            TransB,
-                                           m < MB - 1 ? blocksize : lastMB,
-                                           n < NB - 1 ? blocksize : lastNB,
+                                           m_blk,
+                                           n_blk,
                                            k < KB - 1 ? blocksize : lastKB,
                                            alpha,
                                            A + blocksize * AT( k, m, lda ),
                                            lda,
                                            B + blocksize * AT( n, k, ldb ),
                                            ldb,
-                                           beta,
-                                           C + blocksize * AT( m, n, ldc ),
+                                           1.,
+                                           C_padding,
                                            ldc );
                     }
                 }
@@ -262,21 +275,29 @@ namespace my_lapack {
         }
         else if ( !bTransA && bTransB ) {
             for ( m = 0; m < MB; m++ ) {
+                m_blk = m < MB - 1 ? blocksize : lastMB;
                 for ( n = 0; n < NB; n++ ) {
+                    n_blk = n < NB - 1 ? blocksize : lastNB;
+                    C_padding = C + blocksize * AT( m, n, ldc );
+                    for(int l = 0; l < m_blk; ++l) {
+                        for(int c = 0; c < n_blk; ++c) {
+                        C_padding[AT(l, c, ldc)] *= beta;
+                        }
+                    }
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_seq( Order,
                                            TransA,
                                            TransB,
-                                           m < MB - 1 ? blocksize : lastMB,
-                                           n < NB - 1 ? blocksize : lastNB,
+                                           m_blk,
+                                           n_blk,
                                            k < KB - 1 ? blocksize : lastKB,
                                            alpha,
                                            A + blocksize * AT( m, k, lda ),
                                            lda,
                                            B + blocksize * AT( n, k, ldb ),
                                            ldb,
-                                           beta,
-                                           C + blocksize * AT( m, n, ldc ),
+                                           1.,
+                                           C_padding,
                                            ldc );
                     }
                 }
@@ -284,21 +305,29 @@ namespace my_lapack {
         }
         else if ( bTransA && !bTransB ) {
             for ( m = 0; m < MB; m++ ) {
+                m_blk = m < MB - 1 ? blocksize : lastMB;
                 for ( n = 0; n < NB; n++ ) {
+                    n_blk = n < NB - 1 ? blocksize : lastNB;
+                    C_padding = C + blocksize * AT( m, n, ldc );
+                    for(int l = 0; l < m_blk; ++l) {
+                        for(int c = 0; c < n_blk; ++c) {
+                        C_padding[AT(l, c, ldc)] *= beta;
+                        }
+                    }
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_seq( Order,
                                            TransA,
                                            TransB,
-                                           m < MB - 1 ? blocksize : lastMB,
-                                           n < NB - 1 ? blocksize : lastNB,
+                                           m_blk,
+                                           n_blk,
                                            k < KB - 1 ? blocksize : lastKB,
                                            alpha,
                                            A + blocksize * AT( k, m, lda ),
                                            lda,
                                            B + blocksize * AT( k, n, ldb ),
                                            ldb,
-                                           beta,
-                                           C + blocksize * AT( m, n, ldc ),
+                                           1.,
+                                           C_padding,
                                            ldc );
                     }
                 }
@@ -306,21 +335,29 @@ namespace my_lapack {
         }
         else {
             for ( m = 0; m < MB; m++ ) {
+                m_blk = m < MB - 1 ? blocksize : lastMB;
                 for ( n = 0; n < NB; n++ ) {
+                    n_blk = n < NB - 1 ? blocksize : lastNB;
+                    C_padding = C + blocksize * AT( m, n, ldc );
+                    for(int l = 0; l < m_blk; ++l) {
+                        for(int c = 0; c < n_blk; ++c) {
+                        C_padding[AT(l, c, ldc)] *= beta;
+                        }
+                    }
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_seq( Order,
                                            TransA,
                                            TransB,
-                                           m < MB - 1 ? blocksize : lastMB,
-                                           n < NB - 1 ? blocksize : lastNB,
+                                           m_blk,
+                                           n_blk,
                                            k < KB - 1 ? blocksize : lastKB,
                                            alpha,
                                            A + blocksize * AT( m, k, lda ),
                                            lda,
                                            B + blocksize * AT( k, n, ldb ),
                                            ldb,
-                                           beta,
-                                           C + blocksize * AT( m, n, ldc ),
+                                           1.,
+                                           C_padding,
                                            ldc );
                     }
                 }

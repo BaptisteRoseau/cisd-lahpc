@@ -10,7 +10,7 @@
 #include <omp.h>
 #include <utility>
 
-#define _LAHPC_BLOCK_SIZE 128
+#define _LAHPC_BLOCK_SIZE 11 //128
 static const int BLOCK_SIZE = _LAHPC_BLOCK_SIZE;
 
 #define AT_RM( i, j, width ) ( ( i ) * ( width ) + ( j ) )
@@ -177,7 +177,7 @@ namespace my_lapack {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
                     for ( k = 0; k < K; k++ ) {
-                        C[AT( m, n, ldc )] += alpha * A[AT( n, k, lda )] * B[AT( k, m, ldb )];
+                        C[AT( m, n, ldc )] += alpha * A[AT( k, m, lda )] * B[AT( n, k, ldb )];
                     }
                 }
             }
@@ -188,7 +188,7 @@ namespace my_lapack {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
                     for ( k = 0; k < K; k++ ) {
-                        C[AT( m, n, ldc )] += alpha * A[AT( m, k, lda )] * B[AT( k, m, ldb )];
+                        C[AT( m, n, ldc )] += alpha * A[AT( m, k, lda )] * B[AT( n, k, ldb )];
                     }
                 }
             }
@@ -199,7 +199,7 @@ namespace my_lapack {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
                     for ( k = 0; k < K; k++ ) {
-                        C[AT( m, n, ldc )] += alpha * A[AT( n, k, lda )] * B[AT( k, n, ldb )];
+                        C[AT( m, n, ldc )] += alpha * A[AT( k, m, lda )] * B[AT( k, n, ldb )];
                     }
                 }
             }

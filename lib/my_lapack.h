@@ -175,21 +175,22 @@ namespace my_lapack {
         #define my_dscal      my_dscal_seq
         #define my_dlaswp     my_dlaswp_seq
     #else 
-    //#if defined _my_lapack_omp || defined _my_lapack_all
-        #define my_ddot       my_ddot_openmp
-        #define my_daxpy      my_daxpy_openmp
-        #define my_dgemv      my_dgemv_openmp
-        #define my_dgemm_scal my_dgemm_scal_openmp
-        #define my_dger       my_dger_openmp
-        #define my_dgemm      my_dgemm_openmp
-        #define my_dgetf2     my_dgetf2_openmp
-        #define my_dgetrf     my_dgetrf_openmp
-        #define my_dtrsm      my_dtrsm_openmp
-        #define my_idamax     my_idamax_openmp
-        #define my_dscal      my_dscal_openmp
-        #define my_dlaswp     my_dlaswp_openmp
+        #if defined _my_lapack_omp || defined _my_lapack_all
+            #define my_ddot       my_ddot_openmp
+            #define my_daxpy      my_daxpy_openmp
+            #define my_dgemv      my_dgemv_openmp
+            #define my_dgemm_scal my_dgemm_scal_openmp
+            #define my_dger       my_dger_openmp
+            #define my_dgemm      my_dgemm_openmp
+            #define my_dgetf2     my_dgetf2_openmp
+            #define my_dgetrf     my_dgetrf_openmp
+            #define my_dtrsm      my_dtrsm_openmp
+            #define my_idamax     my_idamax_openmp
+            #define my_dscal      my_dscal_openmp
+            #define my_dlaswp     my_dlaswp_openmp
 
-        #define my_dgemm_bloc_openmp my_dgemm_openmp //Default verison is bloc bersion
+            #define my_dgemm_bloc_openmp my_dgemm_openmp //Default verison is bloc bersion
+        #endif
     #endif
 
 

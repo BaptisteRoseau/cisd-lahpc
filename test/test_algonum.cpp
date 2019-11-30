@@ -12,6 +12,10 @@ int main( int argc, char **argv )
     printf( "----------- TEST ALGONUM -----------\n" );
 
     // M.Faverge's tests
+    printf( "DGEMM SCAL SEQUENTIAL:\n" );
+    testall_dgemm( (dgemm_fct_t) my_dgemm_scal_seq );
+    printf( "DGEMM SCAL OPENMP:\n" );
+    testall_dgemm( (dgemm_fct_t) my_dgemm_scal_openmp );
     printf( "DGEMM SEQUENTIAL:\n" );
     testall_dgemm( (dgemm_fct_t) my_dgemm_seq );
     printf( "DGEMM OPENMP:\n" );

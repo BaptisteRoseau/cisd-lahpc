@@ -42,7 +42,7 @@ int test_dgemm_square()
 {
     printf("%s:\t", __func__);
 
-    size_t SideLen = 10;
+    size_t SideLen = 260;
     double alpha, beta, val = (double)rand() / RAND_MAX;
     Mat A, B, C;
 
@@ -79,13 +79,14 @@ int test_dgemm_square()
     return EXIT_SUCCESS;
 }
 
+//FIXME: test bugged
 int test_dgemm_rectangle()
 {
     printf("%s:\t", __func__);
     
-    size_t M = 2;
-    size_t N = 3;
-    size_t K = 4;
+    size_t M = 200;
+    size_t N = 100;
+    size_t K = 260;
     double alpha, beta, val;
     Mat A = Mat(M, K);
     Mat B = Mat(K, N);
@@ -111,7 +112,7 @@ int test_dgemm_rectangle()
                  (transA ? AdimX : AdimY), (transB ? BdimY : BdimX));
                 return EXIT_FAILURE;
             }
-            my_dgemm( CblasColMajor,
+            my_dgemm_scal( CblasColMajor,
                       transA ? CblasTrans : CblasNoTrans,
                       transA ? CblasTrans : CblasNoTrans,
                       AdimX,
@@ -176,6 +177,8 @@ int test_dgetrf()
 
     Prod.print();
 
+    //TODO: directly test if matrix values are valid and return success or fail instead of print
+
     return 0;
 }
 
@@ -183,12 +186,6 @@ int main( int argc, char **argv )
 {
     printf( "----------- TEST VALID -----------\n" );
 
-    // M.Faverge's tests
-    //~~printf("Running M.Faverge's tests...\n");
-    //~~testall_dgemm( (dgemm_fct_t) my_dgemm );
-    //~~testall_dgetrf( (dgetrf_fct_t) my_dgetrf );
-
-    // Our tests
     int nb_success = 0;
     int nb_tests   = 0;
     srand(time(NULL));
