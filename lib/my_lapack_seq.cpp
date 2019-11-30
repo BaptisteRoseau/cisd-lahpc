@@ -67,6 +67,7 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE_STRICT( incX );
         LAHPC_CHECK_POSITIVE_STRICT( incY );
         LAHPC_CHECK_PREDICATE( layout == CblasColMajor );
+        LAHPC_CHECK_PREDICATE( (TransA == CblasTrans) || (TransA == CblasNoTrans) );
 
         if ( M == 0 || N == 0 || ( alpha == 0.0 && beta == 1.0 ) ) return;
 
@@ -123,6 +124,8 @@ namespace my_lapack {
                             int             ldc )
     {
         LAHPC_CHECK_PREDICATE( Order == CblasColMajor );
+        LAHPC_CHECK_PREDICATE( (TransA == CblasTrans) || (TransA == CblasNoTrans) );
+        LAHPC_CHECK_PREDICATE( (TransB == CblasTrans) || (TransB == CblasNoTrans) );
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE( K );
@@ -210,6 +213,8 @@ namespace my_lapack {
                    int             ldc )
     {
         LAHPC_CHECK_PREDICATE( Order == CblasColMajor );
+        LAHPC_CHECK_PREDICATE( (TransA == CblasTrans) || (TransA == CblasNoTrans) );
+        LAHPC_CHECK_PREDICATE( (TransB == CblasTrans) || (TransB == CblasNoTrans) );
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE( K );
@@ -229,9 +234,9 @@ namespace my_lapack {
         bool bTransB = ( TransB == CblasTrans );
 
         int blocksize = min_macro( min_macro( M, N ), BLOCK_SIZE );
-        int lastMB = M % blocksize, MB = (M + blocksize - 1 / blocksize);
-        int lastNB = N % blocksize, NB = (N + blocksize - 1 / blocksize);
-        int lastKB = K % blocksize, KB = (M + blocksize - 1 / blocksize);
+        int lastMB = M % blocksize, MB = (M + blocksize) / blocksize;
+        int lastNB = N % blocksize, NB = (N + blocksize) / blocksize;
+        int lastKB = K % blocksize, KB = (M + blocksize) / blocksize;
         int m, n, k;
         if ( bTransA && bTransB ) {
             for ( m = 0; m < MB; m++ ) {
@@ -404,6 +409,7 @@ namespace my_lapack {
                    int             ldb )
     {
         LAHPC_CHECK_PREDICATE( layout == CblasColMajor );
+        LAHPC_CHECK_PREDICATE( (transA == CblasTrans) || (transA == CblasNoTrans) );
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE_STRICT( lda );
