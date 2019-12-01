@@ -51,4 +51,4 @@ function(make_benchmark my_lapack_lib)
 endfunction()
 
 #make_benchmark("my_lapack_seq")
-make_benchmark("my_lapack_omp")
+make_benchmark("my_lapack_all")
