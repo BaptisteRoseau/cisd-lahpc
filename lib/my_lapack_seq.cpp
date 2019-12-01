@@ -9,7 +9,7 @@
 #include <limits>
 #include <utility>
 
-#define _LAHPC_BLOCK_SIZE 128
+#define _LAHPC_BLOCK_SIZE 34
 static const int BLOCK_SIZE = _LAHPC_BLOCK_SIZE;
 
 #define AT_RM( i, j, width ) ( ( i ) * ( width ) + ( j ) )
