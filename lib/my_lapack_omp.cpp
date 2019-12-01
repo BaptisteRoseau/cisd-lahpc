@@ -271,7 +271,7 @@ namespace my_lapack {
                     }
 #pragma omp parallel for default( shared )
                     for ( k = 0; k < KB; k++ ) {
-                        my_dgemm_scal_openmp( Order,
+                        my_dgemm_scal_seq( Order,
                                               TransA,
                                               TransB,
                                               m_blk,
@@ -305,7 +305,7 @@ namespace my_lapack {
                     }
 #pragma omp parallel for default( shared )
                     for ( k = 0; k < KB; k++ ) {
-                        my_dgemm_scal_openmp( Order,
+                        my_dgemm_scal_seq( Order,
                                               TransA,
                                               TransB,
                                               m_blk,
@@ -339,7 +339,7 @@ namespace my_lapack {
                     }
 #pragma omp parallel for default( shared )
                     for ( k = 0; k < KB; k++ ) {
-                        my_dgemm_scal_openmp( Order,
+                        my_dgemm_scal_seq( Order,
                                               TransA,
                                               TransB,
                                               m_blk,
@@ -373,7 +373,7 @@ namespace my_lapack {
                     }
 #pragma omp parallel for default( shared )
                     for ( k = 0; k < KB; k++ ) {
-                        my_dgemm_scal_openmp( Order,
+                        my_dgemm_scal_seq( Order,
                                               TransA,
                                               TransB,
                                               m_blk,

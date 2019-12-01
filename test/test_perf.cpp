@@ -50,7 +50,7 @@ int test_perf_dgemm(dgemm_fct_t dgemm_func,
         m3      = new Mat( len, len, 10 );
         auto t0 = chrono::system_clock::now();
         dgemm_func( CblasColMajor,
-                    CblasNoTrans,
+                    CblasTrans,
                     CblasNoTrans,
                     m1->dimX(),
                     m2->dimY(),
