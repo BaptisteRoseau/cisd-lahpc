@@ -187,7 +187,7 @@ namespace my_lapack {
             }
         }
         else if ( bTransA && !bTransB ) {
-#pragma omp parallel for default( shared ) collapse( 2 ) private( k ) schedule(dynamic)
+#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
