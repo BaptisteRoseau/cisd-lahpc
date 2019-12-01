@@ -269,7 +269,7 @@ namespace my_lapack {
                             C_padding[AT( l, c, ldc )] *= beta;
                         }
                     }
-#pragma omp parallel for default( shared )
+#pragma omp parallel for default( shared ) schedule(dynamic, 4)
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_seq( Order,
                                               TransA,
@@ -303,7 +303,7 @@ namespace my_lapack {
                             C_padding[AT( l, c, ldc )] *= beta;
                         }
                     }
-#pragma omp parallel for default( shared )
+#pragma omp parallel for default( shared ) schedule(dynamic, 4)
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_seq( Order,
                                               TransA,
@@ -337,7 +337,7 @@ namespace my_lapack {
                             C_padding[AT( l, c, ldc )] *= beta;
                         }
                     }
-#pragma omp parallel for default( shared )
+#pragma omp parallel for default( shared ) schedule(dynamic, 4)
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_seq( Order,
                                               TransA,
@@ -371,7 +371,7 @@ namespace my_lapack {
                             C_padding[AT( l, c, ldc )] *= beta;
                         }
                     }
-#pragma omp parallel for default( shared )
+#pragma omp parallel for default( shared ) schedule(dynamic, 4)
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_seq( Order,
                                               TransA,
@@ -682,7 +682,7 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE_STRICT( lda );
 
-        if ( M == 0 || N == 0 ) { return; }
+        //if ( M == 0 || N == 0 ) { return; }
 
         const int maxBlockSize = 10;
         int       minMN        = std::min( M, N );
