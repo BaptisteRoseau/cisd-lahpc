@@ -9,17 +9,12 @@
 #include <limits>
 #include <utility>
 
-#define _LAHPC_BLOCK_SIZE 11 //128
+#define _LAHPC_BLOCK_SIZE 11 // 128
 static const int BLOCK_SIZE = _LAHPC_BLOCK_SIZE;
 
 #define AT_RM( i, j, width ) ( ( i ) * ( width ) + ( j ) )
 #define AT( i, j, heigth ) ( ( i ) + ( j ) * ( heigth ) )
 #define min_macro( a, b ) ( ( a ) < ( b ) ? ( a ) : ( b ) )
-
-#ifdef __cplusplus
-extern "C"{
-#endif
-
 
 namespace my_lapack {
 
@@ -50,24 +45,24 @@ namespace my_lapack {
     }
 
     void my_dgemv_seq( CBLAS_ORDER     layout,
-                   CBLAS_TRANSPOSE TransA,
-                   int             M,
-                   int             N,
-                   double          alpha,
-                   const double *  A,
-                   int             lda,
-                   const double *  X,
-                   int             incX,
-                   double          beta,
-                   double *        Y,
-                   const int       incY )
+                       CBLAS_TRANSPOSE TransA,
+                       int             M,
+                       int             N,
+                       double          alpha,
+                       const double *  A,
+                       int             lda,
+                       const double *  X,
+                       int             incX,
+                       double          beta,
+                       double *        Y,
+                       const int       incY )
     {
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE_STRICT( incX );
         LAHPC_CHECK_POSITIVE_STRICT( incY );
         LAHPC_CHECK_PREDICATE( layout == CblasColMajor );
-        LAHPC_CHECK_PREDICATE( (TransA == CblasTrans) || (TransA == CblasNoTrans) );
+        LAHPC_CHECK_PREDICATE( ( TransA == CblasTrans ) || ( TransA == CblasNoTrans ) );
 
         if ( M == 0 || N == 0 || ( alpha == 0.0 && beta == 1.0 ) ) return;
 
@@ -124,8 +119,8 @@ namespace my_lapack {
                             int             ldc )
     {
         LAHPC_CHECK_PREDICATE( Order == CblasColMajor );
-        LAHPC_CHECK_PREDICATE( (TransA == CblasTrans) || (TransA == CblasNoTrans) );
-        LAHPC_CHECK_PREDICATE( (TransB == CblasTrans) || (TransB == CblasNoTrans) );
+        LAHPC_CHECK_PREDICATE( ( TransA == CblasTrans ) || ( TransA == CblasNoTrans ) );
+        LAHPC_CHECK_PREDICATE( ( TransB == CblasTrans ) || ( TransB == CblasNoTrans ) );
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE( K );
@@ -195,23 +190,23 @@ namespace my_lapack {
     }
 
     void my_dgemm_seq( CBLAS_ORDER     Order,
-                   CBLAS_TRANSPOSE TransA,
-                   CBLAS_TRANSPOSE TransB,
-                   int             M,
-                   int             N,
-                   int             K,
-                   double          alpha,
-                   const double *  A,
-                   int             lda,
-                   const double *  B,
-                   int             ldb,
-                   double          beta,
-                   double *        C,
-                   int             ldc )
+                       CBLAS_TRANSPOSE TransA,
+                       CBLAS_TRANSPOSE TransB,
+                       int             M,
+                       int             N,
+                       int             K,
+                       double          alpha,
+                       const double *  A,
+                       int             lda,
+                       const double *  B,
+                       int             ldb,
+                       double          beta,
+                       double *        C,
+                       int             ldc )
     {
         LAHPC_CHECK_PREDICATE( Order == CblasColMajor );
-        LAHPC_CHECK_PREDICATE( (TransA == CblasTrans) || (TransA == CblasNoTrans) );
-        LAHPC_CHECK_PREDICATE( (TransB == CblasTrans) || (TransB == CblasNoTrans) );
+        LAHPC_CHECK_PREDICATE( ( TransA == CblasTrans ) || ( TransA == CblasNoTrans ) );
+        LAHPC_CHECK_PREDICATE( ( TransB == CblasTrans ) || ( TransB == CblasNoTrans ) );
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE( K );
@@ -233,21 +228,21 @@ namespace my_lapack {
         int lastMBB = M % BLOCK_SIZE;
         int lastNBB = N % BLOCK_SIZE;
         int lastKBB = K % BLOCK_SIZE;
-        int MB = lastMBB ? (M / BLOCK_SIZE) + 1 : (M / BLOCK_SIZE) ;
-        int NB = lastNBB ? (N / BLOCK_SIZE) + 1 : (N / BLOCK_SIZE) ;
-        int KB = lastKBB ? (K / BLOCK_SIZE) + 1 : (K / BLOCK_SIZE) ;
+        int MB      = lastMBB ? ( M / BLOCK_SIZE ) + 1 : ( M / BLOCK_SIZE );
+        int NB      = lastNBB ? ( N / BLOCK_SIZE ) + 1 : ( N / BLOCK_SIZE );
+        int KB      = lastKBB ? ( K / BLOCK_SIZE ) + 1 : ( K / BLOCK_SIZE );
 
         double *C_padding;
-        int m, n, k, m_blk, n_blk;
+        int     m, n, k, m_blk, n_blk;
         if ( bTransA && bTransB ) {
             for ( m = 0; m < MB; m++ ) {
                 m_blk = m < MB - 1 ? BLOCK_SIZE : lastMBB;
                 for ( n = 0; n < NB; n++ ) {
-                    n_blk = n < NB - 1 ? BLOCK_SIZE : lastNBB;
+                    n_blk     = n < NB - 1 ? BLOCK_SIZE : lastNBB;
                     C_padding = C + BLOCK_SIZE * AT( m, n, ldc );
-                    for(int l = 0; l < m_blk; ++l) {
-                        for(int c = 0; c < n_blk; ++c) {
-                        C_padding[AT(l, c, ldc)] *= beta;
+                    for ( int l = 0; l < m_blk; ++l ) {
+                        for ( int c = 0; c < n_blk; ++c ) {
+                            C_padding[AT( l, c, ldc )] *= beta;
                         }
                     }
                     for ( k = 0; k < KB; k++ ) {
@@ -273,11 +268,11 @@ namespace my_lapack {
             for ( m = 0; m < MB; m++ ) {
                 m_blk = m < MB - 1 ? BLOCK_SIZE : lastMBB;
                 for ( n = 0; n < NB; n++ ) {
-                    n_blk = n < NB - 1 ? BLOCK_SIZE : lastNBB;
+                    n_blk     = n < NB - 1 ? BLOCK_SIZE : lastNBB;
                     C_padding = C + BLOCK_SIZE * AT( m, n, ldc );
-                    for(int l = 0; l < m_blk; ++l) {
-                        for(int c = 0; c < n_blk; ++c) {
-                        C_padding[AT(l, c, ldc)] *= beta;
+                    for ( int l = 0; l < m_blk; ++l ) {
+                        for ( int c = 0; c < n_blk; ++c ) {
+                            C_padding[AT( l, c, ldc )] *= beta;
                         }
                     }
                     for ( k = 0; k < KB; k++ ) {
@@ -303,11 +298,11 @@ namespace my_lapack {
             for ( m = 0; m < MB; m++ ) {
                 m_blk = m < MB - 1 ? BLOCK_SIZE : lastMBB;
                 for ( n = 0; n < NB; n++ ) {
-                    n_blk = n < NB - 1 ? BLOCK_SIZE : lastNBB;
+                    n_blk     = n < NB - 1 ? BLOCK_SIZE : lastNBB;
                     C_padding = C + BLOCK_SIZE * AT( m, n, ldc );
-                    for(int l = 0; l < m_blk; ++l) {
-                        for(int c = 0; c < n_blk; ++c) {
-                        C_padding[AT(l, c, ldc)] *= beta;
+                    for ( int l = 0; l < m_blk; ++l ) {
+                        for ( int c = 0; c < n_blk; ++c ) {
+                            C_padding[AT( l, c, ldc )] *= beta;
                         }
                     }
                     for ( k = 0; k < KB; k++ ) {
@@ -333,11 +328,11 @@ namespace my_lapack {
             for ( m = 0; m < MB; m++ ) {
                 m_blk = m < MB - 1 ? BLOCK_SIZE : lastMBB;
                 for ( n = 0; n < NB; n++ ) {
-                    n_blk = n < NB - 1 ? BLOCK_SIZE : lastNBB;
+                    n_blk     = n < NB - 1 ? BLOCK_SIZE : lastNBB;
                     C_padding = C + BLOCK_SIZE * AT( m, n, ldc );
-                    for(int l = 0; l < m_blk; ++l) {
-                        for(int c = 0; c < n_blk; ++c) {
-                        C_padding[AT(l, c, ldc)] *= beta;
+                    for ( int l = 0; l < m_blk; ++l ) {
+                        for ( int c = 0; c < n_blk; ++c ) {
+                            C_padding[AT( l, c, ldc )] *= beta;
                         }
                     }
                     for ( k = 0; k < KB; k++ ) {
@@ -362,15 +357,15 @@ namespace my_lapack {
     }
 
     void my_dger_seq( CBLAS_ORDER   layout,
-                  int           M,
-                  int           N,
-                  double        alpha,
-                  const double *X,
-                  int           incX,
-                  const double *Y,
-                  int           incY,
-                  double *      A,
-                  int           lda )
+                      int           M,
+                      int           N,
+                      double        alpha,
+                      const double *X,
+                      int           incX,
+                      const double *Y,
+                      int           incY,
+                      double *      A,
+                      int           lda )
     {
         LAHPC_CHECK_PREDICATE( layout == CblasColMajor );
         LAHPC_CHECK_POSITIVE( M );
@@ -381,13 +376,10 @@ namespace my_lapack {
 
         if ( M == 0 || N == 0 || alpha == 0.0 ) { return; }
 
-        for ( int j = 0, yi = 0; j < N; ++j, yi += incY ) {
-            if ( Y[yi] == 0.0 ) { continue; }
-            else {
-                double tmp = alpha * Y[yi];
-                for ( int i = 0, xi = 0; i < N; ++i, xi += incX ) {
-                    A[j * lda + i] += tmp * X[xi];
-                }
+        for ( int i = 0; i < M; ++i ) {
+            double tmp = alpha * X[i * incX];
+            for ( int j = 0; j < N; ++j ) {
+                A[i + j * lda] += tmp * Y[j * incY];
             }
         }
     }
@@ -403,46 +395,37 @@ namespace my_lapack {
         int minMN = std::min( M, N );
 
         for ( int j = 0; j < minMN; ++j ) {
-            if ( j < M - 1 ) {
-                if ( std::abs( A[j * lda + j] ) > ( 2.0 * std::numeric_limits<double>::epsilon() ) ) {
-                    my_dscal_seq( M - j - 1, 1.0 / A[j * lda + j], A + j * lda + j + 1, 1 );
-                }
-                else {
-                    for ( int i = 0; i < M - j; ++i ) {
-                        A[j * lda + j + i] /= A[j * lda + j];
-                    }
-                }
-            }
+            if ( j < M - 1 ) { my_dscal( M - j - 1, 1.0 / A[j * lda + j], A + j * lda + j + 1, 1 ); }
             if ( j < minMN - 1 ) {
                 my_dger_seq( CblasColMajor,
-                         M - j - 1,
-                         N - j - 1,
-                         -1.0,
-                         A + j * lda + j + 1,
-                         1,
-                         A + ( j + 1 ) * lda + j,
-                         lda,
-                         A + ( j + 1 ) * lda + j + 1,
-                         lda );
+                             M - j - 1,
+                             N - j - 1,
+                             -1.0,
+                             A + j * lda + j + 1,
+                             1,
+                             A + ( j + 1 ) * lda + j,
+                             lda,
+                             A + ( j + 1 ) * lda + j + 1,
+                             lda );
             }
         }
     }
 
     void my_dtrsm_seq( CBLAS_ORDER     layout,
-                   CBLAS_SIDE      side,
-                   CBLAS_UPLO      uplo,
-                   CBLAS_TRANSPOSE transA,
-                   CBLAS_DIAG      diag,
-                   int             M,
-                   int             N,
-                   double          alpha,
-                   const double *  A,
-                   int             lda,
-                   double *        B,
-                   int             ldb )
+                       CBLAS_SIDE      side,
+                       CBLAS_UPLO      uplo,
+                       CBLAS_TRANSPOSE transA,
+                       CBLAS_DIAG      diag,
+                       int             M,
+                       int             N,
+                       double          alpha,
+                       const double *  A,
+                       int             lda,
+                       double *        B,
+                       int             ldb )
     {
         LAHPC_CHECK_PREDICATE( layout == CblasColMajor );
-        LAHPC_CHECK_PREDICATE( (transA == CblasTrans) || (transA == CblasNoTrans) );
+        LAHPC_CHECK_PREDICATE( ( transA == CblasTrans ) || ( transA == CblasNoTrans ) );
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE_STRICT( lda );
@@ -450,14 +433,12 @@ namespace my_lapack {
 
         double lambda;
 
-        if ( M == 0 || N == 0 ) { return; }
+        if ( M == 0 || N == 0 ) return;
 
         /* scale 0. */
         if ( alpha == 0. ) {
             for ( int j = 0; j < N; ++j ) {
-                for ( int i = 0; i < M; ++i ) {
-                    B[i + j * ldb] = 0.;
-                }
+                memset( B + j * ldb, 0, M * sizeof( double ) );
             }
             return;
         }
@@ -476,7 +457,7 @@ namespace my_lapack {
                             }
                             /* The diagonal is A[i + i*lda] (Otherwise : 1.) */
                             /* Relevent when solving A = L*U as we use A to store
-                            both L and U, so diag(L) is full of 1. . */
+                               both L and U, so diag(L) is full of 1. . */
                             if ( diag == CblasNonUnit ) lambda /= A[i * ( 1 + lda )];
                             B[i + j * ldb] = lambda;
                         }
@@ -497,18 +478,19 @@ namespace my_lapack {
                     }
                 }
             }
-            /* A is triangular Upper */
+            /* B = alpha * inv(A) * B */
             else {
+                /* A is triangular Upper */
                 if ( uplo == CblasUpper ) {
                     for ( int j = 0; j < N; ++j ) {
                         if ( alpha != 1. ) {
-                            for ( int i = 0; i < M; ++i ) {
+                            for ( int i = 0; i < M; i++ ) {
                                 B[i + j * ldb] *= alpha;
                             }
                         }
                         for ( int k = M - 1; k >= 0; --k ) {
                             if ( B[k + j * ldb] ) {
-                                if ( diag != CblasNonUnit ) B[k + j * ldb] /= A[k * ( 1 + lda )];
+                                if ( diag == CblasNonUnit ) B[k + j * ldb] /= A[k * ( 1 + lda )];
                                 lambda = B[k + j * ldb];
                                 for ( int i = 0; i < k; ++i ) {
                                     B[i + j * ldb] -= lambda * A[i + k * lda];
@@ -520,15 +502,15 @@ namespace my_lapack {
                 /* A is lower triangular */
                 else {
                     for ( int j = 0; j < N; ++j ) {
-                        for ( int i = 0; i < M; ++i ) {
+                        for ( int i = 0; i < M; i++ ) {
                             B[i + j * ldb] *= alpha;
                         }
                         for ( int k = 0; k < M; ++k ) {
-                            if ( B[k + j * ldb] ) {
-                                if ( diag != CblasNonUnit ) B[k + j * ldb] /= A[k * ( 1 + lda )];
+                            if ( B[k + j * ldb] != 0. ) {
+                                if ( diag == CblasNonUnit ) B[k + j * ldb] /= A[k * ( 1 + lda )];
                                 lambda = B[k + j * ldb];
-                                for ( int i = k + 1; k < M; ++k ) {
-                                    B[k + j * ldb] -= lambda * A[i + k * lda];
+                                for ( int i = k + 1; i < M; ++i ) {
+                                    B[i + j * ldb] -= lambda * A[i + k * lda];
                                 }
                             }
                         }
@@ -536,19 +518,22 @@ namespace my_lapack {
                 }
             }
         }
+        /* Right side : X * op( A ) = alpha*B */
         else {
-            if ( transA == CblasTrans ) {
+            /* X = alpha * B * inv(A) */
+            if ( transA == CblasNoTrans ) {
+                /* A is upper triangular */
                 if ( uplo == CblasUpper ) {
-                    for ( int j = 0; j < N; ++j ) {
+                    for ( int j = 0; j < N; j++ ) {
                         if ( alpha != 1.0 ) {
                             for ( int i = 0; i < M; ++i ) {
                                 B[i + j * ldb] *= alpha;
                             }
                         }
-                        for ( int k = 0; k < j; ++k ) {
+                        for ( int k = 0; k < j - 1; k++ ) {
                             if ( A[k + j * lda] != 0.0 ) {
                                 for ( int i = 0; i < M; i++ ) {
-                                    lambda -= A[k + j * lda] * B[i + k * ldb];
+                                    B[i + j * ldb] -= A[k + j * lda] * B[i + k * ldb];
                                 }
                             }
                         }
@@ -560,6 +545,7 @@ namespace my_lapack {
                         }
                     }
                 }
+                /* A is lower triangular */
                 else {
                     for ( int j = N - 1; j >= 0; --j ) {
                         if ( alpha != 1.0 ) {
@@ -583,12 +569,14 @@ namespace my_lapack {
                     }
                 }
             }
+            /* X = alpha * B * inv(A ** t) */
             else {
+                /* A is upper triangular */
                 if ( uplo == CblasUpper ) {
                     for ( int k = N - 1; k >= 0; --k ) {
                         if ( diag == CblasNonUnit ) {
                             lambda = 1.0 / A[k + k * lda];
-                            for ( int i = 0; i < M; ++i ) {
+                            for ( int i = 0; i < M; i++ ) {
                                 B[i + k * ldb] = lambda * B[i + k * ldb];
                             }
                         }
@@ -601,12 +589,13 @@ namespace my_lapack {
                             }
                         }
                         if ( alpha != 1.0 ) {
-                            for ( int i = 0; i < M; ++i ) {
+                            for ( int i = 0; i < M; i++ ) {
                                 B[i + k * ldb] = alpha * B[i + k * ldb];
                             }
                         }
                     }
                 }
+                /* A is lower triangular */
                 else {
                     for ( int k = 0; k < N; ++k ) {
                         if ( diag == CblasNonUnit ) {
@@ -615,10 +604,10 @@ namespace my_lapack {
                                 B[i + k * ldb] = lambda * B[i + k * ldb];
                             }
                         }
-                        for ( int j = k + 1; j < N; ++j ) {
+                        for ( int j = k + 1; j < N; j++ ) {
                             if ( A[j + k * lda] != 0.0 ) {
                                 lambda = A[j + k * lda];
-                                for ( int i = 0; i < M; ++i ) {
+                                for ( int i = 0; i < M; i++ ) {
                                     B[i + j * ldb] -= lambda * B[i + k * ldb];
                                 }
                             }
@@ -637,50 +626,57 @@ namespace my_lapack {
     void my_dgetrf_seq( CBLAS_ORDER order, int M, int N, double *A, int lda )
     {
         LAHPC_CHECK_PREDICATE( order == CblasColMajor );
-        LAHPC_CHECK_POSITIVE_STRICT( M );
-        LAHPC_CHECK_POSITIVE_STRICT( N );
+        LAHPC_CHECK_POSITIVE( M );
+        LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE_STRICT( lda );
 
         if ( M == 0 || N == 0 ) { return; }
 
-        const int nb    = BLOCK_SIZE;
+        const int nb    = 10;
         int       minMN = std::min( M, N );
 
-        if ( nb >= minMN ) { my_dgetf2_seq( CblasColMajor, M, N, A, lda ); }
+        if ( nb <= 1 || nb >= minMN ) {
+            my_dgetf2_seq( order, M, N, A, lda );
+            return;
+        }
 
         for ( int j = 0; j < minMN; j += nb ) {
             int jb = std::min( minMN - j, nb );
-            my_dgetf2_seq( CblasColMajor, M - j, jb, A + j * lda + j, lda );
-            my_dtrsm_seq( order,
-                      CBLAS_SIDE::CblasLeft,
-                      CBLAS_UPLO::CblasLower,
-                      CBLAS_TRANSPOSE::CblasNoTrans,
-                      CblasUnit,
-                      jb,
-                      N - j - jb,
-                      1.0,
-                      A + j * lda + j,
-                      lda,
-                      A + ( j + jb ) * lda + j,
-                      lda );
-            if ( j + jb <= M ) {
-                my_dgemm_seq( CblasColMajor,
-                          CblasNoTrans,
-                          CblasNoTrans,
-                          M - j - jb,
-                          N - j - jb,
-                          jb,
-                          -1.0,
-                          A + j * lda + j + jb,
-                          lda,
-                          A + ( j + jb ) * lda + j,
-                          lda,
-                          1.0,
-                          A + ( j + jb ) * lda + j + jb,
-                          lda );
+            my_dgetf2_seq( order, M - j, jb, A + j * lda + j, lda );
+            if ( j + jb < N ) {
+                my_dtrsm_seq( order,
+                              CblasLeft,
+                              CblasLower,
+                              CblasNoTrans,
+                              CblasUnit,
+                              jb,
+                              N - j - jb,
+                              1.0,
+                              A + j * lda + j,
+                              lda,
+                              A + ( j + jb ) * lda + j,
+                              lda );
+
+                if ( j + jb < M ) {
+                    my_dgemm_seq( CblasColMajor,
+                                  CblasNoTrans,
+                                  CblasNoTrans,
+                                  M - j - jb,
+                                  N - j - jb,
+                                  jb,
+                                  -1.0,
+                                  A + j * lda + j + jb,
+                                  lda,
+                                  A + ( j + jb ) * lda + j,
+                                  lda,
+                                  1.0,
+                                  A + ( j + jb ) * lda + j + jb,
+                                  lda );
+                }
             }
         }
     }
+
     int my_idamax_seq( int N, double *dx, int incX )
     {
         LAHPC_CHECK_POSITIVE_STRICT( N );
@@ -741,8 +737,3 @@ namespace my_lapack {
         }
     }
 } // namespace my_lapack
-
-
-#ifdef __cplusplus
-} // extern "C"
-#endif

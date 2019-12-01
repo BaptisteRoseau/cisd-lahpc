@@ -84,13 +84,22 @@ set_target_properties(
     PROPERTIES CXX_STANDARD 11
 )
 
-find_library(
-    libalgonum
-    "libalgonum.so"
-    HINTS
-        "${PROJECT_SOURCE_DIR}/algonum/lib/"
-)
-message(STATUS ${libalgonum})
+if ( UNIX )
+
+    find_library(
+        libalgonum
+        "libalgonum.so"
+        HINTS
+            "${PROJECT_SOURCE_DIR}/algonum/lib/"
+    )
+
+    message(STATUS ${libalgonum})
+
+else()
+    
+    set(libalgonum)
+
+endif()
 
 target_link_libraries(
     "test_algonum_my_lapack_all"
@@ -113,5 +122,6 @@ make("driver" "my_lapack_omp")
 make("test_valid" "my_lapack_seq")
 make("test_valid" "my_lapack_omp")
 
-make("test_perf" "my_lapack_all")
-
+if ( UNIX )
+    make("test_perf" "my_lapack_all")
+endif()

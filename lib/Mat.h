@@ -1,5 +1,7 @@
 #pragma once
 
+#include <limits>
+
 namespace my_lapack {
 
     class Mat {
@@ -9,6 +11,7 @@ namespace my_lapack {
         Mat( int m, int n );
         Mat( int m, int n, double value );
         Mat( const Mat &other );
+        void reshape( int m, int n, double value );
 
         Mat &operator=( const Mat &other );
         bool operator==( const Mat &other );
@@ -19,12 +22,13 @@ namespace my_lapack {
         double *       col( int j );
         inline int     dimX() { return m; }
         inline int     dimY() { return n; }
-        void reshape(int m, int n, double value);
+        inline int     numRow() { return m; }
+        inline int     numCol() { return n; }
         inline int     ld() { return m; }
-        void print(int precision = 6);
-        int equals(const Mat &m);
-        int containsOnly(const double d);
-        void fill(double d);
+        void           print( int precision = 6 );
+        bool           equals( const Mat &m, double epsilon = std::numeric_limits<double>::epsilon() );
+        bool           containsOnly( const double d );
+        void           fill( double d );
 
       private:
         double *storage;
