@@ -5,26 +5,27 @@
 
 using namespace my_lapack;
 
+#define LAHPC_TESTALL( fct_t, testall_func, func ) \
+    printf( " --- " #func ":\n" );                 \
+    testall_func( static_cast<fct_t>( func ) );    \
+    printf( "\n" );
+
 int main()
 {
-    printf( "----------- TEST ALGONUM -----------\n" );
+    printf( "----------- TEST ALGONUM -----------\n\n" );
 
     // M.Faverge's tests
-    printf( "DGEMM SCAL SEQUENTIAL:\n" );
-    testall_dgemm( static_cast<dgemm_fct_t>( my_dgemm_scal_seq ) );
+    LAHPC_TESTALL( dgemm_fct_t, testall_dgemm, my_dgemm_scal_seq );
 
-    printf( "DGEMM SCAL OPENMP:\n" );
-    testall_dgemm( static_cast<dgemm_fct_t>( my_dgemm_scal_openmp ) );
+    LAHPC_TESTALL( dgemm_fct_t, testall_dgemm, my_dgemm_scal_openmp );
 
-    printf( "DGEMM SEQUENTIAL:\n" );
-    testall_dgemm( static_cast<dgemm_fct_t>( my_dgemm_seq ) );
+    LAHPC_TESTALL( dgemm_fct_t, testall_dgemm, my_dgemm_seq );
 
-    printf( "DGEMM OPENMP:\n" );
-    testall_dgemm( static_cast<dgemm_fct_t>( my_dgemm_openmp ) );
+    LAHPC_TESTALL( dgemm_fct_t, testall_dgemm, my_dgemm_openmp );
 
-    printf( "DGETRF SEQUENTIAL:\n" );
-    testone_dgetrf( static_cast<dgetrf_fct_t>( my_dgetrf_seq ), 100, 100, 0 );
-    testall_dgetrf( static_cast<dgetrf_fct_t>( my_dgetrf_seq ) );
+    LAHPC_TESTALL( dgetrf_fct_t, testall_dgetrf, my_dgetf2_seq );
+
+    LAHPC_TESTALL( dgetrf_fct_t, testall_dgetrf, my_dgetrf_seq );
 
     /*printf( "DGETRF OPENMP:\n" );
     testall_dgetrf( (dgetrf_fct_t) my_dgetrf_openmp );*/
@@ -33,5 +34,5 @@ int main()
     printf( "DGEMM TILED OPENMP:\n" );
     testall_dgemm_tiled( (dgemm_tiled_fct_t) tested_dgemm ); */
 
-    return 1;
+    return 0;
 }

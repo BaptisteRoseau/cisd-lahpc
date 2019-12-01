@@ -10,16 +10,12 @@
 #include <omp.h>
 #include <utility>
 
-#define _LAHPC_BLOCK_SIZE 11 //128
+#define _LAHPC_BLOCK_SIZE 11 // 128
 static const int BLOCK_SIZE = _LAHPC_BLOCK_SIZE;
 
 #define AT_RM( i, j, width ) ( ( i ) * ( width ) + ( j ) )
 #define AT( i, j, heigth ) ( ( j ) * ( heigth ) + ( i ) )
 #define min_macro( a, b ) ( ( a ) < ( b ) ? ( a ) : ( b ) )
-
-#ifdef __cplusplus
-extern "C"{
-#endif
 
 // TODO: simd if incX == 1
 
@@ -60,24 +56,24 @@ namespace my_lapack {
     }
 
     void my_dgemv_openmp( CBLAS_ORDER     layout,
-                   CBLAS_TRANSPOSE TransA,
-                   int             M,
-                   int             N,
-                   double          alpha,
-                   const double *  A,
-                   int             lda,
-                   const double *  X,
-                   int             incX,
-                   double          beta,
-                   double *        Y,
-                   const int       incY )
+                          CBLAS_TRANSPOSE TransA,
+                          int             M,
+                          int             N,
+                          double          alpha,
+                          const double *  A,
+                          int             lda,
+                          const double *  X,
+                          int             incX,
+                          double          beta,
+                          double *        Y,
+                          const int       incY )
     {
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE_STRICT( incX );
         LAHPC_CHECK_POSITIVE_STRICT( incY );
         LAHPC_CHECK_PREDICATE( layout == CblasColMajor );
-        LAHPC_CHECK_PREDICATE( (TransA == CblasTrans) || (TransA == CblasNoTrans) );
+        LAHPC_CHECK_PREDICATE( ( TransA == CblasTrans ) || ( TransA == CblasNoTrans ) );
 
         if ( M == 0 || N == 0 || ( alpha == 0.0 && beta == 1.0 ) ) return;
 
@@ -126,23 +122,23 @@ namespace my_lapack {
 
     // TODO: reduce on linear add
     void my_dgemm_scal_openmp( CBLAS_ORDER     Order,
-                            CBLAS_TRANSPOSE TransA,
-                            CBLAS_TRANSPOSE TransB,
-                            int             M,
-                            int             N,
-                            int             K,
-                            double          alpha,
-                            const double *  A,
-                            int             lda,
-                            const double *  B,
-                            int             ldb,
-                            double          beta,
-                            double *        C,
-                            int             ldc )
+                               CBLAS_TRANSPOSE TransA,
+                               CBLAS_TRANSPOSE TransB,
+                               int             M,
+                               int             N,
+                               int             K,
+                               double          alpha,
+                               const double *  A,
+                               int             lda,
+                               const double *  B,
+                               int             ldb,
+                               double          beta,
+                               double *        C,
+                               int             ldc )
     {
         LAHPC_CHECK_PREDICATE( Order == CblasColMajor );
-        LAHPC_CHECK_PREDICATE( (TransA == CblasTrans) || (TransA == CblasNoTrans) );
-        LAHPC_CHECK_PREDICATE( (TransB == CblasTrans) || (TransB == CblasNoTrans) );
+        LAHPC_CHECK_PREDICATE( ( TransA == CblasTrans ) || ( TransA == CblasNoTrans ) );
+        LAHPC_CHECK_PREDICATE( ( TransB == CblasTrans ) || ( TransB == CblasNoTrans ) );
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE( K );
@@ -153,7 +149,7 @@ namespace my_lapack {
         // Early return
         if ( alpha == 0. ) {
             if ( beta != 1. ) {
-                int i, len = M*N;
+                int i, len = M * N;
 #pragma omp parallel for simd
                 for ( i = 0; i < len; i++ ) {
                     C[i] *= beta;
@@ -180,7 +176,7 @@ namespace my_lapack {
             }
         }
         else if ( !bTransA && bTransB ) {
-#pragma omp parallel for default( shared ) collapse( 2 ) private( k ) 
+#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
@@ -215,23 +211,23 @@ namespace my_lapack {
     }
 
     void my_dgemm_openmp( CBLAS_ORDER     Order,
-                   CBLAS_TRANSPOSE TransA,
-                   CBLAS_TRANSPOSE TransB,
-                   int             M,
-                   int             N,
-                   int             K,
-                   double          alpha,
-                   const double *  A,
-                   int             lda,
-                   const double *  B,
-                   int             ldb,
-                   double          beta,
-                   double *        C,
-                   int             ldc )
+                          CBLAS_TRANSPOSE TransA,
+                          CBLAS_TRANSPOSE TransB,
+                          int             M,
+                          int             N,
+                          int             K,
+                          double          alpha,
+                          const double *  A,
+                          int             lda,
+                          const double *  B,
+                          int             ldb,
+                          double          beta,
+                          double *        C,
+                          int             ldc )
     {
         LAHPC_CHECK_PREDICATE( Order == CblasColMajor );
-        LAHPC_CHECK_PREDICATE( (TransA == CblasTrans) || (TransA == CblasNoTrans) );
-        LAHPC_CHECK_PREDICATE( (TransB == CblasTrans) || (TransB == CblasNoTrans) );
+        LAHPC_CHECK_PREDICATE( ( TransA == CblasTrans ) || ( TransA == CblasNoTrans ) );
+        LAHPC_CHECK_PREDICATE( ( TransB == CblasTrans ) || ( TransB == CblasNoTrans ) );
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE( K );
@@ -253,144 +249,144 @@ namespace my_lapack {
         int lastMB = M % BLOCK_SIZE;
         int lastNB = N % BLOCK_SIZE;
         int lastKB = K % BLOCK_SIZE;
-        int MB = lastMB ? (M / BLOCK_SIZE) + 1 : (M / BLOCK_SIZE) ;
-        int NB = lastNB ? (N / BLOCK_SIZE) + 1 : (N / BLOCK_SIZE) ;
-        int KB = lastKB ? (K / BLOCK_SIZE) + 1 : (K / BLOCK_SIZE) ;
+        int MB     = lastMB ? ( M / BLOCK_SIZE ) + 1 : ( M / BLOCK_SIZE );
+        int NB     = lastNB ? ( N / BLOCK_SIZE ) + 1 : ( N / BLOCK_SIZE );
+        int KB     = lastKB ? ( K / BLOCK_SIZE ) + 1 : ( K / BLOCK_SIZE );
 
         double *C_padding;
-        int m, n, k, m_blk, n_blk;
+        int     m, n, k, m_blk, n_blk;
         if ( bTransA && bTransB ) {
-            #pragma omp parallel for default(shared) private(m, n, k, m_blk, n_blk, C_padding)
+#pragma omp parallel for default( shared ) private( m, n, k, m_blk, n_blk, C_padding )
             for ( m = 0; m < MB; m++ ) {
                 m_blk = m < MB - 1 ? BLOCK_SIZE : lastMB;
-                #pragma omp parallel for default(shared) private(n, k, n_blk, C_padding)
+#pragma omp parallel for default( shared ) private( n, k, n_blk, C_padding )
                 for ( n = 0; n < NB; n++ ) {
-                    n_blk = n < NB - 1 ? BLOCK_SIZE : lastNB;
+                    n_blk     = n < NB - 1 ? BLOCK_SIZE : lastNB;
                     C_padding = C + BLOCK_SIZE * AT( m, n, ldc );
-                    #pragma omp parallel for default(shared)
-                    for(int l = 0; l < m_blk; ++l) {
-                        for(int c = 0; c < n_blk; ++c) {
-                        C_padding[AT(l, c, ldc)] *= beta;
+#pragma omp parallel for default( shared )
+                    for ( int l = 0; l < m_blk; ++l ) {
+                        for ( int c = 0; c < n_blk; ++c ) {
+                            C_padding[AT( l, c, ldc )] *= beta;
                         }
                     }
-                    #pragma omp parallel for default(shared)
+#pragma omp parallel for default( shared )
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_openmp( Order,
-                                           TransA,
-                                           TransB,
-                                           m_blk,
-                                           n_blk,
-                                           k < KB - 1 ? BLOCK_SIZE : lastKB,
-                                           alpha,
-                                           A + BLOCK_SIZE * AT( k, m, lda ),
-                                           lda,
-                                           B + BLOCK_SIZE * AT( n, k, ldb ),
-                                           ldb,
-                                           1.,
-                                           C_padding,
-                                           ldc );
+                                              TransA,
+                                              TransB,
+                                              m_blk,
+                                              n_blk,
+                                              k < KB - 1 ? BLOCK_SIZE : lastKB,
+                                              alpha,
+                                              A + BLOCK_SIZE * AT( k, m, lda ),
+                                              lda,
+                                              B + BLOCK_SIZE * AT( n, k, ldb ),
+                                              ldb,
+                                              1.,
+                                              C_padding,
+                                              ldc );
                     }
                 }
             }
         }
         else if ( !bTransA && bTransB ) {
-            #pragma omp parallel for default(shared) private(m, n, k, m_blk, n_blk, C_padding)
+#pragma omp parallel for default( shared ) private( m, n, k, m_blk, n_blk, C_padding )
             for ( m = 0; m < MB; m++ ) {
                 m_blk = m < MB - 1 ? BLOCK_SIZE : lastMB;
-                #pragma omp parallel for default(shared) private(n, k, n_blk, C_padding)
+#pragma omp parallel for default( shared ) private( n, k, n_blk, C_padding )
                 for ( n = 0; n < NB; n++ ) {
-                    n_blk = n < NB - 1 ? BLOCK_SIZE : lastNB;
+                    n_blk     = n < NB - 1 ? BLOCK_SIZE : lastNB;
                     C_padding = C + BLOCK_SIZE * AT( m, n, ldc );
-                    #pragma omp parallel for default(shared)
-                    for(int l = 0; l < m_blk; ++l) {
-                        for(int c = 0; c < n_blk; ++c) {
-                        C_padding[AT(l, c, ldc)] *= beta;
+#pragma omp parallel for default( shared )
+                    for ( int l = 0; l < m_blk; ++l ) {
+                        for ( int c = 0; c < n_blk; ++c ) {
+                            C_padding[AT( l, c, ldc )] *= beta;
                         }
                     }
-                    #pragma omp parallel for default(shared)
+#pragma omp parallel for default( shared )
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_openmp( Order,
-                                           TransA,
-                                           TransB,
-                                           m_blk,
-                                           n_blk,
-                                           k < KB - 1 ? BLOCK_SIZE : lastKB,
-                                           alpha,
-                                           A + BLOCK_SIZE * AT( m, k, lda ),
-                                           lda,
-                                           B + BLOCK_SIZE * AT( n, k, ldb ),
-                                           ldb,
-                                           1.,
-                                           C_padding,
-                                           ldc );
+                                              TransA,
+                                              TransB,
+                                              m_blk,
+                                              n_blk,
+                                              k < KB - 1 ? BLOCK_SIZE : lastKB,
+                                              alpha,
+                                              A + BLOCK_SIZE * AT( m, k, lda ),
+                                              lda,
+                                              B + BLOCK_SIZE * AT( n, k, ldb ),
+                                              ldb,
+                                              1.,
+                                              C_padding,
+                                              ldc );
                     }
                 }
             }
         }
         else if ( bTransA && !bTransB ) {
-            #pragma omp parallel for default(shared) private(m, n, k, m_blk, n_blk, C_padding)
+#pragma omp parallel for default( shared ) private( m, n, k, m_blk, n_blk, C_padding )
             for ( m = 0; m < MB; m++ ) {
                 m_blk = m < MB - 1 ? BLOCK_SIZE : lastMB;
-                #pragma omp parallel for default(shared) private(n, k, n_blk, C_padding)
+#pragma omp parallel for default( shared ) private( n, k, n_blk, C_padding )
                 for ( n = 0; n < NB; n++ ) {
-                    n_blk = n < NB - 1 ? BLOCK_SIZE : lastNB;
+                    n_blk     = n < NB - 1 ? BLOCK_SIZE : lastNB;
                     C_padding = C + BLOCK_SIZE * AT( m, n, ldc );
-                    #pragma omp parallel for default(shared)
-                    for(int l = 0; l < m_blk; ++l) {
-                        for(int c = 0; c < n_blk; ++c) {
-                        C_padding[AT(l, c, ldc)] *= beta;
+#pragma omp parallel for default( shared )
+                    for ( int l = 0; l < m_blk; ++l ) {
+                        for ( int c = 0; c < n_blk; ++c ) {
+                            C_padding[AT( l, c, ldc )] *= beta;
                         }
                     }
-                    #pragma omp parallel for default(shared)
+#pragma omp parallel for default( shared )
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_openmp( Order,
-                                           TransA,
-                                           TransB,
-                                           m_blk,
-                                           n_blk,
-                                           k < KB - 1 ? BLOCK_SIZE : lastKB,
-                                           alpha,
-                                           A + BLOCK_SIZE * AT( k, m, lda ),
-                                           lda,
-                                           B + BLOCK_SIZE * AT( k, n, ldb ),
-                                           ldb,
-                                           1.,
-                                           C_padding,
-                                           ldc );
+                                              TransA,
+                                              TransB,
+                                              m_blk,
+                                              n_blk,
+                                              k < KB - 1 ? BLOCK_SIZE : lastKB,
+                                              alpha,
+                                              A + BLOCK_SIZE * AT( k, m, lda ),
+                                              lda,
+                                              B + BLOCK_SIZE * AT( k, n, ldb ),
+                                              ldb,
+                                              1.,
+                                              C_padding,
+                                              ldc );
                     }
                 }
             }
         }
         else {
-            #pragma omp parallel for default(shared) private(m, n, k, m_blk, n_blk, C_padding)
+#pragma omp parallel for default( shared ) private( m, n, k, m_blk, n_blk, C_padding )
             for ( m = 0; m < MB; m++ ) {
                 m_blk = m < MB - 1 ? BLOCK_SIZE : lastMB;
-                #pragma omp parallel for default(shared) private(n, k, n_blk, C_padding)
+#pragma omp parallel for default( shared ) private( n, k, n_blk, C_padding )
                 for ( n = 0; n < NB; n++ ) {
-                    n_blk = n < NB - 1 ? BLOCK_SIZE : lastNB;
+                    n_blk     = n < NB - 1 ? BLOCK_SIZE : lastNB;
                     C_padding = C + BLOCK_SIZE * AT( m, n, ldc );
-                    #pragma omp parallel for default(shared)
-                    for(int l = 0; l < m_blk; ++l) {
-                        for(int c = 0; c < n_blk; ++c) {
-                        C_padding[AT(l, c, ldc)] *= beta;
+#pragma omp parallel for default( shared )
+                    for ( int l = 0; l < m_blk; ++l ) {
+                        for ( int c = 0; c < n_blk; ++c ) {
+                            C_padding[AT( l, c, ldc )] *= beta;
                         }
                     }
-                    #pragma omp parallel for default(shared)
+#pragma omp parallel for default( shared )
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_openmp( Order,
-                                           TransA,
-                                           TransB,
-                                           m_blk,
-                                           n_blk,
-                                           k < KB - 1 ? BLOCK_SIZE : lastKB,
-                                           alpha,
-                                           A + BLOCK_SIZE * AT( m, k, lda ),
-                                           lda,
-                                           B + BLOCK_SIZE * AT( k, n, ldb ),
-                                           ldb,
-                                           1.,
-                                           C_padding,
-                                           ldc );
+                                              TransA,
+                                              TransB,
+                                              m_blk,
+                                              n_blk,
+                                              k < KB - 1 ? BLOCK_SIZE : lastKB,
+                                              alpha,
+                                              A + BLOCK_SIZE * AT( m, k, lda ),
+                                              lda,
+                                              B + BLOCK_SIZE * AT( k, n, ldb ),
+                                              ldb,
+                                              1.,
+                                              C_padding,
+                                              ldc );
                     }
                 }
             }
@@ -398,15 +394,15 @@ namespace my_lapack {
     }
 
     void my_dger_openmp( CBLAS_ORDER   layout,
-                  int           M,
-                  int           N,
-                  double        alpha,
-                  const double *X,
-                  int           incX,
-                  const double *Y,
-                  int           incY,
-                  double *      A,
-                  int           lda )
+                         int           M,
+                         int           N,
+                         double        alpha,
+                         const double *X,
+                         int           incX,
+                         const double *Y,
+                         int           incY,
+                         double *      A,
+                         int           lda )
     {
         LAHPC_CHECK_PREDICATE( layout == CblasColMajor );
         LAHPC_CHECK_POSITIVE( M );
@@ -417,13 +413,12 @@ namespace my_lapack {
 
         if ( M == 0 || N == 0 || alpha == 0.0 ) { return; }
 
-#pragma omp parallel for default( shared )
+#pragma omp parallel for default( none ) shared( Y, X, A, M, N, alpha, incX, incY, lda )
         for ( int j = 0; j < N; ++j ) {
             int yi = j * incY;
             if ( Y[yi] == 0.0 ) { continue; }
             else {
                 double tmp = alpha * Y[yi];
-#pragma omp parallel for
                 for ( int i = 0; i < N; ++i ) {
                     A[j * lda + i] += tmp * X[i * incX];
                 }
@@ -455,34 +450,34 @@ namespace my_lapack {
             }
             if ( j < minMN - 1 ) {
                 my_dger_openmp( CblasColMajor,
-                         M - j - 1,
-                         N - j - 1,
-                         -1.0,
-                         A + j * lda + j + 1,
-                         1,
-                         A + ( j + 1 ) * lda + j,
-                         lda,
-                         A + ( j + 1 ) * lda + j + 1,
-                         lda );
+                                M - j - 1,
+                                N - j - 1,
+                                -1.0,
+                                A + j * lda + j + 1,
+                                1,
+                                A + ( j + 1 ) * lda + j,
+                                lda,
+                                A + ( j + 1 ) * lda + j + 1,
+                                lda );
             }
         }
     }
 
     void my_dtrsm_openmp( CBLAS_ORDER     layout,
-                   CBLAS_SIDE      side,
-                   CBLAS_UPLO      uplo,
-                   CBLAS_TRANSPOSE transA,
-                   CBLAS_DIAG      diag,
-                   int             M,
-                   int             N,
-                   double          alpha,
-                   const double *  A,
-                   int             lda,
-                   double *        B,
-                   int             ldb )
+                          CBLAS_SIDE      side,
+                          CBLAS_UPLO      uplo,
+                          CBLAS_TRANSPOSE transA,
+                          CBLAS_DIAG      diag,
+                          int             M,
+                          int             N,
+                          double          alpha,
+                          const double *  A,
+                          int             lda,
+                          double *        B,
+                          int             ldb )
     {
         LAHPC_CHECK_PREDICATE( layout == CblasColMajor );
-        LAHPC_CHECK_PREDICATE( (transA == CblasTrans) || (transA == CblasNoTrans) );
+        LAHPC_CHECK_PREDICATE( ( transA == CblasTrans ) || ( transA == CblasNoTrans ) );
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_POSITIVE_STRICT( lda );
@@ -706,36 +701,36 @@ namespace my_lapack {
             int jb = std::min( minMN - j, nb );
             my_dgetf2_openmp( CblasColMajor, M - j, jb, A + j * lda + j, lda );
             my_dtrsm_openmp( order,
-                      CBLAS_SIDE::CblasLeft,
-                      CBLAS_UPLO::CblasLower,
-                      CBLAS_TRANSPOSE::CblasNoTrans,
-                      CblasUnit,
-                      jb,
-                      N - j - jb,
-                      1.0,
-                      A + j * lda + j,
-                      lda,
-                      A + ( j + jb ) * lda + j,
-                      lda );
+                             CBLAS_SIDE::CblasLeft,
+                             CBLAS_UPLO::CblasLower,
+                             CBLAS_TRANSPOSE::CblasNoTrans,
+                             CblasUnit,
+                             jb,
+                             N - j - jb,
+                             1.0,
+                             A + j * lda + j,
+                             lda,
+                             A + ( j + jb ) * lda + j,
+                             lda );
             if ( j + jb <= M ) {
                 my_dgemm_openmp( CblasColMajor,
-                          CblasNoTrans,
-                          CblasNoTrans,
-                          M - j - jb,
-                          N - j - jb,
-                          jb,
-                          -1.0,
-                          A + j * lda + j + jb,
-                          lda,
-                          A + ( j + jb ) * lda + j,
-                          lda,
-                          1.0,
-                          A + ( j + jb ) * lda + j + jb,
-                          lda );
+                                 CblasNoTrans,
+                                 CblasNoTrans,
+                                 M - j - jb,
+                                 N - j - jb,
+                                 jb,
+                                 -1.0,
+                                 A + j * lda + j + jb,
+                                 lda,
+                                 A + ( j + jb ) * lda + j,
+                                 lda,
+                                 1.0,
+                                 A + ( j + jb ) * lda + j + jb,
+                                 lda );
             }
         }
     }
-    
+
     int my_idamax_openmp( int N, double *dx, int incX )
     {
         LAHPC_CHECK_POSITIVE_STRICT( N );
@@ -796,22 +791,16 @@ namespace my_lapack {
         }
     }
 
+    // TODO: Implement these ones
+    /* void my_dgemm_tiled_openmp( CBLAS_LAYOUT layout,
+                                CBLAS_TRANSPOSE TransA, CBLAS_TRANSPOSE TransB,
+                                int M, int N, int K, int b,
+                                double alpha, const double **A,
+                                              const double **B,
+                                double beta,        double **C );
 
-
-// TODO: Implement these ones
-/* void my_dgemm_tiled_openmp( CBLAS_LAYOUT layout,
-                            CBLAS_TRANSPOSE TransA, CBLAS_TRANSPOSE TransB,
-                            int M, int N, int K, int b,
-                            double alpha, const double **A,
-                                          const double **B,
-                            double beta,        double **C );
-
-void my_dgetrf_tiled_openmp( CBLAS_LAYOUT layout,
-                             int m, int n, int b, double **a );
- */
+    void my_dgetrf_tiled_openmp( CBLAS_LAYOUT layout,
+                                 int m, int n, int b, double **a );
+     */
 
 } // namespace my_lapack
-
-#ifdef __cplusplus
-}
-#endif
