@@ -10,7 +10,7 @@
 #include <omp.h>
 #include <utility>
 
-#define _LAHPC_BLOCK_SIZE 11 // 128
+#define _LAHPC_BLOCK_SIZE 128
 static const int BLOCK_SIZE = _LAHPC_BLOCK_SIZE;
 
 #define AT_RM( i, j, width ) ( ( i ) * ( width ) + ( j ) )
@@ -187,7 +187,7 @@ namespace my_lapack {
             }
         }
         else if ( bTransA && !bTransB ) {
-#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
+#pragma omp parallel for default( shared ) collapse( 2 ) private( k ) schedule(dynamic)
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;

@@ -114,7 +114,7 @@ int test_dgemm_rectangle()
             }
             my_dgemm( CblasColMajor,
                       transA ? CblasTrans : CblasNoTrans,
-                      transA ? CblasTrans : CblasNoTrans,
+                      transB ? CblasTrans : CblasNoTrans,
                       AdimX,
                       BdimY,
                       AdimY,
