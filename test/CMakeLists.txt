@@ -116,11 +116,15 @@ target_link_libraries(
 ############################################################
 
 
-make("driver" "my_lapack_seq")
-make("driver" "my_lapack_omp")
+#make("driver" "my_lapack_seq")
+#make("driver" "my_lapack_omp")
+#
+#make("test_valid" "my_lapack_seq")
+#make("test_valid" "my_lapack_omp")
 
-make("test_valid" "my_lapack_seq")
-make("test_valid" "my_lapack_omp")
+make("driver" "my_lapack_all")
+
+make("test_valid" "my_lapack_all")
 
 if ( UNIX )
     make("test_perf" "my_lapack_all")

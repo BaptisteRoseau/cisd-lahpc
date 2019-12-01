@@ -148,8 +148,8 @@ int test_dgetrf()
 
     const int size = 20;
 
-    Mat L = MatRandLi( size );
-    Mat U = MatRandUi( size );
+    Mat L = MatRandLi( size );// Lower triangular matrix, all elements are strictly positive, and diagonal is filled with one
+    Mat U = MatRandUi( size );// Upper triangular matrix, all elements are strictly positive
 
     Mat LU( L.numRow(), L.numCol() );
     for ( int i = 0; i < L.numRow(); ++i ) {
@@ -163,7 +163,7 @@ int test_dgetrf()
 
     Mat Prod( L.dimX(), U.dimY(), 0.0 );
 
-    my_dgemm( CblasColMajor,
+    my_dgemm_seq( CblasColMajor,
               CblasNoTrans,
               CblasNoTrans,
               L.dimX(),
@@ -178,10 +178,10 @@ int test_dgetrf()
               Prod.get(),
               Prod.dimX() );
 
-    my_dgetrf( CblasColMajor, Prod.dimX(), Prod.dimY(), Prod.get(), Prod.dimX() );
+    my_dgetrf_seq( CblasColMajor, Prod.dimX(), Prod.dimY(), Prod.get(), Prod.dimX() );
 
-   /* LU.print();
-    Prod.print();*/
+    LU.print();
+    Prod.print();
     bool equal = LU.equals(Prod, 1);
 
     return !equal;
