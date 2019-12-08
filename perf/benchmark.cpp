@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <limits>
+#include <omp.h>
 
 using namespace my_lapack;
 
@@ -63,7 +64,7 @@ void benchmark_dgetf2( int n )
                      Prod.get(),
                      Prod.dimX() );*/
 
-    my_dgetrf_openmp( CblasColMajor, LU.dimX(), LU.dimY(), LU.get(), LU.dimX() );
+    my_dgetrf_seq( CblasColMajor, LU.dimX(), LU.dimY(), LU.get(), LU.dimX() );
 }
 
 int main( int argc, char **argv )

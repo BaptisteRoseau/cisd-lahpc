@@ -28,11 +28,11 @@ namespace my_lapack {
         LAHPC_CHECK_POSITIVE( incY );
 
         double ret = 0;
-        int xi, yi;
-        #pragma omp parallel for reduction(+:ret) default(shared) private(xi, yi)
-        for ( int i = 0; i < N; ++i) {
-            xi = i*incX;
-            yi = i*incY;
+        int    xi, yi;
+#pragma omp parallel for reduction( + : ret ) default( shared ) private( xi, yi )
+        for ( int i = 0; i < N; ++i ) {
+            xi = i * incX;
+            yi = i * incY;
             ret += X[xi] * Y[yi];
         }
         return ret;
@@ -46,13 +46,13 @@ namespace my_lapack {
 
         if ( alpha == 0.0 ) { return; }
 
-            int xi, yi;
-#pragma omp parallel for private(xi, yi) default( shared )
-            for ( int i = 0; i < N; i++ ) {
-                yi = i * incY;
-                xi = i * incX;
-                Y[yi] += alpha * X[xi];
-            }
+        int xi, yi;
+#pragma omp parallel for private( xi, yi ) default( shared )
+        for ( int i = 0; i < N; i++ ) {
+            yi = i * incY;
+            xi = i * incX;
+            Y[yi] += alpha * X[xi];
+        }
     }
 
     void my_dgemv_openmp( CBLAS_ORDER     layout,
@@ -150,7 +150,9 @@ namespace my_lapack {
         if ( alpha == 0. ) {
             if ( beta != 1. ) {
                 int i, len = M * N;
-#pragma omp parallel for simd
+#if ( _OPENMP > 201301 )
+    #pragma omp parallel for simd
+#endif
                 for ( i = 0; i < len; i++ ) {
                     C[i] *= beta;
                 }
@@ -165,7 +167,7 @@ namespace my_lapack {
         // Calculating dgemm
         int m, n, k;
         if ( bTransA && bTransB ) {
-#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
+#pragma omp          parallel for default( shared ) collapse( 2 ) private( k )
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
@@ -176,7 +178,7 @@ namespace my_lapack {
             }
         }
         else if ( !bTransA && bTransB ) {
-#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
+#pragma omp          parallel for default( shared ) collapse( 2 ) private( k )
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
@@ -187,7 +189,7 @@ namespace my_lapack {
             }
         }
         else if ( bTransA && !bTransB ) {
-#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
+#pragma omp          parallel for default( shared ) collapse( 2 ) private( k )
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
@@ -198,7 +200,7 @@ namespace my_lapack {
             }
         }
         else {
-#pragma omp parallel for default( shared ) collapse( 2 ) private( k )
+#pragma omp          parallel for default( shared ) collapse( 2 ) private( k )
             for ( n = 0; n < N; n++ ) {
                 for ( m = 0; m < M; m++ ) {
                     C[AT( m, n, ldc )] *= beta;
@@ -211,19 +213,19 @@ namespace my_lapack {
     }
 
     void my_dgemm_openmp( CBLAS_ORDER     Order,
-                          CBLAS_TRANSPOSE TransA,
-                          CBLAS_TRANSPOSE TransB,
-                          int             M,
-                          int             N,
-                          int             K,
-                          double          alpha,
-                          const double *  A,
-                          int             lda,
-                          const double *  B,
-                          int             ldb,
-                          double          beta,
-                          double *        C,
-                          int             ldc )
+                                   CBLAS_TRANSPOSE TransA,
+                                   CBLAS_TRANSPOSE TransB,
+                                   int             M,
+                                   int             N,
+                                   int             K,
+                                   double          alpha,
+                                   const double *  A,
+                                   int             lda,
+                                   const double *  B,
+                                   int             ldb,
+                                   double          beta,
+                                   double *        C,
+                                   int             ldc )
     {
         LAHPC_CHECK_PREDICATE( Order == CblasColMajor );
         LAHPC_CHECK_PREDICATE( ( TransA == CblasTrans ) || ( TransA == CblasNoTrans ) );
@@ -272,25 +274,25 @@ namespace my_lapack {
 #pragma omp parallel for default( shared )
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_seq( Order,
-                                              TransA,
-                                              TransB,
-                                              m_blk,
-                                              n_blk,
-                                              k < KB - 1 ? BLOCK_SIZE : lastKB,
-                                              alpha,
-                                              A + BLOCK_SIZE * AT( k, m, lda ),
-                                              lda,
-                                              B + BLOCK_SIZE * AT( n, k, ldb ),
-                                              ldb,
-                                              1.,
-                                              C_padding,
-                                              ldc );
+                                           TransA,
+                                           TransB,
+                                           m_blk,
+                                           n_blk,
+                                           k < KB - 1 ? BLOCK_SIZE : lastKB,
+                                           alpha,
+                                           A + BLOCK_SIZE * AT( k, m, lda ),
+                                           lda,
+                                           B + BLOCK_SIZE * AT( n, k, ldb ),
+                                           ldb,
+                                           1.,
+                                           C_padding,
+                                           ldc );
                     }
                 }
             }
         }
         else if ( !bTransA && bTransB ) {
-#pragma omp parallel for default( shared ) private( m, n, k, m_blk, n_blk, C_padding )
+#pragma omp          parallel for default( shared ) private( m, n, k, m_blk, n_blk, C_padding )
             for ( m = 0; m < MB; m++ ) {
                 m_blk = m < MB - 1 ? BLOCK_SIZE : lastMB;
 #pragma omp parallel for default( shared ) private( n, k, n_blk, C_padding )
@@ -306,25 +308,25 @@ namespace my_lapack {
 #pragma omp parallel for default( shared )
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_seq( Order,
-                                              TransA,
-                                              TransB,
-                                              m_blk,
-                                              n_blk,
-                                              k < KB - 1 ? BLOCK_SIZE : lastKB,
-                                              alpha,
-                                              A + BLOCK_SIZE * AT( m, k, lda ),
-                                              lda,
-                                              B + BLOCK_SIZE * AT( n, k, ldb ),
-                                              ldb,
-                                              1.,
-                                              C_padding,
-                                              ldc );
+                                           TransA,
+                                           TransB,
+                                           m_blk,
+                                           n_blk,
+                                           k < KB - 1 ? BLOCK_SIZE : lastKB,
+                                           alpha,
+                                           A + BLOCK_SIZE * AT( m, k, lda ),
+                                           lda,
+                                           B + BLOCK_SIZE * AT( n, k, ldb ),
+                                           ldb,
+                                           1.,
+                                           C_padding,
+                                           ldc );
                     }
                 }
             }
         }
         else if ( bTransA && !bTransB ) {
-#pragma omp parallel for default( shared ) private( m, n, k, m_blk, n_blk, C_padding )
+#pragma omp          parallel for default( shared ) private( m, n, k, m_blk, n_blk, C_padding )
             for ( m = 0; m < MB; m++ ) {
                 m_blk = m < MB - 1 ? BLOCK_SIZE : lastMB;
 #pragma omp parallel for default( shared ) private( n, k, n_blk, C_padding )
@@ -340,25 +342,25 @@ namespace my_lapack {
 #pragma omp parallel for default( shared )
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_seq( Order,
-                                              TransA,
-                                              TransB,
-                                              m_blk,
-                                              n_blk,
-                                              k < KB - 1 ? BLOCK_SIZE : lastKB,
-                                              alpha,
-                                              A + BLOCK_SIZE * AT( k, m, lda ),
-                                              lda,
-                                              B + BLOCK_SIZE * AT( k, n, ldb ),
-                                              ldb,
-                                              1.,
-                                              C_padding,
-                                              ldc );
+                                           TransA,
+                                           TransB,
+                                           m_blk,
+                                           n_blk,
+                                           k < KB - 1 ? BLOCK_SIZE : lastKB,
+                                           alpha,
+                                           A + BLOCK_SIZE * AT( k, m, lda ),
+                                           lda,
+                                           B + BLOCK_SIZE * AT( k, n, ldb ),
+                                           ldb,
+                                           1.,
+                                           C_padding,
+                                           ldc );
                     }
                 }
             }
         }
         else {
-#pragma omp parallel for default( shared ) private( m, n, k, m_blk, n_blk, C_padding )
+#pragma omp          parallel for default( shared ) private( m, n, k, m_blk, n_blk, C_padding )
             for ( m = 0; m < MB; m++ ) {
                 m_blk = m < MB - 1 ? BLOCK_SIZE : lastMB;
 #pragma omp parallel for default( shared ) private( n, k, n_blk, C_padding )
@@ -374,19 +376,19 @@ namespace my_lapack {
 #pragma omp parallel for default( shared )
                     for ( k = 0; k < KB; k++ ) {
                         my_dgemm_scal_seq( Order,
-                                              TransA,
-                                              TransB,
-                                              m_blk,
-                                              n_blk,
-                                              k < KB - 1 ? BLOCK_SIZE : lastKB,
-                                              alpha,
-                                              A + BLOCK_SIZE * AT( m, k, lda ),
-                                              lda,
-                                              B + BLOCK_SIZE * AT( k, n, ldb ),
-                                              ldb,
-                                              1.,
-                                              C_padding,
-                                              ldc );
+                                           TransA,
+                                           TransB,
+                                           m_blk,
+                                           n_blk,
+                                           k < KB - 1 ? BLOCK_SIZE : lastKB,
+                                           alpha,
+                                           A + BLOCK_SIZE * AT( m, k, lda ),
+                                           lda,
+                                           B + BLOCK_SIZE * AT( k, n, ldb ),
+                                           ldb,
+                                           1.,
+                                           C_padding,
+                                           ldc );
                     }
                 }
             }
@@ -394,15 +396,15 @@ namespace my_lapack {
     }
 
     void my_dger_openmp( CBLAS_ORDER   layout,
-                         int           M,
-                         int           N,
-                         double        alpha,
-                         const double *X,
-                         int           incX,
-                         const double *Y,
-                         int           incY,
-                         double *      A,
-                         int           lda )
+                                  int           M,
+                                  int           N,
+                                  double        alpha,
+                                  const double *X,
+                                  int           incX,
+                                  const double *Y,
+                                  int           incY,
+                                  double *      A,
+                                  int           lda )
     {
         LAHPC_CHECK_PREDICATE( layout == CblasColMajor );
         LAHPC_CHECK_POSITIVE( M );
@@ -448,17 +450,17 @@ namespace my_lapack {
     }
 
     void my_dtrsm_openmp( CBLAS_ORDER     layout,
-                          CBLAS_SIDE      side,
-                          CBLAS_UPLO      uplo,
-                          CBLAS_TRANSPOSE transA,
-                          CBLAS_DIAG      diag,
-                          int             M,
-                          int             N,
-                          double          alpha,
-                          const double *  A,
-                          int             lda,
-                          double *        B,
-                          int             ldb )
+                                   CBLAS_SIDE      side,
+                                   CBLAS_UPLO      uplo,
+                                   CBLAS_TRANSPOSE transA,
+                                   CBLAS_DIAG      diag,
+                                   int             M,
+                                   int             N,
+                                   double          alpha,
+                                   const double *  A,
+                                   int             lda,
+                                   double *        B,
+                                   int             ldb )
     {
         LAHPC_CHECK_PREDICATE( layout == CblasColMajor );
         LAHPC_CHECK_PREDICATE( ( transA == CblasTrans ) || ( transA == CblasNoTrans ) );
@@ -485,11 +487,10 @@ namespace my_lapack {
             if ( transA == CblasTrans ) {
                 /* A is a lower triangular */
                 if ( uplo == CblasLower ) {
-#pragma omp parallel for default( none ) private( lambda ) \
-    shared( layout, side, uplo, transA, diag, M, N, alpha, A, lda, B, ldb )
                     for ( int j = 0; j < N; ++j ) {
                         for ( int i = M - 1; i >= 0; --i ) {
                             lambda = alpha * B[i + j * ldb];
+#pragma omp parallel for default( shared ) schedule( dynamic )
                             for ( int k = i + 1; k < M; ++k ) {
                                 lambda -= B[k + j * ldb] * A[k + i * lda];
                             }
@@ -503,11 +504,10 @@ namespace my_lapack {
                 }
                 /* A is triangular upper */
                 else if ( uplo == CblasUpper ) {
-#pragma omp parallel for default( none ) private( lambda ) \
-    shared( layout, side, uplo, transA, diag, M, N, alpha, A, lda, B, ldb )
                     for ( int j = 0; j < N; ++j ) {
                         for ( int i = 0; i < M; ++i ) {
                             lambda = alpha * B[i + j * ldb];
+#pragma omp parallel for default( shared ) schedule( dynamic )
                             for ( int k = 0; k < i; ++k ) {
                                 lambda -= A[k + i * lda] * B[k + j * ldb];
                             }
@@ -522,8 +522,6 @@ namespace my_lapack {
             else {
                 /* A is triangular Upper */
                 if ( uplo == CblasUpper ) {
-#pragma omp parallel for default( none ) private( lambda ) \
-    shared( layout, side, uplo, transA, diag, M, N, alpha, A, lda, B, ldb )
                     for ( int j = 0; j < N; ++j ) {
                         if ( alpha != 1. ) {
                             for ( int i = 0; i < M; i++ ) {
@@ -534,6 +532,7 @@ namespace my_lapack {
                             if ( B[k + j * ldb] ) {
                                 if ( diag == CblasNonUnit ) B[k + j * ldb] /= A[k * ( 1 + lda )];
                                 lambda = B[k + j * ldb];
+#pragma omp parallel for default( shared ) schedule( dynamic )
                                 for ( int i = 0; i < k; ++i ) {
                                     B[i + j * ldb] -= lambda * A[i + k * lda];
                                 }
@@ -543,8 +542,6 @@ namespace my_lapack {
                 }
                 /* A is lower triangular */
                 else {
-#pragma omp parallel for default( none ) private( lambda ) \
-    shared( layout, side, uplo, transA, diag, M, N, alpha, A, lda, B, ldb )
                     for ( int j = 0; j < N; ++j ) {
                         for ( int i = 0; i < M; i++ ) {
                             B[i + j * ldb] *= alpha;
@@ -553,6 +550,7 @@ namespace my_lapack {
                             if ( B[k + j * ldb] != 0. ) {
                                 if ( diag == CblasNonUnit ) B[k + j * ldb] /= A[k * ( 1 + lda )];
                                 lambda = B[k + j * ldb];
+#pragma omp parallel for default( shared ) schedule( dynamic )
                                 for ( int i = k + 1; i < M; ++i ) {
                                     B[i + j * ldb] -= lambda * A[i + k * lda];
                                 }
@@ -568,8 +566,6 @@ namespace my_lapack {
             if ( transA == CblasNoTrans ) {
                 /* A is upper triangular */
                 if ( uplo == CblasUpper ) {
-#pragma omp parallel for default( none ) private( lambda ) \
-    shared( layout, side, uplo, transA, diag, M, N, alpha, A, lda, B, ldb )
                     for ( int j = 0; j < N; j++ ) {
                         if ( alpha != 1.0 ) {
                             for ( int i = 0; i < M; ++i ) {
@@ -585,6 +581,7 @@ namespace my_lapack {
                         }
                         if ( diag == CblasNonUnit ) {
                             lambda = 1.0 / A[j * ( 1 + lda )];
+#pragma omp parallel for default( shared ) schedule( dynamic )
                             for ( int i = 0; i < M; i++ ) {
                                 B[i + j * ldb] = lambda * B[i + j * ldb];
                             }
@@ -593,8 +590,6 @@ namespace my_lapack {
                 }
                 /* A is lower triangular */
                 else {
-#pragma omp parallel for default( none ) private( lambda ) \
-    shared( layout, side, uplo, transA, diag, M, N, alpha, A, lda, B, ldb )
                     for ( int j = N - 1; j >= 0; --j ) {
                         if ( alpha != 1.0 ) {
                             for ( int i = 0; i < M; ++i ) {
@@ -610,6 +605,7 @@ namespace my_lapack {
                         }
                         if ( diag == CblasNonUnit ) {
                             lambda = 1.0 / A[j * ( 1 + lda )];
+#pragma omp parallel for default( shared ) schedule( dynamic )
                             for ( int i = 0; i < M; i++ ) {
                                 B[i + j * ldb] = lambda * B[i + j * ldb];
                             }
@@ -621,8 +617,6 @@ namespace my_lapack {
             else {
                 /* A is upper triangular */
                 if ( uplo == CblasUpper ) {
-#pragma omp parallel for default( none ) private( lambda ) \
-    shared( layout, side, uplo, transA, diag, M, N, alpha, A, lda, B, ldb )
                     for ( int k = N - 1; k >= 0; --k ) {
                         if ( diag == CblasNonUnit ) {
                             lambda = 1.0 / A[k + k * lda];
@@ -630,25 +624,28 @@ namespace my_lapack {
                                 B[i + k * ldb] = lambda * B[i + k * ldb];
                             }
                         }
-                        for ( int j = 0; j < k; ++j ) {
-                            if ( A[j + k * lda] != 0.0 ) {
-                                lambda = A[j + k * lda];
-                                for ( int i = 0; i < M; ++i ) {
-                                    B[i + j * ldb] -= lambda * B[i + k * ldb];
+#pragma omp parallel sections
+                        {
+#pragma omp section
+                            for ( int j = 0; j < k; ++j ) {
+                                if ( A[j + k * lda] != 0.0 ) {
+                                    lambda = A[j + k * lda];
+                                    for ( int i = 0; i < M; ++i ) {
+                                        B[i + j * ldb] -= lambda * B[i + k * ldb];
+                                    }
                                 }
                             }
-                        }
-                        if ( alpha != 1.0 ) {
-                            for ( int i = 0; i < M; i++ ) {
-                                B[i + k * ldb] = alpha * B[i + k * ldb];
+#pragma omp section
+                            if ( alpha != 1.0 ) {
+                                for ( int i = 0; i < M; i++ ) {
+                                    B[i + k * ldb] = alpha * B[i + k * ldb];
+                                }
                             }
                         }
                     }
                 }
                 /* A is lower triangular */
                 else {
-#pragma omp parallel for default( none ) private( lambda ) \
-    shared( layout, side, uplo, transA, diag, M, N, alpha, A, lda, B, ldb )
                     for ( int k = 0; k < N; ++k ) {
                         if ( diag == CblasNonUnit ) {
                             lambda = 1.0 / A[k + k * lda];
@@ -656,17 +653,22 @@ namespace my_lapack {
                                 B[i + k * ldb] = lambda * B[i + k * ldb];
                             }
                         }
-                        for ( int j = k + 1; j < N; j++ ) {
-                            if ( A[j + k * lda] != 0.0 ) {
-                                lambda = A[j + k * lda];
-                                for ( int i = 0; i < M; i++ ) {
-                                    B[i + j * ldb] -= lambda * B[i + k * ldb];
+#pragma omp parallel sections
+                        {
+#pragma omp section
+                            for ( int j = k + 1; j < N; j++ ) {
+                                if ( A[j + k * lda] != 0.0 ) {
+                                    lambda = A[j + k * lda];
+                                    for ( int i = 0; i < M; i++ ) {
+                                        B[i + j * ldb] -= lambda * B[i + k * ldb];
+                                    }
                                 }
                             }
-                        }
-                        if ( alpha != 1.0 ) {
-                            for ( int i = 0; i < M; ++i ) {
-                                B[i + k * lda] = alpha * B[i + k * ldb];
+#pragma omp section
+                            if ( alpha != 1.0 ) {
+                                for ( int i = 0; i < M; ++i ) {
+                                    B[i + k * lda] = alpha * B[i + k * ldb];
+                                }
                             }
                         }
                     }
@@ -691,23 +693,23 @@ namespace my_lapack {
             my_dgetf2_seq( order, M, N, A, lda );
             return;
         }
-//#pragma omp parallel for schedule( guided ) default( shared )
+        //#pragma omp parallel for schedule( guided ) default( shared )
         for ( int j = 0; j < minMN; j += maxBlockSize ) {
             int blockSize = std::min( minMN - j, maxBlockSize );
             my_dgetrf_openmp( order, M - j, blockSize, A + j * lda + j, lda );
             if ( j + blockSize < N ) {
-                my_dtrsm_openmp( order,
-                                 CblasLeft,
-                                 CblasLower,
-                                 CblasNoTrans,
-                                 CblasUnit,
-                                 blockSize,
-                                 N - j - blockSize,
-                                 1.0,
-                                 A + j * lda + j,
-                                 lda,
-                                 A + ( j + blockSize ) * lda + j,
-                                 lda );
+                my_dtrsm_seq( order,
+                              CblasLeft,
+                              CblasLower,
+                              CblasNoTrans,
+                              CblasUnit,
+                              blockSize,
+                              N - j - blockSize,
+                              1.0,
+                              A + j * lda + j,
+                              lda,
+                              A + ( j + blockSize ) * lda + j,
+                              lda );
 
                 if ( j + blockSize < M ) {
                     my_dgemm_openmp( CblasColMajor,

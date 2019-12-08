@@ -10,6 +10,55 @@ using namespace my_lapack;
     testall_func( static_cast<fct_t>( func ) );    \
     printf( "\n" );
 
+void my_dgetrf_seq_test( CBLAS_ORDER order, int M, int N, double *A, int lda )
+{
+    if ( M == 0 || N == 0 ) { return; }
+
+    const int nb    = 10;
+    int       minMN = std::min( M, N );
+
+    if ( nb <= 1 || nb >= minMN ) {
+        my_dgetf2_seq( order, M, N, A, lda );
+        return;
+    }
+
+    for ( int j = 0; j < minMN; j += nb ) {
+        int jb = std::min( minMN - j, nb );
+        my_dgetf2_seq( order, M - j, jb, A + j * lda + j, lda );
+        if ( j + jb < N ) {
+            cblas_dtrsm( order,
+                          CblasLeft,
+                          CblasLower,
+                          CblasNoTrans,
+                          CblasUnit,
+                          jb,
+                          N - j - jb,
+                          1.0,
+                          A + j * lda + j,
+                          lda,
+                          A + ( j + jb ) * lda + j,
+                          lda );
+
+            if ( j + jb < M ) {
+                my_dgemm_seq( CblasColMajor,
+                              CblasNoTrans,
+                              CblasNoTrans,
+                              M - j - jb,
+                              N - j - jb,
+                              jb,
+                              -1.0,
+                              A + j * lda + j + jb,
+                              lda,
+                              A + ( j + jb ) * lda + j,
+                              lda,
+                              1.0,
+                              A + ( j + jb ) * lda + j + jb,
+                              lda );
+            }
+        }
+    }
+}
+
 int main()
 {
     printf( "----------- TEST ALGONUM -----------\n\n" );
@@ -25,7 +74,7 @@ int main()
 
     LAHPC_TESTALL( dgetrf_fct_t, testall_dgetrf, my_dgetf2_seq );
 
-    LAHPC_TESTALL( dgetrf_fct_t, testall_dgetrf, my_dgetrf_seq );
+    LAHPC_TESTALL( dgetrf_fct_t, testall_dgetrf, my_dgetrf_seq_test );
 
     /*printf( "DGETRF OPENMP:\n" );
     testall_dgetrf( (dgetrf_fct_t) my_dgetrf_openmp );*/
