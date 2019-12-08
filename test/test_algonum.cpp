@@ -26,7 +26,7 @@ void my_dgetrf_seq_test( CBLAS_ORDER order, int M, int N, double *A, int lda )
         int jb = std::min( minMN - j, nb );
         my_dgetf2_seq( order, M - j, jb, A + j * lda + j, lda );
         if ( j + jb < N ) {
-            cblas_dtrsm( order,
+            my_dtrsm_seq( order,
                           CblasLeft,
                           CblasLower,
                           CblasNoTrans,
