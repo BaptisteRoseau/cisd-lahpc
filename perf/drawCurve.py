@@ -2,6 +2,18 @@ import matplotlib.pyplot as plt
 import sys
 import csv
 
+# DATA FORMAT:
+#    TITLE, XTITLE, YTITLE, XSCALE ("linear" or "log"), YSCALE
+#    CURVE LABEL
+#    x0_0, y0_0
+#    x0_1, y0_1
+#    ...
+#    CURVE LABEL
+#    x1_0, y1_0
+#    x1_1, y1_1
+#    x1_2, y1_2
+#    ...
+
 if len(sys.argv) < 2:
     print("Usage: python3 drawCurve.py <my_file1.csv> <my_file2.csv>..")
     exit(0)
