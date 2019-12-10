@@ -119,6 +119,21 @@ namespace my_lapack {
                           double *        C,
                           int             ldc );
 
+    void my_dgemm_mpi( CBLAS_ORDER Order,
+                          CBLAS_TRANSPOSE TransA,
+                          CBLAS_TRANSPOSE TransB,
+                          int M,
+                          int N,
+                          int K,
+                          double alpha,
+                          const double * a,
+                          int lda,
+                          const double * b,
+                          int ldb,
+                          double beta,
+                          double * c,
+                          int ldc );
+
     void my_dgetf2_seq( CBLAS_ORDER order, int M, int N, double *A, int lda );
     void my_dgetf2_openmp( CBLAS_ORDER order, int M, int N, double *A, int lda );
 
@@ -158,6 +173,9 @@ namespace my_lapack {
 
     void my_dlaswp_seq( int N, double *A, int lda, int k1, int k2, int *ipv, int incX );
     void my_dlaswp_openmp( int N, double *A, int lda, int k1, int k2, int *ipv, int incX );
+
+    void my_dlacpy( int M, int N, const double *a, int lda, double *b, int ldb );
+
 
 // Macro definitions to respect our previous naming
 #ifdef _my_lapack_seq

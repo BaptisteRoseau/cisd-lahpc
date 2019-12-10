@@ -1,6 +1,5 @@
-
 ### COMMON
-set( HEADERS my_lapack.h util.h Mat.h err.h)
+set( COMMON_HEADERS my_lapack.h util.h Mat.h err.h)
 
 if ( WIN32 )
     set( FLAGS_DEBUG /DEBUG /Od ) 
@@ -20,7 +19,7 @@ function(my_lapack_lib_common libname )
         ${libname}.cpp
         util.cpp
         Mat.cpp
-        ${HEADERS} )
+        ${COMMON_HEADERS} )
     
     target_include_directories(
         ${libname}
@@ -55,7 +54,7 @@ function(my_lapack_lib_common libname )
 
 endfunction()
 
-### OMP
+### OpenMP
 function(link_omp libname)
     find_package(OpenMP)
     if(OpenMP_CXX_FOUND)
@@ -65,20 +64,43 @@ function(link_omp libname)
     endif()
 endfunction()
 
+### MPI
+function(link_mpi libname)
+    find_package(MPI)
+    if (MPI_CXX_FOUND)
+        target_link_libraries(${libname} PUBLIC MPI::MPI_CXX)
+    else()
+        message(FATAL_ERROR "MPI not found !")
+    endif()
+
+    target_include_directories(${libname}
+        PUBLIC ${MPI_CXX_INCLUDE_DIRS}
+    )
+
+    target_compile_options(${libname}
+        PUBLIC
+            ${MPI_CXX_COMPILER_FLAGS}
+    )
+endfunction()
+
 
 ### ALL-IN-ONE LIBRARY
 add_library( my_lapack_all
     my_lapack_omp.cpp
     my_lapack_seq.cpp
+    my_lapack_mpi.cpp
     util.cpp
     Mat.cpp
-    ${HEADERS} )
+    Summa.cpp
+    ${COMMON_HEADERS}
+    Summa.hpp)
 
 target_include_directories(
     my_lapack_all
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/perf
+
 )
 
 target_compile_features(
@@ -106,6 +128,7 @@ else()
 endif()
 
 link_omp("my_lapack_all")
+link_mpi("my_lapack_all")
 
 
 # CREATING LIBRARIES
@@ -115,3 +138,5 @@ my_lapack_lib_common("my_lapack_seq")
 my_lapack_lib_common("my_lapack_omp")
 link_omp("my_lapack_omp")
 
+my_lapack_lib_common("my_lapack_mpi")
+link_mpi("my_lapack_mpi")
