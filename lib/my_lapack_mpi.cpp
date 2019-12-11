@@ -260,10 +260,10 @@ namespace my_lapack {
                                   ldc );
         }*/
 
-        if ( rankWorld == 0 ) {
+        /*if ( rankWorld == 0 ) {
             std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
             affiche( M, N, c, ldc, std::cout );
-        }
+        }*/
 
         // Leave
         delete[] work1, work2;
