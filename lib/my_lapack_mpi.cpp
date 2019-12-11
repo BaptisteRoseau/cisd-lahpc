@@ -49,6 +49,8 @@ namespace my_lapack {
         // SUMMA.reset( M, N, K ); Must have been done before !
 
         Summa &SUMMA     = Summa::getInstance();
+        SUMMA.reset( M, N, K );
+
         int    worldSize = SUMMA.sizeWorld();
         int    rankWorld = SUMMA.rankWorld();
         int    rankRow   = SUMMA.rankRow();
@@ -83,7 +85,7 @@ namespace my_lapack {
             C_offset += m_c[rankRow] * n_c[rankCol];
         }
 
-        // if ( rankWorld == 1 ) { affiche( m_a[rankRow], n_a[rankCol], B_block.data(), m_a[rankRow], std::cout ); }
+        if ( rankWorld == 1 ) { affiche( m_a[rankRow], n_a[rankCol], A_block.data(), m_a[rankRow], std::cout ); }
 
         // SUMMA.finalize(); Must be done at some point !
     }

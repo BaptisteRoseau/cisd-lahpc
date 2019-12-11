@@ -37,6 +37,7 @@ namespace my_lapack {
         double *initStorage( int size );
     };
 
+    Mat MatSequenceRow(int m, int n);
     Mat MatRandi( int m, int n, unsigned int max, unsigned int seed = 0x9d2c5680 );
     Mat MatSqrDiag( int m, double v );
     Mat MatZero( int m, int n );

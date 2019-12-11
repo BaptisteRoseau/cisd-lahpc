@@ -135,6 +135,19 @@ namespace my_lapack {
         return randEngine;
     }
 
+    my_lapack::Mat MatSequenceRow( int m, int n )
+    {
+        Mat mat( m, n );
+        int k = 0;
+        for ( int j = 0; j < n; ++j ) {
+            for ( int i = 0; i < m; ++i ) {
+                mat.at( i, j ) = k++;
+            }
+        }
+
+        return mat;
+    }
+
     Mat MatRandi( int m, int n, unsigned int max, unsigned int seed /*= 0x9d2c5680*/ )
     {
         auto &randEngine = GetRandEngine();
