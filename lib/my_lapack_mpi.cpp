@@ -115,7 +115,10 @@ namespace my_lapack {
                                   m_c[rankRow] );
         }
 
-        if ( rankWorld == 0 ) { affiche( m_a[rankRow], n_a[rankCol], A_block.data(), m_a[rankRow], std::cout ); }
+        if ( rankWorld == 1 ) {
+            std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
+            affiche( m_a[rankRow], n_a[rankCol], A_block.data(), m_a[rankRow], std::cout );
+        }
 
         // SUMMA.finalize(); Must be done at some point !
     }
