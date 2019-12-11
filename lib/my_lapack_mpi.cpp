@@ -134,7 +134,7 @@ namespace my_lapack {
 
         int worldSize = SUMMA.sizeWorld();
         int rankWorld = SUMMA.rankWorld();
-        int rankRow   = SUMMA.rankCol();
+        int rankRow   = SUMMA.rankCol();// it seems odd but it is correct
         int rankCol   = SUMMA.rankRow();
         int rowCount, colCount;
         SUMMA.gridDimensions( &rowCount, &colCount );
@@ -234,12 +234,16 @@ namespace my_lapack {
                 work2 );
 
         // Gather blocks
-        if ( rankWorld == 3 ) {
+        /*if ( rankWorld == 3 ) {
             std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
             affiche( m_c[rankRow], n_c[rankCol], C_block.data(), m_c[rankRow], std::cout );
-        }
+        }*/
 
         for ( int proc = 0; proc < worldSize; ++proc ) {
+
+            std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
+            affiche( m_c[rankRow], n_c[rankCol], C_block.data(), m_c[rankRow], std::cout );
+
             int C_assignedWidth = 0, C_assignedHeight = 0;
 
             for ( int i = 0; i < proc % colCount; ++i ) {
