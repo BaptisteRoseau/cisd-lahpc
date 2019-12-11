@@ -171,8 +171,8 @@ namespace my_lapack {
                 B_assignedHeight += m_b[i];
                 C_assignedHeight += m_c[i];
             }
-            if ( rankWorld == 0 )
-                std::cout << "A( " << A_assignedHeight << ", " << A_assignedWidth << " )" << std::endl;
+            /*if ( rankWorld == 0 )
+                std::cout << "A( " << A_assignedHeight << ", " << A_assignedWidth << " )" << std::endl;*/
             SUMMA.sendBlockWorld( 0,
                                   proc,
                                   m_a[rankRow],
@@ -232,6 +232,8 @@ namespace my_lapack {
                 SUMMA.getColComm(),
                 work1,
                 work2 );
+
+        MPI_Barrier(MPI_COMM_WORLD);
 
         // Gather blocks
         if ( rankWorld == 2 ) {
