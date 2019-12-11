@@ -88,7 +88,7 @@ namespace my_lapack {
                 B_assignedHeight += m_b[i];
                 C_assignedHeight += m_c[i];
             }
-
+            std::cout << "A( " << A_assignedWidth << ", " << A_assignedHeight << " )" << std::endl;
             SUMMA.sendBlockWorld( 0,
                                   proc,
                                   m_a[rankRow],
