@@ -234,12 +234,12 @@ namespace my_lapack {
                 work2 );
 
         // Gather blocks
-        if ( rankWorld == 2 ) {
+        /*if ( rankWorld == 2 ) {
             std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
             affiche( m_c[rankRow], n_c[rankCol], C_block.data(), m_c[rankRow], std::cout );
-        }
+        }*/
 
-        /*for ( int proc = 0; proc < worldSize; ++proc ) {
+        for ( int proc = 0; proc < worldSize; ++proc ) {
             int C_assignedWidth = 0, C_assignedHeight = 0;
 
             for ( int i = 0; i < proc % colCount; ++i ) {
@@ -263,7 +263,7 @@ namespace my_lapack {
         if ( rankWorld == 0 ) {
             std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
             affiche( M, N, c, ldc, std::cout );
-        }*/
+        }
 
         // Leave
         delete[] work1, work2;
