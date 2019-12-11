@@ -233,13 +233,11 @@ namespace my_lapack {
                 work1,
                 work2 );
 
-        MPI_Barrier(MPI_COMM_WORLD);
-
         // Gather blocks
-        if ( rankWorld == 2 ) {
+        /*if ( rankWorld == 2 ) {
             std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
             affiche( m_c[rankRow], n_c[rankCol], C_block.data(), m_c[rankRow], std::cout );
-        }
+        }*/
 
         for ( int proc = 0; proc < worldSize; ++proc ) {
             int C_assignedWidth = 0, C_assignedHeight = 0;
@@ -262,10 +260,10 @@ namespace my_lapack {
                                   ldc );
         }
 
-        /*if ( rankWorld == 0 ) {
+        if ( rankWorld == 0 ) {
             std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
             affiche( M, N, c, ldc, std::cout );
-        }*/
+        }
 
         // Leave
         delete[] work1, work2;
