@@ -72,7 +72,7 @@ void benchmark_summa( int argc, char **argv )
 {
     Summa &SUMMA = Summa::getInstance();
 
-    int M = 100, N = 100, K = 100;
+    int M = 20, N = 20, K = 20;
     SUMMA.init( &argc, &argv );
     SUMMA.reset( M, N, K );
 

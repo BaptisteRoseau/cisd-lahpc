@@ -79,7 +79,7 @@ namespace my_lapack {
             SUMMA.sendBlock( 0, rankWorld, m_a[rankRow], n_a[rankCol], a, lda, A_block.data(), m_a[rankRow] );
             SUMMA.sendBlock( 0, rankWorld, m_b[rankRow], n_b[rankCol], b, ldb, B_block.data(), m_b[rankRow] );
             SUMMA.sendBlock( 0, rankWorld, m_c[rankRow], n_c[rankCol], c, ldc, C_block.data(), m_c[rankRow] );
-            affiche( m_a[rankRow], n_a[rankCol], A_block.data(), m_a[rankRow], std::cout );
+            //affiche( m_a[rankRow], n_a[rankCol], A_block.data(), m_a[rankRow], std::cout );
         }
 
         
