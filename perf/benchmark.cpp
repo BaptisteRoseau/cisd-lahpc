@@ -1,4 +1,5 @@
 #include "Mat.h"
+#include "Summa.hpp"
 #include "my_lapack.h"
 #include "util.h"
 
@@ -67,13 +68,44 @@ void benchmark_dgetf2( int n )
     my_dgetrf_seq( CblasColMajor, LU.dimX(), LU.dimY(), LU.get(), LU.dimX() );
 }
 
+void benchmark_summa( int argc, char **argv )
+{
+    Summa &SUMMA = Summa::getInstance();
+
+    int M = 100, N = 100, K = 100;
+    SUMMA.init( &argc, &argv );
+    SUMMA.reset( M, N, K );
+
+    /*if ( SUMMA.rankWorld() == 0 ) {
+        Mat A( M, K, 1. ), B( K, N, 1. ), C( M, N, 1. );
+        my_dgemm_mpi( CblasColMajor,
+                      CblasNoTrans,
+                      CblasNoTrans,
+                      M,
+                      N,
+                      K,
+                      1.,
+                      A.get(),
+                      A.ld(),
+                      B.get(),
+                      B.ld(),
+                      0.,
+                      C.get(),
+                      C.ld() ); 
+    }*/
+}
+
 int main( int argc, char **argv )
 {
-    if ( argc != 2 ) return -1;
+    /*if ( argc != 2 ) return -1;
 
-    int n = std::atoi( argv[1] );
+    int n = std::atoi( argv[1] );*/
 
     // benchmark_dgemm_scalaire( n );
 
-    benchmark_dgetf2( n );
+    // benchmark_dgetf2( n );
+
+    benchmark_summa( argc, argv );
+
+    return 0;
 }

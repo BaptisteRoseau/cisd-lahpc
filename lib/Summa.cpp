@@ -30,7 +30,13 @@ Summa::Summa()
 
 void throwNotInitialized()
 {
-    throw std::exception( "Summa is not initialized" );
+    throw std::runtime_error( "Summa is not initialized" );
+}
+
+Summa &Summa::getInstance()
+{
+    static Summa instance;
+    return instance;
 }
 
 void Summa::init( int *argc, char ***argv )
@@ -59,12 +65,12 @@ void Summa::reset( int M, int N, int K )
         MPI_Comm_rank( MPI_COMM_WORLD, &worldRank );
 
         // Make sure the number of processes is the square of some number
-        int squareSide = std::sqrt( worldSize );
-        if ( squareSide * squareSide != worldSize ) {
+        int worldSizeSqrt = std::sqrt( worldSize );
+        if ( worldSizeSqrt * worldSizeSqrt != worldSize ) {
             throw std::invalid_argument( "The number of processes must be the square of some positive number" );
         }
 
-        this->r = this->c = squareSide;
+        this->r = this->c = worldSizeSqrt;
 
         freeDimensionsArrays();
         m_a = new int[r];
@@ -77,7 +83,7 @@ void Summa::reset( int M, int N, int K )
         int A_blockRowCount = M / r, A_blockColCount = K / c;
         int B_blockRowCount = K / r, B_blockColCount = N / c;
         int C_blockRowCount = M / r, C_blockColCount = N / c;
-        
+
         for ( int i = 0; i < r; ++i ) {
             m_a[i] = A_blockRowCount;
             m_b[i] = B_blockRowCount;
@@ -88,8 +94,7 @@ void Summa::reset( int M, int N, int K )
         m_b[r - 1] += K % r;
         m_c[r - 1] += M % r;
 
-        for (int i = 0; i < c; ++i)
-        {
+        for ( int i = 0; i < c; ++i ) {
             n_a[i] = A_blockColCount;
             n_b[i] = B_blockColCount;
             n_c[i] = C_blockColCount;
@@ -100,9 +105,9 @@ void Summa::reset( int M, int N, int K )
         n_c[c - 1] += N % c;
 
         // row communicator
-        MPI_Comm_split( MPI_COMM_WORLD, worldRank / squareSide, worldRank, &commRow );
+        MPI_Comm_split( MPI_COMM_WORLD, worldRank / worldSizeSqrt, worldRank, &commRow );
         // column communicator
-        MPI_Comm_split( MPI_COMM_WORLD, worldRank % squareSide, worldRank, &commCol );
+        MPI_Comm_split( MPI_COMM_WORLD, worldRank % worldSizeSqrt, worldRank, &commCol );
     }
     else {
         throwNotInitialized();
@@ -134,6 +139,19 @@ Summa::~Summa()
     freeDimensionsArrays();
 }
 
+int Summa::sizeWorld() const
+{
+    if ( isInitialized ) {
+        int size;
+        MPI_Comm_size( MPI_COMM_WORLD, &size );
+        return size;
+    }
+    else {
+        throwNotInitialized();
+        return -1;
+    }
+}
+
 int Summa::rankWorld() const
 {
     if ( isInitialized ) {
@@ -143,6 +161,7 @@ int Summa::rankWorld() const
     }
     else {
         throwNotInitialized();
+        return -1;
     }
 }
 
@@ -155,6 +174,7 @@ int Summa::rankRow() const
     }
     else {
         throwNotInitialized();
+        return -1;
     }
 }
 
@@ -167,7 +187,14 @@ int Summa::rankCol() const
     }
     else {
         throwNotInitialized();
+        return -1;
     }
+}
+
+void Summa::gridDimensions( int *r, int *c ) const
+{
+    *r = this->r;
+    *c = this->c;
 }
 
 void Summa::sendBlock( MPI_Comm      communicator,
@@ -181,6 +208,7 @@ void Summa::sendBlock( MPI_Comm      communicator,
                        int           ldb )
 {
     int rankWorld_ = rankWorld();
+    // TODO : find out if the case emitter == reciever is gracefully handle by MPI
     if ( rankWorld_ == emitter ) {
         double *sendBlock = new double[M * N];
         my_lapack::my_dlacpy( M, N, a, lda, sendBlock, ldb );
@@ -194,10 +222,29 @@ void Summa::sendBlock( MPI_Comm      communicator,
 
 int Summa::Bcast( double *buffer, int count, int emitter_rank, MPI_Comm communicator )
 {
-    if ( isInitialized ) { MPI_Bcast( static_cast<void *>( buffer ), count, MPI_DOUBLE, emitter_rank, communicator ); }
+    if ( isInitialized ) { return MPI_Bcast( static_cast<void *>( buffer ), count, MPI_DOUBLE, emitter_rank, communicator ); }
     else {
         throwNotInitialized();
+        return -1;
     }
+}
+
+void Summa::A_blockDimensions( int *m, int *n ) const
+{
+    std::memcpy( m, m_a, r * sizeof( int ) );
+    std::memcpy( n, n_a, c * sizeof( int ) );
+}
+
+void Summa::B_blockDimensions( int *m, int *n ) const
+{
+    std::memcpy( m, m_b, r * sizeof( int ) );
+    std::memcpy( n, n_b, c * sizeof( int ) );
+}
+
+void Summa::C_blockDimensions( int *m, int *n ) const
+{
+    std::memcpy( m, m_c, r * sizeof( int ) );
+    std::memcpy( n, n_c, c * sizeof( int ) );
 }
 
 void Summa::freeDimensionsArrays()

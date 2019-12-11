@@ -4,15 +4,21 @@
 
 class Summa {
   public:
-    Summa();
+    static Summa &getInstance();
+    ~Summa();
+
     void init( int *argc, char ***argv );
     void reset( int M, int N, int K );
     void finalize();
-    ~Summa();
 
-    int rankWorld() const;
-    int rankRow() const;
-    int rankCol() const;
+    int  sizeWorld() const;
+    int  rankWorld() const;
+    int  rankRow() const;
+    int  rankCol() const;
+    void gridDimensions( int *r, int *c ) const;
+    void A_blockDimensions( int *m, int *n ) const;
+    void B_blockDimensions( int *m, int *n ) const;
+    void C_blockDimensions( int *m, int *n ) const;
 
     void sendBlock( MPI_Comm      communicator,
                     int           emitter,
@@ -24,21 +30,6 @@ class Summa {
                     double *      b,
                     int           ldb );
     int  Bcast( double *buffer, int count, int emitter_rank, MPI_Comm communicator );
-    void A_blockDimensions( int **m, int **n )
-    {
-        *m = m_a;
-        *n = n_a;
-    }
-    void B_blockDimensions( int **m, int **n )
-    {
-        *m = m_b;
-        *n = n_b;
-    }
-    void C_blockDimensions( int **m, int **n )
-    {
-        *m = m_c;
-        *n = n_c;
-    }
 
   private:
     MPI_Comm commRow, commCol;
@@ -54,5 +45,6 @@ class Summa {
     int    argc;
     char **argv;
 
+    Summa();
     void freeDimensionsArrays();
 };

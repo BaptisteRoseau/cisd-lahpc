@@ -48,7 +48,33 @@ function(make_benchmark my_lapack_lib)
             ${my_lapack_lib}
     )
 
+    find_package(MPI)
+    if (MPI_CXX_FOUND)
+        target_link_libraries(${benchmark_exe} PUBLIC MPI::MPI_CXX ${MPI_CXX_LINK_FLAGS})
+    else()
+        message(FATAL_ERROR "MPI not found !")
+    endif()
+
+    target_include_directories(${benchmark_exe}
+        PUBLIC ${MPI_CXX_INCLUDE_DIRS}
+    )
+
+    target_compile_options(${benchmark_exe}
+        PUBLIC
+            ${MPI_CXX_COMPILER_FLAGS}
+    )
+
+    add_test(NAME benchmark_mpi
+         COMMAND ${MPIEXEC_EXECUTABLE}
+         ${MPIEXEC_NUMPROC_FLAG}
+         ${MPIEXEC_MAX_NUMPROCS}
+         ${MPIEXEC_PREFLAGS}
+         ${CMAKE_CURRENT_BINARY_DIR}"/Debug/benchmark_${my_lapack_lib}"
+         ${MPIEXEC_POSTFLAGS}
+)
+
 endfunction()
 
 #make_benchmark("my_lapack_seq")
 make_benchmark("my_lapack_all")
+

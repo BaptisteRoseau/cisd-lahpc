@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.10)
 project( cisd-lahpc
                DESCRIPTION "Matrix product and sequential LU factorisation"
                LANGUAGES CXX )
 
 set_property( GLOBAL PROPERTY USE_FOLDERS ON )
+
+enable_testing()
 
 add_subdirectory(lib)
 add_subdirectory(perf)

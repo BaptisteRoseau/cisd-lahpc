@@ -68,7 +68,7 @@ endfunction()
 function(link_mpi libname)
     find_package(MPI)
     if (MPI_CXX_FOUND)
-        target_link_libraries(${libname} PUBLIC MPI::MPI_CXX)
+        target_link_libraries(${libname} PUBLIC MPI::MPI_CXX ${MPI_CXX_LINK_FLAGS})
     else()
         message(FATAL_ERROR "MPI not found !")
     endif()
@@ -81,6 +81,9 @@ function(link_mpi libname)
         PUBLIC
             ${MPI_CXX_COMPILER_FLAGS}
     )
+
+    #set(MPIEXEC_PREFLAGS ${MPIEXEC_PREFLAGS} -n 4)
+
 endfunction()
 
 
