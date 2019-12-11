@@ -199,10 +199,10 @@ namespace my_lapack {
                                   m_c[rankRow] );
         }
 
-        /*if ( rankWorld == 3 ) {
+        if ( rankWorld == 3 ) {
             std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
             affiche( m_a[rankRow], n_a[rankCol], A_block.data(), m_a[rankRow], std::cout );
-        }*/
+        }
 
         // Create work arrays
         int     nb    = n_a[rankCol]; // TODO : is this correct ?
@@ -260,10 +260,10 @@ namespace my_lapack {
                                   ldc );
         }
 
-        if ( rankWorld == 0 ) {
+        /*if ( rankWorld == 0 ) {
             std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
             affiche( M, N, c, ldc, std::cout );
-        }
+        }*/
 
         // Leave
         delete[] work1, work2;
