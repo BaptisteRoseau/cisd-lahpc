@@ -245,7 +245,7 @@ MPI_Comm Summa::getRowComm() const
     if ( isInitialized ) { return commRow; }
     else {
         throwNotInitialized();
-        return -1;
+        return MPI_COMM_NULL;
     }
 }
 
@@ -254,7 +254,7 @@ MPI_Comm Summa::getColComm() const
     if ( isInitialized ) { return commCol; }
     else {
         throwNotInitialized();
-        return -1;
+        return MPI_COMM_NULL;
     }
 }
 
