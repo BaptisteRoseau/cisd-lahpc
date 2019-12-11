@@ -171,12 +171,12 @@ namespace my_lapack {
                 B_assignedHeight += m_b[i];
                 C_assignedHeight += m_c[i];
             }
-            if (rankWorld == 0)
+            /*if (rankWorld == 0)
             {
                 std::cout << "Send A( " << A_assignedHeight << ", " << A_assignedWidth << " )" << std::endl;
                 std::cout << "Send B( " << B_assignedHeight << ", " << B_assignedWidth << " )" << std::endl;
                 std::cout << "Send C( " << C_assignedHeight << ", " << C_assignedWidth << " )" << std::endl;
-            }
+            }*/
             SUMMA.sendBlockWorld( 0,
                                   proc,
                                   m_a[rankRow],
@@ -238,10 +238,6 @@ namespace my_lapack {
                 work2 );
 
         // Gather blocks
-        /*if ( rankWorld == 3 ) {
-            std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
-            affiche( m_c[rankRow], n_c[rankCol], C_block.data(), m_c[rankRow], std::cout );
-        }*/
 
         for ( int proc = 0; proc < worldSize; ++proc ) {
 
@@ -258,8 +254,8 @@ namespace my_lapack {
                 C_assignedHeight += m_c[i];
             }
 
-            if (rankWorld == 0)
-                std::cout << "C( " << C_assignedHeight << ", " << C_assignedWidth << " )" << std::endl;
+            /*if (rankWorld == 0)
+                std::cout << "C( " << C_assignedHeight << ", " << C_assignedWidth << " )" << std::endl;*/
 
             SUMMA.sendBlockWorld( proc,
                                   0,
@@ -271,10 +267,10 @@ namespace my_lapack {
                                   ldc );
         }
 
-        if ( rankWorld == 0 ) {
+        /*if ( rankWorld == 0 ) {
             std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
             affiche( M, N, c, ldc, std::cout );
-        }
+        }*/
 
         // Leave
         delete[] work1, work2;

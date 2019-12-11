@@ -92,6 +92,8 @@ void benchmark_summa( int argc, char **argv )
                       0.,
                       C.get(),
                       C.ld() );
+
+        affiche( M, N, C.get(), C.ld(), std::cout );
     }
     else {
         my_dgemm_mpi( CblasColMajor, CblasNoTrans, CblasNoTrans, M, N, K, 1., nullptr, 0, nullptr, 0, 0., nullptr, 0 );
