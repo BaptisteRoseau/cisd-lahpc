@@ -60,8 +60,8 @@ namespace my_lapack {
 
         Summa &SUMMA = Summa::getInstance();
 
-        MPI_Comm_rank( comm_row, &myrow );
-        MPI_Comm_rank( comm_col, &mycol );
+        MPI_Comm_rank( comm_row, &mycol );
+        MPI_Comm_rank( comm_col, &myrow );
 
         for ( j = 0; j < n_c[mycol]; j++ ) {
             for ( i = 0; i < m_c[myrow]; i++ ) {
@@ -134,8 +134,8 @@ namespace my_lapack {
 
         int worldSize = SUMMA.sizeWorld();
         int rankWorld = SUMMA.rankWorld();
-        int rankRow   = SUMMA.rankRow();
-        int rankCol   = SUMMA.rankCol();
+        int rankRow   = SUMMA.rankCol();
+        int rankCol   = SUMMA.rankRow();
         int rowCount, colCount;
         SUMMA.gridDimensions( &rowCount, &colCount );
 
