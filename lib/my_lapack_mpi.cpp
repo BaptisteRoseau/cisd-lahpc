@@ -116,7 +116,7 @@ namespace my_lapack {
                                   m_c[rankRow] );
         }
 
-        if ( rankWorld == 2 ) {
+        if ( rankWorld == 3 ) {
             std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
             affiche( m_a[rankRow], n_a[rankCol], A_block.data(), m_a[rankRow], std::cout );
         }
