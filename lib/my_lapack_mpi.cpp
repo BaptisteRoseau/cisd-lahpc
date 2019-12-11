@@ -64,11 +64,11 @@ namespace my_lapack {
 
         for ( int proc = 0; proc < worldSize; ++proc ) {
             SUMMA
-                .sendBlock( MPI_COMM_WORLD, 0, proc, m_a[rankRow], n_a[rankCol], a, lda, A_block.data(), m_a[rankRow] );
+                .sendBlock( 0, proc, m_a[rankRow], n_a[rankCol], a, lda, A_block.data(), m_a[rankRow]);
             SUMMA
-                .sendBlock( MPI_COMM_WORLD, 0, proc, m_b[rankRow], n_b[rankCol], b, ldb, B_block.data(), m_b[rankRow] );
+                .sendBlock( 0, proc, m_b[rankRow], n_b[rankCol], b, ldb, B_block.data(), m_b[rankRow]);
             SUMMA
-                .sendBlock( MPI_COMM_WORLD, 0, proc, m_c[rankRow], n_c[rankCol], c, ldc, C_block.data(), m_c[rankRow] );
+                .sendBlock( 0, proc, m_c[rankRow], n_c[rankCol], c, ldc, C_block.data(), m_c[rankRow]);
         }
 
         // SUMMA.finalize(); Must be done at some point !

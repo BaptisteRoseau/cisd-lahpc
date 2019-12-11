@@ -6,6 +6,7 @@
 #include <cmath>
 #include <cstring>
 #include <stdexcept>
+#include <iostream>
 
 #define A( i, j ) ( a[j * lda + i] )
 #define B( i, j ) ( b[j * ldb + i] )
@@ -197,26 +198,31 @@ void Summa::gridDimensions( int *r, int *c ) const
     *c = this->c;
 }
 
-void Summa::sendBlock( MPI_Comm      communicator,
-                       int           emitter,
-                       int           receiver,
-                       int           M,
-                       int           N,
+void Summa::sendBlock( int emitter,
+                       int receiver,
+                       int M,
+                       int N,
                        const double *a,
-                       int           lda,
-                       double *      b,
-                       int           ldb )
+                       int lda,
+                       double * b,
+                       int ldb )
 {
     int rankWorld_ = rankWorld();
     // TODO : find out if the case emitter == reciever is gracefully handle by MPI
     if ( rankWorld_ == emitter ) {
         double *sendBlock = new double[M * N];
         my_lapack::my_dlacpy( M, N, a, lda, sendBlock, ldb );
-        MPI_Send( sendBlock, M * N, MPI_DOUBLE, receiver, 0, communicator );
+        std::cout << "Sending block..." << std::endl;
+        MPI_Send( sendBlock, M * N, MPI_DOUBLE, receiver, 0, MPI_COMM_WORLD );
+        std::cout << "Send done." << std::endl;
+
     }
     else if ( rankWorld_ == receiver ) {
         MPI_Status status;
-        MPI_Recv( b, M * N, MPI_DOUBLE, emitter, 0, communicator, &status );
+        std::cout << "Receiving block..." << std::endl;
+        MPI_Recv( b, M * N, MPI_DOUBLE, emitter, 0, MPI_COMM_WORLD, &status );
+        std::cout << "Receive done." << std::endl;
+
     }
 }
 

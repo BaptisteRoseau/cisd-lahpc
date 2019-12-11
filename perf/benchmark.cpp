@@ -91,7 +91,7 @@ void benchmark_summa( int argc, char **argv )
                       B.ld(),
                       0.,
                       C.get(),
-                      C.ld() ); 
+                      C.ld() );
     }
 
     SUMMA.finalize();

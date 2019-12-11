@@ -20,15 +20,14 @@ class Summa {
     void B_blockDimensions( int *m, int *n ) const;
     void C_blockDimensions( int *m, int *n ) const;
 
-    void sendBlock( MPI_Comm      communicator,
-                    int           emitter,
-                    int           receiver,
-                    int           M,
-                    int           N,
+    void sendBlock( int emitter,
+                    int receiver,
+                    int M,
+                    int N,
                     const double *a,
-                    int           lda,
-                    double *      b,
-                    int           ldb );
+                    int lda,
+                    double * b,
+                    int ldb );
     int  Bcast( double *buffer, int count, int emitter_rank, MPI_Comm communicator );
 
   private:
