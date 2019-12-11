@@ -31,6 +31,7 @@ Summa::Summa()
 
 void throwNotInitialized()
 {
+    std::cout << "I am about to throw an exception !" << std::endl;
     throw std::runtime_error( "Summa is not initialized" );
 }
 
