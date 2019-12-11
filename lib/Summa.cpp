@@ -216,6 +216,7 @@ void Summa::sendBlockWorld( int emitter, int receiver, int M, int N, const doubl
         double *sendBlock = new double[M * N];
         my_lapack::my_dlacpy( M, N, a, lda, sendBlock, ldb );
         MPI_Send( sendBlock, M * N, MPI_DOUBLE, receiver, 0, MPI_COMM_WORLD );
+        delete[] sendBlock;
         // std::cout << "Send done." << std::endl;
     }
     else if ( rankWorld_ == receiver ) {
