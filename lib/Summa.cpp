@@ -209,10 +209,11 @@ void Summa::sendBlock( int emitter,
 {
     int rankWorld_ = rankWorld();
     // TODO : find out if the case emitter == receiver is gracefully handle by MPI
+    std::cout << "emitter: " << emitter << " receiver: " << receiver << std::endl;
     if (emitter == receiver)
     {
         std::cout << "[ " << emitter << " ] Self send" << std::endl;
-        my_lapack::my_dlacpy(M, N, a, lda, b, ldb);
+        //my_lapack::my_dlacpy(M, N, a, lda, b, ldb);
         return;
     }
     if ( rankWorld_ == emitter ) {
