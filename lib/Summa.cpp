@@ -209,19 +209,16 @@ void Summa::sendBlock( int emitter,
                        int ldb )
 {
     int rankWorld_ = rankWorld();
-    std::cout << "My world rank is " << rankWorld_ << std::endl;
-    std::cout << "Emitter is " << emitter << std::endl;
-    std::cout << "Receiver is " << receiver << std::endl;
     // TODO : find out if the case emitter == reciever is gracefully handle by MPI
     if ( rankWorld_ == emitter ) {
         double *sendBlock = new double[M * N];
         my_lapack::my_dlacpy( M, N, a, lda, sendBlock, ldb );
-        std::cout << "Sending block..." << std::endl;
+        std::cout << "Sending block to " << receiver << " ..." << std::endl;
         MPI_Send( sendBlock, M * N, MPI_DOUBLE, receiver, 0, MPI_COMM_WORLD );
         std::cout << "Send done." << std::endl;
 
     }
-    else if ( rankWorld_ == receiver ) {
+    if ( rankWorld_ == receiver ) {
         MPI_Status status;
         std::cout << "Receiving block..." << std::endl;
         MPI_Recv( b, M * N, MPI_DOUBLE, emitter, 0, MPI_COMM_WORLD, &status );
