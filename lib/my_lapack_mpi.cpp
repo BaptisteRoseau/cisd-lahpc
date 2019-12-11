@@ -49,7 +49,7 @@ namespace my_lapack {
         // SUMMA.reset( M, N, K ); Must have been done before !
 
         Summa &SUMMA     = Summa::getInstance();
-        SUMMA.reset( M, N, K );
+        // SUMMA.reset( M, N, K );
 
         int    worldSize = SUMMA.sizeWorld();
         int    rankWorld = SUMMA.rankWorld();
