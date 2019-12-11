@@ -16,7 +16,8 @@ namespace my_lapack {
 
     void my_dlacpy( int M, int N, const double *a, int lda, double *b, int ldb )
     {
-
+        int rankWorld_ = Summa::getInstance().rankWorld();
+        std::cout << "rank world dlacpy: " << rankWorld_ << std::endl;
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_PREDICATE( lda >= std::max( 1, M ) );

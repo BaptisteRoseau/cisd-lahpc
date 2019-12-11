@@ -213,7 +213,7 @@ void Summa::sendBlock( int emitter,
     if (emitter == receiver)
     {
         std::cout << "[ " << emitter << " ] Self send" << std::endl;
-        //my_lapack::my_dlacpy(M, N, a, lda, b, ldb);
+        my_lapack::my_dlacpy(M, N, a, lda, b, ldb);
         return;
     }
     else if ( rankWorld_ == emitter ) {
