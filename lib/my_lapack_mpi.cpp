@@ -63,7 +63,7 @@ namespace my_lapack {
         std::vector<int> m_a( rowCount ), n_a( colCount ), m_b( rowCount ), n_b( colCount ), m_c( rowCount ),
             n_c( colCount );
 
-        // Creating blocks
+        // Create blocks
         SUMMA.A_blockDimensions( m_a.data(), n_a.data() );
         SUMMA.B_blockDimensions( m_b.data(), n_b.data() );
         SUMMA.C_blockDimensions( m_c.data(), n_c.data() );
@@ -122,6 +122,11 @@ namespace my_lapack {
             std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
             affiche( m_a[rankRow], n_a[rankCol], A_block.data(), m_a[rankRow], std::cout );
         }*/
+
+        // Create work arrays
+
+        // call pdgemm
+
 
         // SUMMA.finalize(); Must be done at some point !
     }
