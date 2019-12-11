@@ -211,6 +211,7 @@ void Summa::sendBlock( int emitter,
     // TODO : find out if the case emitter == receiver is gracefully handle by MPI
     if (emitter == receiver)
     {
+        std::cout << "[ " << emitter << " ] Self send" << std::endl;
         my_lapack::my_dlacpy(M, N, a, lda, b, ldb);
         return;
     }
