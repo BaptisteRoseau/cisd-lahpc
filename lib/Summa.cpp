@@ -208,12 +208,12 @@ void Summa::sendBlockWorld( int emitter, int receiver, int M, int N, const doubl
     if ( rankWorld_ != emitter && rankWorld_ != receiver ) { return; }
 
     if ( emitter == receiver ) {
-        // std::cout << "[ " << emitter << " ] Self send" << std::endl;
+        std::cout << "[ " << emitter << " ] Self send" << std::endl;
         my_lapack::my_dlacpy( M, N, a, lda, b, ldb );
         return;
     }
     else if ( rankWorld_ == emitter ) {
-        // std::cout << "[ " << emitter << " ] Sending block to " << receiver << " ..." << std::endl;
+        std::cout << "[ " << emitter << " ] Sending block to " << receiver << " ..." << std::endl;
         double *sendBlock = new double[M * N];
         // std::cout << "send @: " << a << " lda: " << lda << std::endl;
         my_lapack::my_dlacpy( M, N, a, lda, sendBlock, M );
@@ -223,10 +223,10 @@ void Summa::sendBlockWorld( int emitter, int receiver, int M, int N, const doubl
     }
     else if ( rankWorld_ == receiver ) {
         MPI_Status status;
-        // std::cout << "Receiving block..." << std::endl;
+        std::cout << "[ " << receiver << " ] receiving block from " << emitter << " ..." << std::endl;
         double *recvBuff = new double[M * N];
         MPI_Recv( recvBuff, M * N, MPI_DOUBLE, emitter, 0, MPI_COMM_WORLD, &status );
-        //my_lapack::my_dlacpy( M, N, recvBuff, M, b, ldb );
+        // my_lapack::my_dlacpy( M, N, recvBuff, M, b, ldb );
         delete[] recvBuff;
         // std::cout << "Receive done." << std::endl;
     }
