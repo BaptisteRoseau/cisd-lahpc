@@ -31,6 +31,87 @@ namespace my_lapack {
 
     void init_lapack_mpi( int *argc, char ***argv ) { Summa::getInstance().init( argc, argv ); }
 
+    void pdgemm( int           m,
+                 int           n,
+                 int           k,
+                 int           nb,
+                 double        alpha,
+                 const double *a,
+                 int           lda,
+                 const double *b,
+                 int           ldb,
+                 double        beta,
+                 double *      c,
+                 int           ldc,
+                 int *         m_a,
+                 int *         n_a,
+                 int *         m_b,
+                 int *         n_b,
+                 int *         m_c,
+                 int *         n_c,
+                 MPI_Comm      comm_row,
+                 MPI_Comm      comm_col,
+                 double *      work1,
+                 double *      work2 )
+    {
+        int     myrow, mycol, nprow, npcol, i, j, kk, iwrk, icurrow, icurcol, ii, jj;
+        double *temp;
+        double *p;
+
+        Summa &SUMMA = Summa::getInstance();
+
+        MPI_Comm_rank( comm_row, &mycol );
+        MPI_Comm_rank( comm_col, &myrow );
+
+        for ( j = 0; j < n_c[mycol]; j++ ) {
+            for ( i = 0; i < m_c[myrow]; i++ ) {
+                C( i, j ) = beta * C( i, j );
+            }
+        }
+        icurrow = 0;
+        icurcol = 0;
+        ii = jj = 0;
+        // temp    = new double[ m_c[myrow] * nb ]; useless ? WTF ???
+        for ( kk = 0; kk < k; kk += iwrk ) {
+            iwrk = std::min( nb, m_b[icurrow] - ii );
+            iwrk = std::min( iwrk, n_a[icurcol] - jj );
+
+            if ( mycol == icurcol ) my_dlacpy( m_a[myrow], iwrk, &A( 0, jj ), lda, work1, m_a[myrow] );
+            if ( myrow == icurrow ) my_dlacpy( iwrk, n_b[mycol], &B( ii, 0 ), ldb, work2, iwrk );
+
+            /* broadcast work1 and work2*/
+            SUMMA.Bcast( work1, m_a[myrow] * iwrk, icurcol, comm_row );
+            SUMMA.Bcast( work2, n_b[mycol] * iwrk, icurrow, comm_col );
+
+            my_dgemm_seq( CblasColMajor,
+                          CblasNoTrans,
+                          CblasNoTrans,
+                          m_c[myrow],
+                          n_c[mycol],
+                          iwrk,
+                          alpha,
+                          work1,
+                          m_b[myrow],
+                          work2,
+                          iwrk,
+                          1.,
+                          c,
+                          ldc );
+
+            ii += iwrk;
+            jj += iwrk;
+            if ( jj >= n_a[icurcol] ) {
+                icurcol++;
+                jj = 0;
+            };
+            if ( ii >= m_b[icurrow] ) {
+                icurrow++;
+                ii = 0;
+            };
+        }
+        // delete[] temp; ???
+    }
+
     void my_dgemm_mpi( CBLAS_ORDER     Order,
                        CBLAS_TRANSPOSE TransA,
                        CBLAS_TRANSPOSE TransB,
@@ -124,10 +205,39 @@ namespace my_lapack {
         }*/
 
         // Create work arrays
+        int     nb    = n_a[rankCol]; // TODO : is this correct ?
+        double *work1 = new double[nb * m_a[rankRow]];
+        double *work2 = new double[nb * n_b[rankCol]];
 
         // call pdgemm
-
-
-        // SUMMA.finalize(); Must be done at some point !
+        pdgemm( M,
+                N,
+                K,
+                nb,
+                alpha,
+                A_block.data(),
+                m_a[rankRow],
+                B_block.data(),
+                m_b[rankRow],
+                beta,
+                C_block.data(),
+                m_c[rankRow],
+                m_a.data(),
+                n_a.data(),
+                m_b.data(),
+                n_b.data(),
+                m_c.data(),
+                n_c.data(),
+                SUMMA.getRowComm(),
+                SUMMA.getColComm(),
+                work1,
+                work2 );
+        // Gather blocks
+        if ( rankWorld == 3 ) {
+            std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
+            affiche( m_c[rankRow], n_c[rankCol], C_block.data(), m_c[rankRow], std::cout );
+        }
+        // Leave
+        delete[] work1, work2;
     }
 } // namespace my_lapack

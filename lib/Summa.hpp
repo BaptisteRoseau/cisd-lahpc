@@ -22,6 +22,8 @@ class Summa {
 
     void sendBlockWorld( int emitter, int receiver, int M, int N, const double *a, int lda, double *b, int ldb );
     int  Bcast( double *buffer, int count, int emitter_rank, MPI_Comm communicator );
+    MPI_Comm getRowComm() const;
+    MPI_Comm getColComm() const;
 
   private:
     MPI_Comm commRow, commCol;

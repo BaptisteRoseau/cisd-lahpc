@@ -73,6 +73,7 @@ void Summa::reset( int M, int N, int K )
 
         this->r = this->c = worldSizeSqrt;
 
+        // Create block dimensions arrays
         freeDimensionsArrays();
         m_a = new int[r];
         m_b = new int[r];
@@ -214,7 +215,7 @@ void Summa::sendBlockWorld( int emitter, int receiver, int M, int N, const doubl
     else if ( rankWorld_ == emitter ) {
         // std::cout << "[ " << emitter << " ] Sending block to " << receiver << " ..." << std::endl;
         double *sendBlock = new double[M * N];
-        //std::cout << "send @: " << a << " lda: " << lda << std::endl;
+        // std::cout << "send @: " << a << " lda: " << lda << std::endl;
         my_lapack::my_dlacpy( M, N, a, lda, sendBlock, ldb );
         MPI_Send( sendBlock, M * N, MPI_DOUBLE, receiver, 0, MPI_COMM_WORLD );
         delete[] sendBlock;
@@ -233,6 +234,24 @@ int Summa::Bcast( double *buffer, int count, int emitter_rank, MPI_Comm communic
     if ( isInitialized ) {
         return MPI_Bcast( static_cast<void *>( buffer ), count, MPI_DOUBLE, emitter_rank, communicator );
     }
+    else {
+        throwNotInitialized();
+        return -1;
+    }
+}
+
+MPI_Comm Summa::getRowComm() const
+{
+    if ( isInitialized ) { return commRow; }
+    else {
+        throwNotInitialized();
+        return -1;
+    }
+}
+
+MPI_Comm Summa::getColComm() const
+{
+    if ( isInitialized ) { return commCol; }
     else {
         throwNotInitialized();
         return -1;
