@@ -254,6 +254,9 @@ namespace my_lapack {
                 C_assignedHeight += m_a[i];
             }
 
+            if (rankWorld == 0)
+                std::cout << "C( " << C_assignedHeight << ", " << C_assignedWidth << " )" << std::endl; */
+
             SUMMA.sendBlockWorld( proc,
                                   0,
                                   m_c[rankRow],
