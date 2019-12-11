@@ -56,7 +56,7 @@ namespace my_lapack {
         int    r_, c_;
         SUMMA.gridDimensions( &r_, &c_ );
 
-        //std::cout << "World size : " << worldSize << std::endl;
+        // std::cout << "World size : " << worldSize << std::endl;
 
         std::vector<int> m_a( r_ ), n_a( c_ ), m_b( r_ ), n_b( c_ ), m_c( r_ ), n_c( c_ );
         SUMMA.A_blockDimensions( m_a.data(), n_a.data() );
@@ -73,16 +73,14 @@ namespace my_lapack {
                 SUMMA.sendBlock( 0, proc, m_b[rankRow], n_b[rankCol], b, ldb, B_block.data(), m_b[rankRow] );
                 SUMMA.sendBlock( 0, proc, m_c[rankRow], n_c[rankCol], c, ldc, C_block.data(), m_c[rankRow] );
             }
-            affiche( m_a[rankRow], n_a[rankCol], A_block.data(), m_a[rankRow], std::cout );
         }
         else {
             SUMMA.sendBlock( 0, rankWorld, m_a[rankRow], n_a[rankCol], a, lda, A_block.data(), m_a[rankRow] );
             SUMMA.sendBlock( 0, rankWorld, m_b[rankRow], n_b[rankCol], b, ldb, B_block.data(), m_b[rankRow] );
             SUMMA.sendBlock( 0, rankWorld, m_c[rankRow], n_c[rankCol], c, ldc, C_block.data(), m_c[rankRow] );
-            //affiche( m_a[rankRow], n_a[rankCol], A_block.data(), m_a[rankRow], std::cout );
         }
 
-        
+        if ( rankWorld == 1 ) { affiche( m_a[rankRow], n_a[rankCol], B_block.data(), m_a[rankRow], std::cout ); }
 
         // SUMMA.finalize(); Must be done at some point !
     }
