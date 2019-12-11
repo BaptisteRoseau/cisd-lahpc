@@ -31,7 +31,6 @@ Summa::Summa()
 
 void throwNotInitialized()
 {
-    std::cout << "I am about to throw an exception !" << std::endl;
     throw std::runtime_error( "Summa is not initialized" );
 }
 
@@ -218,7 +217,7 @@ void Summa::sendBlock( int emitter,
     if ( rankWorld_ == emitter ) {
         double *sendBlock = new double[M * N];
         my_lapack::my_dlacpy( M, N, a, lda, sendBlock, ldb );
-        std::cout << "Sending block to " << receiver << " ..." << std::endl;
+        std::cout << "[ " << emitter << " ] Sending block to " << receiver << " ..." << std::endl;
         MPI_Send( sendBlock, M * N, MPI_DOUBLE, receiver, 0, MPI_COMM_WORLD );
         std::cout << "Send done." << std::endl;
 
