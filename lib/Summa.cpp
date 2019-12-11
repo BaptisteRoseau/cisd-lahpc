@@ -208,6 +208,9 @@ void Summa::sendBlock( int emitter,
                        int ldb )
 {
     int rankWorld_ = rankWorld();
+    std::cout << "My world rank is " << rankWorld_ << std::endl;
+    std::cout << "Emitter is " << emitter << std::endl;
+    std::cout << "Receiver is " << receiver << std::endl;
     // TODO : find out if the case emitter == reciever is gracefully handle by MPI
     if ( rankWorld_ == emitter ) {
         double *sendBlock = new double[M * N];
