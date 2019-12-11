@@ -212,23 +212,23 @@ void Summa::sendBlock( int emitter,
 
     if (emitter == receiver)
     {
-        std::cout << "[ " << emitter << " ] Self send" << std::endl;
+        //std::cout << "[ " << emitter << " ] Self send" << std::endl;
         my_lapack::my_dlacpy(M, N, a, lda, b, ldb);
         return;
     }
     else if ( rankWorld_ == emitter ) {
-        std::cout << "[ " << emitter << " ] Sending block to " << receiver << " ..." << std::endl;
+        //std::cout << "[ " << emitter << " ] Sending block to " << receiver << " ..." << std::endl;
         double *sendBlock = new double[M * N];
         my_lapack::my_dlacpy( M, N, a, lda, sendBlock, ldb );
         MPI_Send( sendBlock, M * N, MPI_DOUBLE, receiver, 0, MPI_COMM_WORLD );
-        std::cout << "Send done." << std::endl;
+        //std::cout << "Send done." << std::endl;
 
     }
     else if ( rankWorld_ == receiver ) {
         MPI_Status status;
-        std::cout << "Receiving block..." << std::endl;
+        //std::cout << "Receiving block..." << std::endl;
         MPI_Recv( b, M * N, MPI_DOUBLE, emitter, 0, MPI_COMM_WORLD, &status );
-        std::cout << "Receive done." << std::endl;
+        //std::cout << "Receive done." << std::endl;
 
     }
 }

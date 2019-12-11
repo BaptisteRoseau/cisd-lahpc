@@ -3,9 +3,9 @@
 #include "my_lapack.h"
 
 #include <algorithm>
+#include <iostream>
 #include <mpi.h>
 #include <vector>
-#include <iostream>
 
 /* Access matrix elements provided storage is COLUMN MAJOR */
 #define A( i, j ) ( a[j * lda + i] )
@@ -16,12 +16,6 @@ namespace my_lapack {
 
     void my_dlacpy( int M, int N, const double *a, int lda, double *b, int ldb )
     {
-        int rankWorld_ = Summa::getInstance().rankWorld();
-        std::cout << "rank world dlacpy: " << rankWorld_ << std::endl;
-        if (rankWorld_ != 0)
-        {
-            throw std::logic_error("dlacpy from process other than root");
-        }
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_PREDICATE( lda >= std::max( 1, M ) );
@@ -55,6 +49,7 @@ namespace my_lapack {
 
         Summa &SUMMA     = Summa::getInstance();
         int    worldSize = SUMMA.sizeWorld();
+        int    rankWorld = SUMMA.rankWorld();
         int    rankRow   = SUMMA.rankRow();
         int    rankCol   = SUMMA.rankCol();
         int    r_, c_;
@@ -71,13 +66,17 @@ namespace my_lapack {
         std::vector<double> B_block( m_b[rankRow] * n_b[rankCol] );
         std::vector<double> C_block( m_c[rankRow] * n_c[rankCol] );
 
-        for ( int proc = 0; proc < worldSize; ++proc ) {
-            SUMMA
-                .sendBlock( 0, proc, m_a[rankRow], n_a[rankCol], a, lda, A_block.data(), m_a[rankRow]);
-            SUMMA
-                .sendBlock( 0, proc, m_b[rankRow], n_b[rankCol], b, ldb, B_block.data(), m_b[rankRow]);
-            SUMMA
-                .sendBlock( 0, proc, m_c[rankRow], n_c[rankCol], c, ldc, C_block.data(), m_c[rankRow]);
+        if ( rankWorld == 0 ) {
+            for ( int proc = 0; proc < worldSize; ++proc ) {
+                SUMMA.sendBlock( 0, proc, m_a[rankRow], n_a[rankCol], a, lda, A_block.data(), m_a[rankRow] );
+                SUMMA.sendBlock( 0, proc, m_b[rankRow], n_b[rankCol], b, ldb, B_block.data(), m_b[rankRow] );
+                SUMMA.sendBlock( 0, proc, m_c[rankRow], n_c[rankCol], c, ldc, C_block.data(), m_c[rankRow] );
+            }
+        }
+        else {
+            SUMMA.sendBlock( 0, rankWorld, m_a[rankRow], n_a[rankCol], a, lda, A_block.data(), m_a[rankRow] );
+            SUMMA.sendBlock( 0, rankWorld, m_b[rankRow], n_b[rankCol], b, ldb, B_block.data(), m_b[rankRow] );
+            SUMMA.sendBlock( 0, rankWorld, m_c[rankRow], n_c[rankCol], c, ldc, C_block.data(), m_c[rankRow] );
         }
 
         // SUMMA.finalize(); Must be done at some point !
