@@ -53,12 +53,13 @@ namespace my_lapack {
         int    rankWorld = SUMMA.rankWorld();
         int    rankRow   = SUMMA.rankRow();
         int    rankCol   = SUMMA.rankCol();
-        int    r_, c_;
-        SUMMA.gridDimensions( &r_, &c_ );
+        int    rowCount, colCount;
+        SUMMA.gridDimensions( &rowCount, &colCount );
 
         // std::cout << "World size : " << worldSize << std::endl;
 
-        std::vector<int> m_a( r_ ), n_a( c_ ), m_b( r_ ), n_b( c_ ), m_c( r_ ), n_c( c_ );
+        std::vector<int> m_a( rowCount ), n_a( colCount ), m_b( rowCount ), n_b( colCount ), m_c( rowCount ),
+            n_c( colCount );
         SUMMA.A_blockDimensions( m_a.data(), n_a.data() );
         SUMMA.B_blockDimensions( m_b.data(), n_b.data() );
         SUMMA.C_blockDimensions( m_c.data(), n_c.data() );
@@ -67,18 +68,18 @@ namespace my_lapack {
         std::vector<double> B_block( m_b[rankRow] * n_b[rankCol] );
         std::vector<double> C_block( m_c[rankRow] * n_c[rankCol] );
 
-        if ( rankWorld == 0 ) {
-            for ( int proc = 0; proc < worldSize; ++proc ) {
-                SUMMA.sendBlock( 0, proc, m_a[rankRow], n_a[rankCol], a, lda, A_block.data(), m_a[rankRow] );
-                SUMMA.sendBlock( 0, proc, m_b[rankRow], n_b[rankCol], b, ldb, B_block.data(), m_b[rankRow] );
-                SUMMA.sendBlock( 0, proc, m_c[rankRow], n_c[rankCol], c, ldc, C_block.data(), m_c[rankRow] );
-            }
+        // if ( rankWorld == 0 ) {
+        for ( int proc = 0; proc < worldSize; ++proc ) {
+            SUMMA.sendBlockWorld( 0, proc, m_a[rankRow], n_a[rankCol], a, lda, A_block.data(), m_a[rankRow] );
+            SUMMA.sendBlockWorld( 0, proc, m_b[rankRow], n_b[rankCol], b, ldb, B_block.data(), m_b[rankRow] );
+            SUMMA.sendBlockWorld( 0, proc, m_c[rankRow], n_c[rankCol], c, ldc, C_block.data(), m_c[rankRow] );
         }
-        else {
-            SUMMA.sendBlock( 0, rankWorld, m_a[rankRow], n_a[rankCol], a, lda, A_block.data(), m_a[rankRow] );
-            SUMMA.sendBlock( 0, rankWorld, m_b[rankRow], n_b[rankCol], b, ldb, B_block.data(), m_b[rankRow] );
-            SUMMA.sendBlock( 0, rankWorld, m_c[rankRow], n_c[rankCol], c, ldc, C_block.data(), m_c[rankRow] );
-        }
+        //}
+        /*else {
+            SUMMA.sendBlockWorld( 0, rankWorld, m_a[rankRow], n_a[rankCol], a, lda, A_block.data(), m_a[rankRow] );
+            SUMMA.sendBlockWorld( 0, rankWorld, m_b[rankRow], n_b[rankCol], b, ldb, B_block.data(), m_b[rankRow] );
+            SUMMA.sendBlockWorld( 0, rankWorld, m_c[rankRow], n_c[rankCol], c, ldc, C_block.data(), m_c[rankRow] );
+        }*/
 
         if ( rankWorld == 1 ) { affiche( m_a[rankRow], n_a[rankCol], B_block.data(), m_a[rankRow], std::cout ); }
 

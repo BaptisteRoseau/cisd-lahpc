@@ -5,8 +5,8 @@
 
 #include <cmath>
 #include <cstring>
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
 
 #define A( i, j ) ( a[j * lda + i] )
 #define B( i, j ) ( b[j * ldb + i] )
@@ -198,44 +198,39 @@ void Summa::gridDimensions( int *r, int *c ) const
     *c = this->c;
 }
 
-void Summa::sendBlock( int emitter,
-                       int receiver,
-                       int M,
-                       int N,
-                       const double *a,
-                       int lda,
-                       double * b,
-                       int ldb )
+void Summa::sendBlockWorld( int emitter, int receiver, int M, int N, const double *a, int lda, double *b, int ldb )
 {
     int rankWorld_ = rankWorld();
-    //std::cout << "emitter: " << emitter << " receiver: " << receiver << std::endl;
+    // std::cout << "emitter: " << emitter << " receiver: " << receiver << std::endl;
 
-    if (emitter == receiver)
-    {
-        //std::cout << "[ " << emitter << " ] Self send" << std::endl;
-        my_lapack::my_dlacpy(M, N, a, lda, b, ldb);
+    // No reason to perform this operation if neither emitter nor receiver is the current process
+    if ( rankWorld_ != emitter && rankWorld_ != receiver ) { return; }
+
+    if ( emitter == receiver ) {
+        // std::cout << "[ " << emitter << " ] Self send" << std::endl;
+        my_lapack::my_dlacpy( M, N, a, lda, b, ldb );
         return;
     }
     else if ( rankWorld_ == emitter ) {
-        //std::cout << "[ " << emitter << " ] Sending block to " << receiver << " ..." << std::endl;
+        // std::cout << "[ " << emitter << " ] Sending block to " << receiver << " ..." << std::endl;
         double *sendBlock = new double[M * N];
         my_lapack::my_dlacpy( M, N, a, lda, sendBlock, ldb );
         MPI_Send( sendBlock, M * N, MPI_DOUBLE, receiver, 0, MPI_COMM_WORLD );
-        //std::cout << "Send done." << std::endl;
-
+        // std::cout << "Send done." << std::endl;
     }
     else if ( rankWorld_ == receiver ) {
         MPI_Status status;
-        //std::cout << "Receiving block..." << std::endl;
+        // std::cout << "Receiving block..." << std::endl;
         MPI_Recv( b, M * N, MPI_DOUBLE, emitter, 0, MPI_COMM_WORLD, &status );
-        //std::cout << "Receive done." << std::endl;
-
+        // std::cout << "Receive done." << std::endl;
     }
 }
 
 int Summa::Bcast( double *buffer, int count, int emitter_rank, MPI_Comm communicator )
 {
-    if ( isInitialized ) { return MPI_Bcast( static_cast<void *>( buffer ), count, MPI_DOUBLE, emitter_rank, communicator ); }
+    if ( isInitialized ) {
+        return MPI_Bcast( static_cast<void *>( buffer ), count, MPI_DOUBLE, emitter_rank, communicator );
+    }
     else {
         throwNotInitialized();
         return -1;
