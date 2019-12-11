@@ -171,7 +171,7 @@ int Summa::rankRow() const
 {
     if ( isInitialized ) {
         int rank;
-        MPI_Comm_rank( commCol, &rank );// it seems odd but it is correct
+        MPI_Comm_rank( commCol, &rank ); // it seems odd but it is correct
         return rank;
     }
     else {
@@ -184,7 +184,7 @@ int Summa::rankCol() const
 {
     if ( isInitialized ) {
         int rank;
-        MPI_Comm_rank( commRow, &rank );// it seems odd but it is correct
+        MPI_Comm_rank( commRow, &rank ); // it seems odd but it is correct
         return rank;
     }
     else {
@@ -202,33 +202,30 @@ void Summa::gridDimensions( int *r, int *c ) const
 void Summa::sendBlockWorld( int emitter, int receiver, int M, int N, const double *a, int lda, double *b, int ldb )
 {
     int rankWorld_ = rankWorld();
-    // std::cout << "emitter: " << emitter << " receiver: " << receiver << std::endl;
 
     // No reason to perform this operation if neither emitter nor receiver is the current process
     if ( rankWorld_ != emitter && rankWorld_ != receiver ) { return; }
 
     if ( emitter == receiver ) {
-        std::cout << "[ " << emitter << " ] Self send" << std::endl;
         my_lapack::my_dlacpy( M, N, a, lda, b, ldb );
         return;
     }
     else if ( rankWorld_ == emitter ) {
-        std::cout << "[ " << emitter << " ] Sending block to " << receiver << " ..." << std::endl;
         double *sendBlock = new double[M * N];
-        // std::cout << "send @: " << a << " lda: " << lda << std::endl;
+
         my_lapack::my_dlacpy( M, N, a, lda, sendBlock, M );
         MPI_Send( sendBlock, M * N, MPI_DOUBLE, receiver, 0, MPI_COMM_WORLD );
+
         delete[] sendBlock;
-        // std::cout << "Send done." << std::endl;
     }
     else if ( rankWorld_ == receiver ) {
         MPI_Status status;
-        std::cout << "[ " << receiver << " ] receiving block from " << emitter << " ..." << std::endl;
-        double *recvBuff = new double[M * N];
+        double *   recvBuff = new double[M * N];
+
         MPI_Recv( recvBuff, M * N, MPI_DOUBLE, emitter, 0, MPI_COMM_WORLD, &status );
         my_lapack::my_dlacpy( M, N, recvBuff, M, b, ldb );
+
         delete[] recvBuff;
-        // std::cout << "Receive done." << std::endl;
     }
 }
 
