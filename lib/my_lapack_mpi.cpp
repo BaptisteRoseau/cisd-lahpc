@@ -18,6 +18,10 @@ namespace my_lapack {
     {
         int rankWorld_ = Summa::getInstance().rankWorld();
         std::cout << "rank world dlacpy: " << rankWorld_ << std::endl;
+        if (rankWorld_ != 0)
+        {
+            throw std::logic_error("dlacpy from process other than root");
+        }
         LAHPC_CHECK_POSITIVE( M );
         LAHPC_CHECK_POSITIVE( N );
         LAHPC_CHECK_PREDICATE( lda >= std::max( 1, M ) );
