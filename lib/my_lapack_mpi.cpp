@@ -239,7 +239,7 @@ namespace my_lapack {
             affiche( m_c[rankRow], n_c[rankCol], C_block.data(), m_c[rankRow], std::cout );
         }*/
 
-        /*for ( int proc = 0; proc < worldSize; ++proc ) {
+        for ( int proc = 0; proc < worldSize; ++proc ) {
             int C_assignedWidth = 0, C_assignedHeight = 0;
 
             for ( int i = 0; i < proc % colCount; ++i ) {
@@ -258,7 +258,7 @@ namespace my_lapack {
                                   m_c[rankRow],
                                   &C( C_assignedHeight, C_assignedWidth ),
                                   ldc );
-        }*/
+        }
 
         if ( rankWorld == 0 ) {
             std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;

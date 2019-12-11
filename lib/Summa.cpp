@@ -217,17 +217,17 @@ void Summa::sendBlockWorld( int emitter, int receiver, int M, int N, const doubl
         double *sendBlock = new double[M * N];
         // std::cout << "send @: " << a << " lda: " << lda << std::endl;
         my_lapack::my_dlacpy( M, N, a, lda, sendBlock, M );
-        //MPI_Send( sendBlock, M * N, MPI_DOUBLE, receiver, 0, MPI_COMM_WORLD );
+        MPI_Send( sendBlock, M * N, MPI_DOUBLE, receiver, 0, MPI_COMM_WORLD );
         delete[] sendBlock;
         // std::cout << "Send done." << std::endl;
     }
     else if ( rankWorld_ == receiver ) {
         MPI_Status status;
         // std::cout << "Receiving block..." << std::endl;
-        /*double *recvBuff = new double[M * N];
+        double *recvBuff = new double[M * N];
         MPI_Recv( recvBuff, M * N, MPI_DOUBLE, emitter, 0, MPI_COMM_WORLD, &status );
         my_lapack::my_dlacpy( M, N, recvBuff, M, b, ldb );
-        delete[] recvBuff;*/
+        delete[] recvBuff;
         // std::cout << "Receive done." << std::endl;
     }
 }
