@@ -208,7 +208,7 @@ void Summa::sendBlock( int emitter,
                        int ldb )
 {
     int rankWorld_ = rankWorld();
-    std::cout << "emitter: " << emitter << " receiver: " << receiver << std::endl;
+    //std::cout << "emitter: " << emitter << " receiver: " << receiver << std::endl;
 
     if (emitter == receiver)
     {
