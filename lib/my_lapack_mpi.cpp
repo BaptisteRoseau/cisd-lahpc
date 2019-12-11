@@ -14,15 +14,16 @@
 
 namespace my_lapack {
 
-    void my_dlacpy( int M, int N, const double *a, int lda, double *b, int ldb )
+    void my_dlacpy( int MMM, int N, const double *a, int lda, double *b, int ldb )
     {
-        LAHPC_CHECK_POSITIVE( M );
+
+        LAHPC_CHECK_POSITIVE( MMM );
         LAHPC_CHECK_POSITIVE( N );
-        LAHPC_CHECK_PREDICATE( lda >= std::max( 1, M ) );
-        LAHPC_CHECK_PREDICATE( ldb >= std::max( 1, M ) );
+        LAHPC_CHECK_PREDICATE( lda >= std::max( 1, MMM ) );
+        LAHPC_CHECK_PREDICATE( ldb >= std::max( 1, MMM ) );
 
         for ( int j = 0; j < N; ++j ) {
-            for ( int i = 0; i < M; ++i ) {
+            for ( int i = 0; i < MMM; ++i ) {
                 B( i, j ) = A( i, j );
             }
         }
