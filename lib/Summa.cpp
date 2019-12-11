@@ -171,7 +171,7 @@ int Summa::rankRow() const
 {
     if ( isInitialized ) {
         int rank;
-        MPI_Comm_rank( commRow, &rank );
+        MPI_Comm_rank( commCol, &rank );// it seems odd but it is correct
         return rank;
     }
     else {
@@ -184,7 +184,7 @@ int Summa::rankCol() const
 {
     if ( isInitialized ) {
         int rank;
-        MPI_Comm_rank( commCol, &rank );
+        MPI_Comm_rank( commRow, &rank );// it seems odd but it is correct
         return rank;
     }
     else {
