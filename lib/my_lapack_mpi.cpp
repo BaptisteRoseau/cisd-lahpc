@@ -250,14 +250,14 @@ namespace my_lapack {
                 C_assignedHeight += m_a[i];
             }
 
-            /*SUMMA.sendBlockWorld( proc,
+            SUMMA.sendBlockWorld( proc,
                                   0,
                                   m_c[rankRow],
                                   n_c[rankCol],
                                   C_block.data(),
                                   m_c[rankRow],
                                   &C( C_assignedHeight, C_assignedWidth ),
-                                  ldc );*/
+                                  ldc );
         }
 
         /*if ( rankWorld == 0 ) {
