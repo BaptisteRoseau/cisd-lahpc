@@ -93,6 +93,9 @@ void benchmark_summa( int argc, char **argv )
                       C.get(),
                       C.ld() );
     }
+    else {
+        my_dgemm_mpi( CblasColMajor, CblasNoTrans, CblasNoTrans, M, N, K, 1., nullptr, 0, nullptr, 0, 0., nullptr, 0 );
+    }
 
     SUMMA.finalize();
 }
