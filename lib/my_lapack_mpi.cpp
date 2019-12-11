@@ -60,8 +60,8 @@ namespace my_lapack {
 
         Summa &SUMMA = Summa::getInstance();
 
-        MPI_Comm_rank( comm_row, &mycol );
-        MPI_Comm_rank( comm_col, &myrow );
+        MPI_Comm_rank( comm_row, &myrow );
+        MPI_Comm_rank( comm_col, &mycol );
 
         for ( j = 0; j < n_c[mycol]; j++ ) {
             for ( i = 0; i < m_c[myrow]; i++ ) {
