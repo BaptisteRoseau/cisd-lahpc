@@ -77,13 +77,15 @@ namespace my_lapack {
             int B_assignedWidth = 0, B_assignedHeight = 0;
             int C_assignedWidth = 0, C_assignedHeight = 0;
 
-            for ( int i = 0; i < proc % colCount; ++i ) {
+            for ( int i = 0; i < proc % colCount;
+                  ++i ) { // TODO : "i < proc % colCount" that's a clear fuck to encapsulation
                 A_assignedWidth += n_a[i];
                 B_assignedWidth += n_b[i];
                 C_assignedWidth += n_c[i];
             }
 
-            for ( int i = 0; i < proc / rowCount; ++i ) {
+            for ( int i = 0; i < proc / rowCount;
+                  ++i ) { // TODO : "i < proc / colCount" that's a clear fuck to encapsulation
                 A_assignedHeight += m_a[i];
                 B_assignedHeight += m_b[i];
                 C_assignedHeight += m_c[i];
@@ -116,10 +118,10 @@ namespace my_lapack {
                                   m_c[rankRow] );
         }
 
-        if ( rankWorld == 3 ) {
+        /*if ( rankWorld == 3 ) {
             std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
             affiche( m_a[rankRow], n_a[rankCol], A_block.data(), m_a[rankRow], std::cout );
-        }
+        }*/
 
         // SUMMA.finalize(); Must be done at some point !
     }
