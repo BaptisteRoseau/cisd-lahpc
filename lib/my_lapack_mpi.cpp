@@ -232,11 +232,39 @@ namespace my_lapack {
                 SUMMA.getColComm(),
                 work1,
                 work2 );
+
         // Gather blocks
-        if ( rankWorld == 3 ) {
+        /*if ( rankWorld == 3 ) {
             std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
             affiche( m_c[rankRow], n_c[rankCol], C_block.data(), m_c[rankRow], std::cout );
+        }*/
+
+        for ( int proc = 0; proc < worldSize; ++proc ) {
+            int C_assignedWidth = 0, C_assignedHeight = 0;
+
+            for ( int i = 0; i < proc % colCount; ++i ) {
+                C_assignedWidth += n_a[i];
+            }
+
+            for ( int i = 0; i < proc / rowCount; ++i ) {
+                C_assignedHeight += m_a[i];
+            }
+
+            SUMMA.sendBlockWorld( proc,
+                                  0,
+                                  m_c[rankRow],
+                                  n_c[rankCol],
+                                  C_block.data(),
+                                  m_c[rankRow],
+                                  &C( C_assignedHeight, C_assignedWidth ),
+                                  ldc );
         }
+
+        if ( rankWorld == 0 ) {
+            std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
+            affiche( M, N, c, ldc, std::cout );
+        }
+
         // Leave
         delete[] work1, work2;
     }
