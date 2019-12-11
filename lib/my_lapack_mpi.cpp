@@ -158,14 +158,14 @@ namespace my_lapack {
             int B_assignedWidth = 0, B_assignedHeight = 0;
             int C_assignedWidth = 0, C_assignedHeight = 0;
 
-            for ( int i = 0; i < proc % colCount;
+            for ( int i = 0; i < proc / colCount;
                   ++i ) { // TODO : "i < proc % colCount" that's a clear fuck to encapsulation
                 A_assignedWidth += n_a[i];
                 B_assignedWidth += n_b[i];
                 C_assignedWidth += n_c[i];
             }
 
-            for ( int i = 0; i < proc / rowCount;
+            for ( int i = 0; i < proc % rowCount;
                   ++i ) { // TODO : "i < proc / colCount" that's a clear fuck to encapsulation
                 A_assignedHeight += m_a[i];
                 B_assignedHeight += m_b[i];
@@ -246,11 +246,11 @@ namespace my_lapack {
 
             int C_assignedWidth = 0, C_assignedHeight = 0;
 
-            for ( int i = 0; i < proc % colCount; ++i ) {
+            for ( int i = 0; i < proc / colCount; ++i ) {
                 C_assignedWidth += n_a[i];
             }
 
-            for ( int i = 0; i < proc / rowCount; ++i ) {
+            for ( int i = 0; i < proc % rowCount; ++i ) {
                 C_assignedHeight += m_a[i];
             }
 
