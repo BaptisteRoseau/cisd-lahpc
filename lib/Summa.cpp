@@ -131,7 +131,7 @@ void deleteArray( T **ptr )
 
 Summa::~Summa()
 {
-    MPI_Finalize();
+    //  MPI_Finalize();
     for ( int i = 0; i < argc; ++i ) {
         deleteArray( &argv[i] );
     }
@@ -208,26 +208,26 @@ void Summa::sendBlock( int emitter,
                        int ldb )
 {
     int rankWorld_ = rankWorld();
-    // TODO : find out if the case emitter == receiver is gracefully handle by MPI
     std::cout << "emitter: " << emitter << " receiver: " << receiver << std::endl;
+
     if (emitter == receiver)
     {
         std::cout << "[ " << emitter << " ] Self send" << std::endl;
-        //my_lapack::my_dlacpy(M, N, a, lda, b, ldb);
+        my_lapack::my_dlacpy(M, N, a, lda, b, ldb);
         return;
     }
-    if ( rankWorld_ == emitter ) {
+    else if ( rankWorld_ == emitter ) {
         std::cout << "[ " << emitter << " ] Sending block to " << receiver << " ..." << std::endl;
-        /*double *sendBlock = new double[M * N];
+        double *sendBlock = new double[M * N];
         my_lapack::my_dlacpy( M, N, a, lda, sendBlock, ldb );
-        MPI_Send( sendBlock, M * N, MPI_DOUBLE, receiver, 0, MPI_COMM_WORLD );*/
+        MPI_Send( sendBlock, M * N, MPI_DOUBLE, receiver, 0, MPI_COMM_WORLD );
         std::cout << "Send done." << std::endl;
 
     }
     else if ( rankWorld_ == receiver ) {
         MPI_Status status;
         std::cout << "Receiving block..." << std::endl;
-        //MPI_Recv( b, M * N, MPI_DOUBLE, emitter, 0, MPI_COMM_WORLD, &status );
+        MPI_Recv( b, M * N, MPI_DOUBLE, emitter, 0, MPI_COMM_WORLD, &status );
         std::cout << "Receive done." << std::endl;
 
     }
