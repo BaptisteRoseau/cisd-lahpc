@@ -79,7 +79,7 @@ void benchmark_summa( int argc, char **argv )
     if ( SUMMA.rankWorld() == 0 ) {
         // Mat A( M, K, 1. ), B( K, N, 1. ), C( M, N, 1. );
         // Mat A = MatSequenceRow(M, K);
-        Mat B( K, N, 1. ), C( M, N, 1. ), A( M, K, 1. );
+        Mat B( K, N, 1. ), C( M, N, 0. ), A( M, K, 1. );
         my_dgemm_mpi( CblasColMajor,
                       CblasNoTrans,
                       CblasNoTrans,

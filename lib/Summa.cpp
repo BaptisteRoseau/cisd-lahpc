@@ -214,11 +214,11 @@ void Summa::sendBlockWorld( int emitter, int receiver, int M, int N, const doubl
     }
     else if ( rankWorld_ == emitter ) {
         // std::cout << "[ " << emitter << " ] Sending block to " << receiver << " ..." << std::endl;
-        //double *sendBlock = new double[M * N];
-        //// std::cout << "send @: " << a << " lda: " << lda << std::endl;
-        //my_lapack::my_dlacpy( M, N, a, lda, sendBlock, M );
+        double *sendBlock = new double[M * N];
+        // std::cout << "send @: " << a << " lda: " << lda << std::endl;
+        my_lapack::my_dlacpy( M, N, a, lda, sendBlock, M );
         //MPI_Send( sendBlock, M * N, MPI_DOUBLE, receiver, 0, MPI_COMM_WORLD );
-        //delete[] sendBlock;
+        delete[] sendBlock;
         // std::cout << "Send done." << std::endl;
     }
     else if ( rankWorld_ == receiver ) {
