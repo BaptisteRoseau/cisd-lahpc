@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <mpi.h>
 #include <vector>
+#include <iostream>
 
 /* Access matrix elements provided storage is COLUMN MAJOR */
 #define A( i, j ) ( a[j * lda + i] )
@@ -52,6 +53,8 @@ namespace my_lapack {
         int    rankCol   = SUMMA.rankCol();
         int    r_, c_;
         SUMMA.gridDimensions( &r_, &c_ );
+
+        std::cout << "World size : " << worldSize << std::endl;
 
         std::vector<int> m_a( r_ ), n_a( c_ ), m_b( r_ ), n_b( c_ ), m_c( r_ ), n_c( c_ );
         SUMMA.A_blockDimensions( m_a.data(), n_a.data() );
