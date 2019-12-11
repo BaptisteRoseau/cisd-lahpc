@@ -77,18 +77,18 @@ namespace my_lapack {
             int B_assignedWidth = 0, B_assignedHeight = 0;
             int C_assignedWidth = 0, C_assignedHeight = 0;
 
-            for ( int i = 0; i < rankRow; ++i ) {
+            for ( int i = 0; i < proc % colCount; ++i ) {
                 A_assignedWidth += n_a[i];
                 B_assignedWidth += n_b[i];
                 C_assignedWidth += n_c[i];
             }
 
-            for ( int i = 0; i < rankCol; ++i ) {
+            for ( int i = 0; i < proc / rowCount; ++i ) {
                 A_assignedHeight += m_a[i];
                 B_assignedHeight += m_b[i];
                 C_assignedHeight += m_c[i];
             }
-            if ( rankWorld == 2 )
+            if ( rankWorld != 0 )
                 std::cout << "A( " << A_assignedHeight << ", " << A_assignedWidth << " )" << std::endl;
             SUMMA.sendBlockWorld( 0,
                                   proc,
