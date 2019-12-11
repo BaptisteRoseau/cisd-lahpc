@@ -199,10 +199,10 @@ namespace my_lapack {
                                   m_c[rankRow] );
         }
 
-        if ( rankWorld == 3 ) {
+        /*if ( rankWorld == 3 ) {
             std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
             affiche( m_a[rankRow], n_a[rankCol], A_block.data(), m_a[rankRow], std::cout );
-        }
+        }*/
 
         // Create work arrays
         int     nb    = n_a[rankCol]; // TODO : is this correct ?
@@ -234,10 +234,10 @@ namespace my_lapack {
                 work2 );
 
         // Gather blocks
-        /*if ( rankWorld == 2 ) {
+        if ( rankWorld == 3 ) {
             std::cout << "rank col: " << rankCol << " rank row: " << rankRow << std::endl;
             affiche( m_c[rankRow], n_c[rankCol], C_block.data(), m_c[rankRow], std::cout );
-        }*/
+        }
 
         for ( int proc = 0; proc < worldSize; ++proc ) {
             int C_assignedWidth = 0, C_assignedHeight = 0;
