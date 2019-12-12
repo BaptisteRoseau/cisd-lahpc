@@ -6,7 +6,7 @@ if [ ! -f $TEST_PERF_FILE ]; then
     scripts/install.sh
     if ! [ $? -eq 0 ]; then
         module load language/python/3.5.9
-        scripts/install_plafrim.sh
+        source scripts/install_plafrim.sh
         if ! [ $? -eq 0 ]; then
         echo "Failed to build binaries."
         cd $currDir

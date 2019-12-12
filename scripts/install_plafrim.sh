@@ -15,7 +15,7 @@ mkdir -p build && cd build && \
  cmake3 -DCMAKE_BUILD_TYPE=$1 .. && make -j20 
 
 if ! [ $? -eq 0 ]; then
-    echo "Please run this script from the project root directory."
+    echo "Please run this script from the project root directory using 'source'."
     rm -r build
     cd $currDir
     exit 1
