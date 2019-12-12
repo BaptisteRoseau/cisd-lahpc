@@ -1,3 +1,12 @@
+#!/usr/bin/bash
+
+if [ $# -le 1 ]; then
+    echo "[INSTALL] No argument provided, default is Debug."
+elif [ ! $1 = "Debug" -a ! $1 = "Release" ]; then
+    echo "[INSTALL] Incorrect configuration. Possible values are Debug and Release.";
+    exit 0
+fi
+
 currDir=$(pwd)
 
 module load compiler/gcc/8.3.0 linalg/mkl/2019_update4 compiler/cuda/10.1 mpi/openmpi/4.0.1
