@@ -8,5 +8,6 @@ set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 enable_testing()
 
 add_subdirectory(lib)
+add_subdirectory(perf)
 add_subdirectory(test)
 

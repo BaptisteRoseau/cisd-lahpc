@@ -199,7 +199,7 @@ void Summa::gridDimensions( int *r, int *c ) const
     *c = this->c;
 }
 
-void Summa::sendBlockWorld( int emitter, int receiver, int M, int N, const double *a, int lda, double *b, int ldb )
+void Summa::sendBlockWorld( int emitter, int receiver, int M, int N, const double *a, int lda, double *b, int ldb ) const
 {
     int rankWorld_ = rankWorld();
 
@@ -229,7 +229,7 @@ void Summa::sendBlockWorld( int emitter, int receiver, int M, int N, const doubl
     }
 }
 
-int Summa::Bcast( double *buffer, int count, int emitter_rank, MPI_Comm communicator )
+int Summa::Bcast( double *buffer, int count, int emitter_rank, MPI_Comm communicator ) const
 {
     if ( isInitialized ) {
         return MPI_Bcast( static_cast<void *>( buffer ), count, MPI_DOUBLE, emitter_rank, communicator );
