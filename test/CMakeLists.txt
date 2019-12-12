@@ -27,21 +27,12 @@ function(make test_filename my_lapack_lib)
             "${PROJECT_SOURCE_DIR}/algonum/include"
     )
     
-    if ( WIN32 )
-        target_compile_options( 
-            "${test_filename}_${my_lapack_lib}"
-            PRIVATE
-                "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
-                "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"
-        )
-    else()
-        target_compile_options( 
-            "${test_filename}_${my_lapack_lib}"
-            PRIVATE
-                "${FLAGS_DEBUG}"
-                "${FLAGS_RELEASE}"
-        )
-    endif()
+    target_compile_options( 
+        "${test_filename}_${my_lapack_lib}"
+        PRIVATE
+            "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
+            "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"
+    )
     
     set_target_properties(
         "${test_filename}_${my_lapack_lib}"
@@ -93,15 +84,14 @@ if ( UNIX )
         PROPERTIES CXX_STANDARD 11
     )
     
+    find_library(
+        libalgonum
+        "libalgonum.so"
+        HINTS
+            "${PROJECT_SOURCE_DIR}/algonum/lib/"
+    )
     
-        find_library(
-            libalgonum
-            "libalgonum.so"
-            HINTS
-                "${PROJECT_SOURCE_DIR}/algonum/lib/"
-        )
-    
-        message(STATUS ${libalgonum})
+    message(STATUS ${libalgonum})
     
     target_link_libraries(
         "test_algonum_my_lapack_all"
