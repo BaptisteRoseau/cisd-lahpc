@@ -3,13 +3,13 @@
 buildType=Debug
 
 if [ $# -le 0 ]; then
-    echo "\n[INSTALL] No argument provided, default is Debug.\n"
+    echo "[INSTALL] No argument provided, default is Debug."
 elif [ ! $1 = "Debug" -a ! $1 = "Release" ]; then
-    echo "\n[INSTALL] Incorrect configuration. Possible values are Debug and Release.\n";
+    echo "[INSTALL] Incorrect configuration. Possible values are Debug and Release.";
     exit 0
 else
     buildType=$1;
-    echo "\n[INSTALL] Build type is $buildType\n"
+    echo "[INSTALL] Build type is $buildType"
 fi
 
 currDir=$(pwd)
