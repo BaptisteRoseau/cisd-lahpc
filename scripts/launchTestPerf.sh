@@ -21,5 +21,5 @@ $TEST_PERF_FILE build/dgemm.csv && \
 python3 scripts/drawCurve.py build/dgemm.csv
 
 if ! [ $? -eq 0 ]; then
-    echo "Please run this script from the project root directory."
+    echo "Please run this script from the project root directory using 'source'."
 fi
