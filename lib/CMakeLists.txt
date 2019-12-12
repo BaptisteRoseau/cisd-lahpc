@@ -25,7 +25,7 @@ function(my_lapack_lib_common libname )
         ${libname}
         PUBLIC
             ${CMAKE_CURRENT_SOURCE_DIR}
-            ${PROJECT_SOURCE_DIR}/perf
+            ${PROJECT_SOURCE_DIR}/algonum/include
     )
     
     target_compile_features(
@@ -102,7 +102,7 @@ target_include_directories(
     my_lapack_all
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
-        ${PROJECT_SOURCE_DIR}/perf
+        ${PROJECT_SOURCE_DIR}/algonum/include
 
 )
 
