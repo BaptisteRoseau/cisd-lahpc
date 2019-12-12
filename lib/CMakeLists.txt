@@ -34,22 +34,19 @@ function(my_lapack_lib_common libname )
             cxx_std_11
     )
 
-    if ( WIN32 )
-        target_compile_options( 
-            ${libname}
-            PUBLIC
-                "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
-                "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"
-                "-D_${libname}"
-        )
-    else()
-        target_compile_options( 
-            ${libname}
-            PUBLIC
-                "${FLAGS_DEBUG}"
-                "${FLAGS_RELEASE}"
-                "-D_${libname}"
-        )
+    target_compile_definitions(
+        ${libname}
+        PUBLIC
+            "_${libname}"
+    )
+
+    target_compile_options( 
+        ${libname}
+        PUBLIC
+            "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
+            "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"
+    )
+    
     endif()
 
 endfunction()
@@ -82,8 +79,6 @@ function(link_mpi libname)
             ${MPI_CXX_COMPILER_FLAGS}
     )
 
-    #set(MPIEXEC_PREFLAGS ${MPIEXEC_PREFLAGS} -n 4)
-
 endfunction()
 
 
@@ -112,23 +107,18 @@ target_compile_features(
         cxx_std_11
 )
 
-if ( WIN32 )
-    target_compile_options( 
-        my_lapack_all
+target_compile_definitions(
+    my_lapack_all
+    PUBLIC
+        "_my_lapack_all"
+)
+
+target_compile_options( 
+        ${libname}
         PUBLIC
             "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
             "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"
-            "-D_my_lapack_all"
-    )
-else()
-    target_compile_options( 
-        my_lapack_all
-        PUBLIC
-            "${FLAGS_DEBUG}"
-            "${FLAGS_RELEASE}"
-            "-D_my_lapack_all"
-    )
-endif()
+)
 
 link_omp("my_lapack_all")
 link_mpi("my_lapack_all")
