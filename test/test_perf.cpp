@@ -99,14 +99,21 @@ x1_2, y1_2
 ...
 */
 
+void print_usage(){
+    cerr << "Usage: test_perf <output file>\n";
+}
+
 int main( int argc, char **argv )
 {
     printf("----------- TEST PERF -----------\n");
-
-    test_perf_dgemm(my_dgemm_scal_seq, "dgemm.csv", "Sequential Scalar", false);
-    test_perf_dgemm(my_dgemm_scal_openmp, "dgemm.csv", "OpenMP Scalar", true);
-    test_perf_dgemm(my_dgemm_seq, "dgemm.csv", "Sequential", true);
-    test_perf_dgemm(my_dgemm_openmp, "dgemm.csv", "OpenMP", true);
+    if (argc < 1){
+        print_usage();
+        return EXIT_FAILURE;
+    }
+    test_perf_dgemm(my_dgemm_scal_seq, argv[1], "Sequential Scalar", false);
+    test_perf_dgemm(my_dgemm_scal_openmp, argv[1], "OpenMP Scalar", true);
+    test_perf_dgemm(my_dgemm_seq, argv[1], "Sequential", true);
+    test_perf_dgemm(my_dgemm_openmp, argv[1], "OpenMP", true);
     
     return EXIT_SUCCESS;
 }
