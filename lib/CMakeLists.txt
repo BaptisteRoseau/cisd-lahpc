@@ -46,8 +46,6 @@ function(my_lapack_lib_common libname )
             "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
             "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"
     )
-    
-    endif()
 
 endfunction()
 
@@ -114,7 +112,7 @@ target_compile_definitions(
 )
 
 target_compile_options( 
-        ${libname}
+        my_lapack_all
         PUBLIC
             "$<$<CONFIG:Debug>:${FLAGS_DEBUG}>"
             "$<$<CONFIG:Release>:${FLAGS_RELEASE}>"
