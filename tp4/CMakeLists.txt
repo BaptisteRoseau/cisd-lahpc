@@ -9,7 +9,7 @@
 ###
 cmake_minimum_required (VERSION 2.8)
 
-include_directories( ${CMAKE_SOURCE_DIR}/algonum/include )
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/algonum/include )
 
 option( ENABLE_STARPU "Define if StarPU support is enabled or not" OFF )
 if (ENABLE_STARPU)

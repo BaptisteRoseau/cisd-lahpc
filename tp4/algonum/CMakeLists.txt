@@ -22,7 +22,7 @@ set( CMAKE_BUILD_WITH_INSTALL_RPATH FALSE )
 option(BUILD_SHARED_LIBS
   "Build shared libraries" ON)
 
-include_directories( include )
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
 
 set( algonum_srcs
   core_dplrnt.c
@@ -79,10 +79,10 @@ install(TARGETS algonum
   LIBRARY DESTINATION lib)
 
 install(FILES
-  include/algonum.h
-  include/cblas.h
-  include/flops.h
-  include/lapacke.h
-  include/perf.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/algonum.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/cblas.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/flops.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/lapacke.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/perf.h
   DESTINATION include )
 

@@ -23,7 +23,7 @@ option(BUILD_SHARED_LIBS
   "Build shared libraries" ON)
 
 if ( NOT DEFINED ALGONUM_DIR )
-  set( ALGONUM_DIR ${CMAKE_SOURCE_DIR}/../install/ )
+  set( ALGONUM_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../install/ )
 endif()
 
 include_directories( ${ALGONUM_DIR}/include )
