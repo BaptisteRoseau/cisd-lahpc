@@ -37,7 +37,7 @@ set( myblas_srcs
 
 if( ENABLE_STARPU )
   include_directories( ${ALGONUM_DIR}/include )
-  list( APPEND myblas_srcs
+  list( APPEND #myblas_srcs
     codelet_dgemm.c
     codelet_dgetrf.c
     codelet_dtrsm.c
@@ -62,7 +62,8 @@ if( ENABLE_STARPU )
     mkl_core
     )
 
-  target_link_libraries( myblas
+  target_link_libraries( #myblas
+    my_lapack_all
     algonum
     ${STARPU_LIBRARIES}
     ${LAPACKE_LIBRARIES_DEP}
