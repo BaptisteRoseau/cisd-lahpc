@@ -13,7 +13,7 @@ FUNCTION="dgemm"
 BENCH_FILE_TIME=build/$FUNCTION\_time.txt
 BENCH_FILE_FLOPS=build/$FUNCTION\_flops.txt
 
-rm $BENCH_FILE_TIME $BENCH_FILE_FLOPS
+rm -f $BENCH_FILE_TIME $BENCH_FILE_FLOPS
 
 echo "$FUNCTION execution time,Size,Time(us),linear,linear"   > $BENCH_FILE_TIME
 echo "$FUNCTION execution GFlop/s,Size,GFlop/s,linear,linear" > $BENCH_FILE_FLOPS
@@ -65,7 +65,7 @@ FUNCTION="dgetrf"
 BENCH_FILE_TIME=build/$FUNCTION\_time.txt
 BENCH_FILE_FLOPS=build/$FUNCTION\_flops.txt
 
-rm $BENCH_FILE_TIME $BENCH_FILE_FLOPS
+rm -f $BENCH_FILE_TIME $BENCH_FILE_FLOPS
 
 echo "$FUNCTION execution time,Size,Time(us),linear,linear"   > $BENCH_FILE_TIME
 echo "$FUNCTION execution GFlop/s,Size,GFlop/s,linear,linear" > $BENCH_FILE_FLOPS
@@ -117,9 +117,9 @@ draw (){
     BENCH_FILE_FLOPS=build/$FUNCTION\_flops.txt
 
     python3 scripts/drawCurve.py $BENCH_FILE_TIME &
-    python3 scripts/drawCurve.py $BENCH_FILE_FLOPS &
+    python3 scripts/drawCurve.py $BENCH_FILE_FLOPS
 }
 
 echo "Plotting results.."
-draw "dgemm"
+draw "dgemm" &
 draw "dgetrf"
